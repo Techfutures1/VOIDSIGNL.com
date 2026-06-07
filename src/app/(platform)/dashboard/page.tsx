@@ -16,6 +16,7 @@ import { SpotlightCard } from '@/components/ui/spotlight-card'
 import { FriendRecs } from '@/components/ui/friend-recs'
 import { Avatar } from '@/components/ui/avatar'
 import { EmptyState } from '@/components/ui/empty-state'
+import { useLang } from '@/lib/lang-context'
 
 type FeedTab = 'your' | 'global'
 
@@ -28,6 +29,7 @@ export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState<FeedTab | string>('your')
   const supabase = createClient()
   const router = useRouter()
+  const { t } = useLang()
 
   useEffect(() => {
     loadDashboard()
@@ -96,7 +98,7 @@ export default function DashboardPage() {
   if (loading || !profile) {
     return (
       <div className="flex items-center justify-center h-full">
-        <div className="text-text-dim text-sm animate-pulse">Loading your signal...</div>
+        <div className="text-text-dim text-sm animate-pulse">{t('dashboard.loading')}</div>
       </div>
     )
   }
@@ -109,17 +111,17 @@ export default function DashboardPage() {
       {/* Welcome */}
       <div className="mb-6">
         <h1 className="text-xl font-medium mb-1">
-          Welcome back, {profile.display_name || profile.username}
+          {t('dashboard.welcome')}, {profile.display_name || profile.username}
         </h1>
         <p className="text-sm text-text-dim">
-          Season 1 · {profile.xp.toLocaleString()} XP · {level.name}
+          {t('dashboard.season')} · {profile.xp.toLocaleString()} XP · {level.name}
         </p>
       </div>
 
       {/* Stats row — followers/following clickable naar profile */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
         <div className="vs-card vs-lit">
-          <p className="vs-label mb-1">YOUR LEVEL</p>
+          <p className="vs-label mb-1">{t('dashboard.yourLevel')}</p>
           <p className="text-xl font-medium text-purple">{level.name}</p>
           <div className="mt-2 h-1.5 bg-void rounded-full overflow-hidden">
             <div
@@ -136,21 +138,21 @@ export default function DashboardPage() {
           href={`/profile/${profile.username}?tab=followers`}
           className="vs-card hover:border-border-hover transition-colors"
         >
-          <p className="vs-label mb-1">FOLLOWERS</p>
+          <p className="vs-label mb-1">{t('dashboard.followers')}</p>
           <p className="text-xl font-medium">{stats.followers}</p>
         </Link>
         <Link
           href={`/profile/${profile.username}?tab=following`}
           className="vs-card hover:border-border-hover transition-colors"
         >
-          <p className="vs-label mb-1">FOLLOWING</p>
+          <p className="vs-label mb-1">{t('dashboard.following')}</p>
           <p className="text-xl font-medium">{stats.following}</p>
         </Link>
         <Link
           href={`/profile/${profile.username}`}
           className="vs-card hover:border-border-hover transition-colors"
         >
-          <p className="vs-label mb-1">POSTS</p>
+          <p className="vs-label mb-1">{t('dashboard.posts')}</p>
           <p className="text-xl font-medium">{stats.posts}</p>
         </Link>
       </div>
@@ -164,14 +166,14 @@ export default function DashboardPage() {
               data-active={activeTab === 'your'}
               className="vs-tab"
             >
-              Your feed
+              {t('dashboard.yourFeed')}
             </button>
             <button
               onClick={() => setActiveTab('global')}
               data-active={activeTab === 'global'}
               className="vs-tab"
             >
-              Global
+              {t('dashboard.global')}
             </button>
             {games.slice(0, 3).map(game => (
               <button
@@ -198,12 +200,12 @@ export default function DashboardPage() {
                 href="/feed?compose=true"
                 className="flex-1 bg-void/50 rounded-lg px-4 py-2.5 text-sm text-text-dim hover:text-text-muted transition-colors cursor-pointer"
               >
-                Share something with the community...
+                {t('dashboard.sharePrompt')}
               </Link>
             </div>
             <div className="flex gap-2 mt-3 ml-12">
               <Link href="/clips" className="vs-btn vs-btn-ghost text-xs px-3 py-1.5">
-                <Upload size={13} /> Clip
+                <Upload size={13} /> {t('dashboard.clip')}
               </Link>
             </div>
           </div>
@@ -212,9 +214,9 @@ export default function DashboardPage() {
           {posts.length === 0 ? (
             <EmptyState
               icon={Newspaper}
-              title="No posts yet"
-              description="Your feed is empty. Follow members or create the first post to get the signal flowing."
-              cta={{ label: 'Create post', href: '/feed?compose=true' }}
+              title={t('dashboard.noPosts')}
+              description={t('dashboard.feedEmptyDesc')}
+              cta={{ label: t('dashboard.createPost'), href: '/feed?compose=true' }}
             />
           ) : (
             <div className="space-y-3">
@@ -275,12 +277,12 @@ export default function DashboardPage() {
                   )}
                   <div className="flex gap-6 text-xs text-text-dim">
                     <button className="hover:text-text-muted transition-colors">
-                      {post.like_count} likes
+                      {post.like_count} {t('dashboard.likes')}
                     </button>
                     <button className="hover:text-text-muted transition-colors">
-                      {post.comment_count} comments
+                      {post.comment_count} {t('dashboard.comments')}
                     </button>
-                    <button className="hover:text-text-muted transition-colors">Share</button>
+                    <button className="hover:text-text-muted transition-colors">{t('dashboard.share')}</button>
                   </div>
                 </div>
               ))}
@@ -317,9 +319,9 @@ export default function DashboardPage() {
           {/* Your games */}
           <div className="vs-card">
             <div className="flex items-center justify-between mb-3">
-              <p className="vs-label">YOUR GAMES</p>
+              <p className="vs-label">{t('dashboard.yourGames')}</p>
               <Link href="/games" className="text-[10px] text-cyan hover:text-cyan/80 transition-colors tracking-wide">
-                Manage →
+                {t('dashboard.manage')}
               </Link>
             </div>
             {games.length === 0 ? (
@@ -327,7 +329,7 @@ export default function DashboardPage() {
                 href="/games"
                 className="block text-xs text-text-dim hover:text-purple transition-colors py-2"
               >
-                + Add games you play
+                {t('dashboard.addGames')}
               </Link>
             ) : (
               <div className="space-y-2">
@@ -335,7 +337,7 @@ export default function DashboardPage() {
                   <div key={game.id} className="flex items-center justify-between">
                     <span className="text-sm">{game.name}</span>
                     {i === 0 && (
-                      <span className="text-[9px] text-purple bg-purple/10 px-2 py-0.5 rounded">MAIN</span>
+                      <span className="text-[9px] text-purple bg-purple/10 px-2 py-0.5 rounded">{t('dashboard.main')}</span>
                     )}
                   </div>
                 ))}
@@ -345,27 +347,27 @@ export default function DashboardPage() {
 
           {/* Quick actions */}
           <div className="vs-card">
-            <p className="vs-label mb-3">QUICK ACTIONS</p>
+            <p className="vs-label mb-3">{t('dashboard.quickActions')}</p>
             <div className="space-y-2">
               <Link href="/feed?compose=true" className="flex items-center gap-2 text-sm text-cyan hover:text-cyan/80 transition-colors">
-                <Plus size={14} /> Create post
+                <Plus size={14} /> {t('dashboard.createPost')}
               </Link>
               <Link href="/clips/upload" className="flex items-center gap-2 text-sm text-cyan hover:text-cyan/80 transition-colors">
-                <Upload size={14} /> Upload clip
+                <Upload size={14} /> {t('dashboard.uploadClip')}
               </Link>
             </div>
           </div>
 
           {/* XP breakdown */}
           <div className="vs-card">
-            <p className="vs-label mb-3">XP EARNED BY</p>
+            <p className="vs-label mb-3">{t('dashboard.xpEarnedBy')}</p>
             <div className="space-y-2 text-xs text-text-dim">
-              <div className="flex justify-between"><span>Posts</span><span className="text-purple">+5 XP each</span></div>
-              <div className="flex justify-between"><span>Comments</span><span className="text-purple">+2 XP each</span></div>
-              <div className="flex justify-between"><span>Clips</span><span className="text-purple">+10 XP each</span></div>
-              <div className="flex justify-between"><span>Daily login</span><span className="text-purple">+3 XP</span></div>
-              <div className="flex justify-between"><span>Tournament</span><span className="text-purple">+25 XP</span></div>
-              <div className="flex justify-between"><span>Tournament win</span><span className="text-purple">+100 XP</span></div>
+              <div className="flex justify-between"><span>{t('dashboard.xpRowPosts')}</span><span className="text-purple">+5 XP each</span></div>
+              <div className="flex justify-between"><span>{t('dashboard.xpRowComments')}</span><span className="text-purple">+2 XP each</span></div>
+              <div className="flex justify-between"><span>{t('dashboard.xpRowClips')}</span><span className="text-purple">+10 XP each</span></div>
+              <div className="flex justify-between"><span>{t('dashboard.xpRowLogin')}</span><span className="text-purple">+3 XP</span></div>
+              <div className="flex justify-between"><span>{t('dashboard.xpRowTournament')}</span><span className="text-purple">+25 XP</span></div>
+              <div className="flex justify-between"><span>{t('dashboard.xpRowTournamentWin')}</span><span className="text-purple">+100 XP</span></div>
             </div>
           </div>
         </div>

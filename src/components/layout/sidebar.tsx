@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
+import { useLang } from '@/lib/lang-context'
 
 interface SidebarProps {
   unreadDms?: number
@@ -119,36 +120,37 @@ interface NavItem {
 }
 
 const PRIMARY_NAV: NavItem[] = [
-  { href: '/dashboard', label: 'Feed',    icon: NAV_ICONS.feed    },
-  { href: '/ranking',   label: 'Ranking', icon: NAV_ICONS.ranking },
-  { href: '/clips',     label: 'Clips',   icon: NAV_ICONS.clips   },
-  { href: '/clans',     label: 'Clans',   icon: NAV_ICONS.clans   },
+  { href: '/dashboard', label: 'nav.feed',    icon: NAV_ICONS.feed    },
+  { href: '/ranking',   label: 'nav.ranking', icon: NAV_ICONS.ranking },
+  { href: '/clips',     label: 'nav.clips',   icon: NAV_ICONS.clips   },
+  { href: '/clans',     label: 'nav.clans',   icon: NAV_ICONS.clans   },
 ]
 
 const NAV_ITEMS: NavItem[] = [
-  { href: '/dashboard', label: 'Feed',      icon: NAV_ICONS.feed     },
-  { href: '/ranking',  label: 'Ranking',   icon: NAV_ICONS.ranking  },
-  { href: '/clips',    label: 'Clips',     icon: NAV_ICONS.clips    },
-  { href: '/clans',    label: 'Clans',     icon: NAV_ICONS.clans    },
-  { href: '/buddies',  label: 'Buddies',   icon: NAV_ICONS.buddies  },
-  { href: '/coaching', label: 'Coaching',  icon: NAV_ICONS.coaching },
-  { href: '/forums',   label: 'Forums',    icon: NAV_ICONS.forums   },
-  { href: '/games',    label: 'Games',     icon: NAV_ICONS.games    },
-  { href: '/messages', label: 'Berichten', icon: NAV_ICONS.messages },
+  { href: '/dashboard', label: 'nav.feed',     icon: NAV_ICONS.feed     },
+  { href: '/ranking',  label: 'nav.ranking',  icon: NAV_ICONS.ranking  },
+  { href: '/clips',    label: 'nav.clips',    icon: NAV_ICONS.clips    },
+  { href: '/clans',    label: 'nav.clans',    icon: NAV_ICONS.clans    },
+  { href: '/buddies',  label: 'nav.buddies',  icon: NAV_ICONS.buddies  },
+  { href: '/coaching', label: 'nav.coaching', icon: NAV_ICONS.coaching },
+  { href: '/forums',   label: 'nav.forums',   icon: NAV_ICONS.forums   },
+  { href: '/games',    label: 'nav.games',    icon: NAV_ICONS.games    },
+  { href: '/messages', label: 'nav.messages', icon: NAV_ICONS.messages },
 ]
 
 const SECONDARY_NAV: NavItem[] = [
-  { href: '/buddies',  label: 'Buddies',   icon: NAV_ICONS.buddies  },
-  { href: '/coaching', label: 'Coaching',  icon: NAV_ICONS.coaching },
-  { href: '/forums',   label: 'Forums',    icon: NAV_ICONS.forums   },
-  { href: '/games',    label: 'Games',     icon: NAV_ICONS.games    },
-  { href: '/messages', label: 'Berichten', icon: NAV_ICONS.messages },
+  { href: '/buddies',  label: 'nav.buddies',  icon: NAV_ICONS.buddies  },
+  { href: '/coaching', label: 'nav.coaching', icon: NAV_ICONS.coaching },
+  { href: '/forums',   label: 'nav.forums',   icon: NAV_ICONS.forums   },
+  { href: '/games',    label: 'nav.games',    icon: NAV_ICONS.games    },
+  { href: '/messages', label: 'nav.messages', icon: NAV_ICONS.messages },
 ]
 
 export function Sidebar({ unreadDms = 0, unreadNotifs: _unreadNotifs = 0 }: SidebarProps = {}) {
   const pathname = usePathname()
   const router = useRouter()
   const supabase = createClient()
+  const { t } = useLang()
   const [moreOpen, setMoreOpen] = useState(false)
   const [profile, setProfile] = useState<ProfileSummary | null>(null)
 
@@ -243,7 +245,7 @@ export function Sidebar({ unreadDms = 0, unreadNotifs: _unreadNotifs = 0 }: Side
                   <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-purple rounded-full" />
                 )}
                 <span className={active ? 'text-purple' : ''}>{item.icon}</span>
-                <span>{item.label}</span>
+                <span>{t(item.label)}</span>
                 {isMsg && <span className="ml-auto"><MessagesBadge /></span>}
               </Link>
             )
@@ -268,7 +270,7 @@ export function Sidebar({ unreadDms = 0, unreadNotifs: _unreadNotifs = 0 }: Side
                 <span className={active ? 'text-cyan' : 'text-cyan/70'}>
                   {NAV_ICONS.innerCircle}
                 </span>
-                <span>Inner Circle</span>
+                <span>{t('nav.innerCircle')}</span>
               </Link>
             )
           })()}
@@ -290,7 +292,7 @@ export function Sidebar({ unreadDms = 0, unreadNotifs: _unreadNotifs = 0 }: Side
                   <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-cyan rounded-full" />
                 )}
                 <span className={active ? 'text-cyan' : 'text-cyan/70'}>{NAV_ICONS.admin}</span>
-                <span>Admin</span>
+                <span>{t('nav.admin')}</span>
               </Link>
             )
           })()}
@@ -338,7 +340,7 @@ export function Sidebar({ unreadDms = 0, unreadNotifs: _unreadNotifs = 0 }: Side
               className="w-full flex items-center gap-3 px-3 py-2 rounded-lg font-mono text-[10px] uppercase tracking-wider text-text-muted hover:text-text hover:bg-surface transition-colors duration-200"
             >
               <span>{NAV_ICONS.home}</span>
-              <span>Publieke pagina</span>
+              <span>{t('nav.publicPage')}</span>
             </Link>
 
             <button
@@ -346,7 +348,7 @@ export function Sidebar({ unreadDms = 0, unreadNotifs: _unreadNotifs = 0 }: Side
               className="w-full flex items-center gap-3 px-3 py-2 rounded-lg font-mono text-[10px] uppercase tracking-wider text-text-muted hover:text-danger hover:bg-danger/8 transition-colors duration-200"
             >
               <span>{NAV_ICONS.signOut}</span>
-              <span>Uitloggen</span>
+              <span>{t('nav.signOut')}</span>
             </button>
           </div>
         )}
@@ -368,7 +370,7 @@ export function Sidebar({ unreadDms = 0, unreadNotifs: _unreadNotifs = 0 }: Side
               }`}
             >
               {item.icon}
-              <span className="font-mono uppercase text-[8px] tracking-wider">{item.label}</span>
+              <span className="font-mono uppercase text-[8px] tracking-wider">{t(item.label)}</span>
             </Link>
           )
         })}
@@ -379,7 +381,7 @@ export function Sidebar({ unreadDms = 0, unreadNotifs: _unreadNotifs = 0 }: Side
           }`}
         >
           {NAV_ICONS.more}
-          <span className="font-mono uppercase text-[8px] tracking-wider">Meer</span>
+          <span className="font-mono uppercase text-[8px] tracking-wider">{t('nav.more')}</span>
         </button>
       </nav>
 
@@ -415,7 +417,7 @@ export function Sidebar({ unreadDms = 0, unreadNotifs: _unreadNotifs = 0 }: Side
                   >
                     {item.icon}
                     <span className="font-mono uppercase text-center text-[9px] tracking-wider leading-tight">
-                      {item.label}
+                      {t(item.label)}
                     </span>
                     {isMsg && unreadDms > 0 && (
                       <span className="absolute top-2 right-2">
