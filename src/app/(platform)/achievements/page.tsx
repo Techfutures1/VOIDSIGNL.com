@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'
 import { ScopeSpinner } from '@/components/ui/loader'
 import { EmptyState } from '@/components/ui/empty-state'
+import { useLang } from '@/lib/lang-context'
 
 interface Achievement {
   id: string
@@ -41,16 +42,17 @@ const RARITY_STYLES: Record<string, { bg: string; border: string; text: string; 
   legendary: { bg: 'bg-yellow-400/10', border: 'border-yellow-400/20', text: 'text-yellow-400', glow: 'shadow-[0_0_16px_rgba(250,204,21,0.12)]' },
 }
 
-const CATEGORY_LABELS: Record<string, { label: string; color: string }> = {
-  all:         { label: 'All', color: 'text-text' },
-  milestone:   { label: 'Milestones', color: 'text-warning' },
-  social:      { label: 'Social', color: 'text-cyan' },
-  content:     { label: 'Content', color: 'text-purple' },
-  competitive: { label: 'Competitive', color: 'text-danger' },
-  special:     { label: 'Special', color: 'text-yellow-400' },
+const CATEGORY_LABELS: Record<string, { labelKey: string; color: string }> = {
+  all:         { labelKey: 'achievements.category.all', color: 'text-text' },
+  milestone:   { labelKey: 'achievements.category.milestone', color: 'text-warning' },
+  social:      { labelKey: 'achievements.category.social', color: 'text-cyan' },
+  content:     { labelKey: 'achievements.category.content', color: 'text-purple' },
+  competitive: { labelKey: 'achievements.category.competitive', color: 'text-danger' },
+  special:     { labelKey: 'achievements.category.special', color: 'text-yellow-400' },
 }
 
 export default function AchievementsPage() {
+  const { t } = useLang()
   const supabase = createClient()
   const [achievements, setAchievements] = useState<Achievement[]>([])
   const [loading, setLoading] = useState(true)
@@ -111,10 +113,10 @@ export default function AchievementsPage() {
 
   function timeAgo(date: string) {
     const s = Math.floor((Date.now() - new Date(date).getTime()) / 1000)
-    if (s < 60) return 'just now'
-    if (s < 3600) return `${Math.floor(s / 60)}m ago`
-    if (s < 86400) return `${Math.floor(s / 3600)}h ago`
-    if (s < 604800) return `${Math.floor(s / 86400)}d ago`
+    if (s < 60) return t('achievements.time.justNow')
+    if (s < 3600) return `${Math.floor(s / 60)}${t('achievements.time.minutesAgo')}`
+    if (s < 86400) return `${Math.floor(s / 3600)}${t('achievements.time.hoursAgo')}`
+    if (s < 604800) return `${Math.floor(s / 86400)}${t('achievements.time.daysAgo')}`
     return new Date(date).toLocaleDateString('en', { month: 'short', day: 'numeric' })
   }
 
@@ -132,14 +134,14 @@ export default function AchievementsPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-xl font-semibold tracking-wide flex items-center gap-2">
-            <Award size={20} className="text-purple" /> Achievements
+            <Award size={20} className="text-purple" /> {t('achievements.title')}
             {achievements.length > 0 && (
               <span className="vs-counter text-[10px] text-text-dim tabular-nums ml-1">
                 {String(totalUnlocked).padStart(2, '0')} / {String(achievements.length).padStart(2, '0')}
               </span>
             )}
           </h1>
-          <p className="text-sm text-text-dim mt-0.5">Unlock badges, earn XP, show off your grind</p>
+          <p className="text-sm text-text-dim mt-0.5">{t('achievements.subtitle')}</p>
         </div>
       </div>
 
@@ -167,17 +169,17 @@ export default function AchievementsPage() {
                   {totalUnlocked}
                   <span className="text-text-dim font-normal text-sm tabular-nums">/{achievements.length}</span>
                 </p>
-                <p className="vs-counter text-[10px] text-text-dim mt-0.5">UNLOCKED</p>
+                <p className="vs-counter text-[10px] text-text-dim mt-0.5">{t('achievements.stat.unlocked')}</p>
               </div>
               <div className="h-8 w-px bg-border" />
               <div>
                 <p className="text-2xl font-bold text-cyan tabular-nums">+{totalXP.toLocaleString()}</p>
-                <p className="vs-counter text-[10px] text-text-dim mt-0.5">XP EARNED</p>
+                <p className="vs-counter text-[10px] text-text-dim mt-0.5">{t('achievements.stat.xpEarned')}</p>
               </div>
               <div className="h-8 w-px bg-border" />
               <div>
                 <p className="text-2xl font-bold tabular-nums">{achievements.length - totalUnlocked}</p>
-                <p className="vs-counter text-[10px] text-text-dim mt-0.5">REMAINING</p>
+                <p className="vs-counter text-[10px] text-text-dim mt-0.5">{t('achievements.stat.remaining')}</p>
               </div>
             </div>
             <div className="h-2 bg-void rounded-full overflow-hidden">
@@ -197,7 +199,7 @@ export default function AchievementsPage() {
               return (
                 <div key={r} className="text-center">
                   <p className={`text-sm font-bold tabular-nums ${style.text}`}>{unlocked}/{total}</p>
-                  <p className="vs-counter text-[8px] text-text-dim mt-0.5">{r.toUpperCase()}</p>
+                  <p className="vs-counter text-[8px] text-text-dim mt-0.5">{t(`achievements.rarity.${r}`)}</p>
                 </div>
               )
             })}
@@ -216,7 +218,7 @@ export default function AchievementsPage() {
               data-active={category === key}
               className="vs-tab whitespace-nowrap shrink-0"
             >
-              {val.label}
+              {t(val.labelKey)}
               {count > 0 && <span className="text-[10px] opacity-60 tabular-nums">({count})</span>}
             </button>
           )
@@ -227,8 +229,8 @@ export default function AchievementsPage() {
       {filtered.length === 0 && achievements.length > 0 && (
         <EmptyState
           icon={Award}
-          title="No achievements in this category"
-          description="Try a different filter."
+          title={t('achievements.empty.title')}
+          description={t('achievements.empty.description')}
         />
       )}
 
@@ -237,7 +239,7 @@ export default function AchievementsPage() {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-3">
             <p className="vs-label flex items-center gap-2">
-              <Sparkles size={12} className="text-purple" /> UNLOCKED
+              <Sparkles size={12} className="text-purple" /> {t('achievements.section.unlocked')}
             </p>
             <span className="vs-counter text-[10px] text-text-dim tabular-nums">
               {String(unlockedFiltered.length).padStart(2, '0')}
@@ -259,11 +261,11 @@ export default function AchievementsPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <p className="text-sm font-medium truncate">{a.name}</p>
-                      <span className={`vs-counter text-[8px] tabular-nums ${style.text}`}>{a.rarity.toUpperCase()}</span>
+                      <span className={`vs-counter text-[8px] tabular-nums ${style.text}`}>{t(`achievements.rarity.${a.rarity}`)}</span>
                     </div>
                     <p className="text-[11px] text-text-dim truncate">{a.description}</p>
                     <div className="flex items-center gap-2 mt-0.5">
-                      <span className="text-[9px] text-purple tabular-nums">+{a.xp_reward} XP</span>
+                      <span className="text-[9px] text-purple tabular-nums">+{a.xp_reward} {t('achievements.xp')}</span>
                       {a.unlocked_at && (
                         <span className="vs-counter text-[9px] text-text-dim tabular-nums">
                           · {timeAgo(a.unlocked_at)}
@@ -283,7 +285,7 @@ export default function AchievementsPage() {
         <div>
           <div className="flex items-center justify-between mb-3">
             <p className="vs-label flex items-center gap-2">
-              <Lock size={12} className="text-text-dim" /> LOCKED
+              <Lock size={12} className="text-text-dim" /> {t('achievements.section.locked')}
             </p>
             <span className="vs-counter text-[10px] text-text-dim tabular-nums">
               {String(lockedFiltered.length).padStart(2, '0')}
@@ -308,11 +310,11 @@ export default function AchievementsPage() {
                     <div className="flex items-center gap-2">
                       <p className="text-sm font-medium truncate">{a.name}</p>
                       <span className={`vs-counter text-[8px] tabular-nums ${style.text} opacity-60`}>
-                        {a.rarity.toUpperCase()}
+                        {t(`achievements.rarity.${a.rarity}`)}
                       </span>
                     </div>
                     <p className="text-[11px] text-text-dim truncate">{a.description}</p>
-                    <span className="text-[9px] text-purple opacity-60 tabular-nums">+{a.xp_reward} XP</span>
+                    <span className="text-[9px] text-purple opacity-60 tabular-nums">+{a.xp_reward} {t('achievements.xp')}</span>
                   </div>
                 </div>
               )

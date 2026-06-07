@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase-browser'
+import { useLang } from '@/lib/lang-context'
 import RankingRow, { type RankingRowUser } from '@/components/ranking/RankingRow'
 import ClanRankingRow, { type ClanRankingRowData } from '@/components/ranking/ClanRankingRow'
 import RankingTabs from '@/components/ranking/RankingTabs'
@@ -31,6 +32,7 @@ interface SidebarData {
 }
 
 export default function RankingPage() {
+  const { t } = useLang()
   const supabase = createClient()
   const [tab, setTab] = useState<Tab>('global')
   const [rows, setRows] = useState<RankingRowUser[]>([])
@@ -116,12 +118,12 @@ export default function RankingPage() {
     if (tab === 'clips') {
       const clips = (r as { total_clips?: number }).total_clips ?? 0
       const likes = (r as { total_likes?: number }).total_likes ?? 0
-      return [`${clips} clips`, `${likes} likes`]
+      return [`${clips} ${t('ranking.metaClips')}`, `${likes} ${t('ranking.metaLikes')}`]
     }
     if (tab === 'coaching') {
       const rating = Number((r as { avg_rating?: number }).avg_rating ?? 0)
       const sessions = (r as { total_sessions?: number }).total_sessions ?? 0
-      return [`★ ${rating.toFixed(1)}`, `${sessions} sessies`]
+      return [`★ ${rating.toFixed(1)}`, `${sessions} ${t('ranking.metaSessions')}`]
     }
     return undefined
   }
@@ -140,11 +142,11 @@ export default function RankingPage() {
       {/* Header — full width zodat tabs + sidebar exact aligned starten */}
       <div className="mb-6">
         <p className="font-mono text-[10px] tracking-[0.2em] text-purple uppercase mb-1">
-          Leaderboard
+          {t('ranking.eyebrow')}
         </p>
-        <h1 className="font-mono text-3xl font-bold text-text mb-1">Ranking</h1>
+        <h1 className="font-mono text-3xl font-bold text-text mb-1">{t('ranking.title')}</h1>
         <p className="text-text-dim text-sm">
-          {total > 0 ? `${total.toLocaleString()} members` : ''}
+          {total > 0 ? `${total.toLocaleString()} ${t('ranking.members')}` : ''}
         </p>
       </div>
 
@@ -166,7 +168,7 @@ export default function RankingPage() {
         {!isGuest && tab === 'global' && (
           <input
             type="text"
-            placeholder="Zoek een speler..."
+            placeholder={t('ranking.searchPlaceholder')}
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             className="w-full bg-void border border-border rounded-xl px-4 py-3 text-text text-sm font-mono placeholder-text-dim/60 focus:outline-none focus:border-purple transition-[border-color] duration-200 mb-4"
@@ -211,10 +213,10 @@ export default function RankingPage() {
             ) : rows.length === 0 ? (
               <div className="bg-surface border border-border rounded-xl flex flex-col items-center justify-center py-16 text-center">
                 <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-text-dim mb-2">
-                  Geen resultaten
+                  {t('ranking.emptyTitle')}
                 </p>
                 <p className="text-text-dim text-sm">
-                  {search ? `Geen spelers gevonden voor "${search}"` : 'Nog niemand hier.'}
+                  {search ? `${t('ranking.noPlayersFound')} "${search}"` : t('ranking.nobodyHere')}
                 </p>
               </div>
             ) : (
@@ -256,7 +258,7 @@ export default function RankingPage() {
                   disabled={page === 1}
                   className="px-4 py-2 border border-border text-text-dim font-mono text-xs rounded-lg hover:border-purple hover:text-text transition-[border-color,color] duration-200 disabled:opacity-30"
                 >
-                  ← Vorige
+                  ← {t('ranking.prev')}
                 </button>
                 <span className="font-mono text-xs text-text-dim">
                   {page} / {totalPages}
@@ -266,7 +268,7 @@ export default function RankingPage() {
                   disabled={page === totalPages}
                   className="px-4 py-2 border border-border text-text-dim font-mono text-xs rounded-lg hover:border-purple hover:text-text transition-[border-color,color] duration-200 disabled:opacity-30"
                 >
-                  Volgende →
+                  {t('ranking.next')} →
                 </button>
               </div>
             )}

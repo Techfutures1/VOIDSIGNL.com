@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import GameCard, { type GameCardData } from '@/components/games/GameCard'
 import GameSearchModal from '@/components/games/GameSearchModal'
+import { useLang } from '@/lib/lang-context'
 
 interface LibEntry {
   id: string
@@ -12,6 +13,7 @@ interface LibEntry {
 }
 
 export default function GamesPage() {
+  const { t } = useLang()
   const [games, setGames] = useState<GameCardData[]>([])
   const [userGames, setUserGames] = useState<LibEntry[]>([])
   const [userGameIds, setUserGameIds] = useState<Set<string>>(new Set())
@@ -36,24 +38,24 @@ export default function GamesPage() {
       <div className="flex items-start justify-between mb-8">
         <div>
           <p className="font-mono text-[10px] tracking-[0.2em] text-purple uppercase mb-1">
-            Platform
+            {t('games.eyebrow')}
           </p>
-          <h1 className="font-mono text-3xl font-bold text-text mb-1">Games</h1>
-          <p className="text-text-dim text-sm">{games.length} games beschikbaar</p>
+          <h1 className="font-mono text-3xl font-bold text-text mb-1">{t('games.title')}</h1>
+          <p className="text-text-dim text-sm">{games.length} {t('games.available')}</p>
         </div>
         <button
           onClick={() => setShowSearch(true)}
           className="px-5 py-2.5 bg-purple text-white font-mono text-xs uppercase tracking-wider rounded-lg hover:bg-purple/85 transition-colors"
         >
-          + Game aanvragen
+          {t('games.requestGame')}
         </button>
       </div>
 
       <div className="flex gap-1 bg-surface border border-border rounded-xl p-1 mb-6 max-w-xs">
         {[
-          { key: 'players', label: 'Spelers' },
-          { key: 'name', label: 'Naam' },
-          { key: 'newest', label: 'Nieuwste' },
+          { key: 'players', label: t('games.sortPlayers') },
+          { key: 'name', label: t('games.sortName') },
+          { key: 'newest', label: t('games.sortNewest') },
         ].map(s => (
           <button
             key={s.key}
@@ -75,8 +77,8 @@ export default function GamesPage() {
         </div>
       ) : games.length === 0 ? (
         <div className="text-center py-16">
-          <p className="font-mono text-[10px] tracking-[0.2em] text-text-dim/60 uppercase mb-3">Leeg</p>
-          <p className="text-text-dim text-sm">Nog geen games. Vraag de eerste aan.</p>
+          <p className="font-mono text-[10px] tracking-[0.2em] text-text-dim/60 uppercase mb-3">{t('games.emptyEyebrow')}</p>
+          <p className="text-text-dim text-sm">{t('games.emptyMessage')}</p>
         </div>
       ) : (
         <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-4">

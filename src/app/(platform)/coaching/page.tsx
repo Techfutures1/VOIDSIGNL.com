@@ -5,10 +5,12 @@ import Link from 'next/link'
 import CoachCard, { type CoachCardData } from '@/components/coaching/CoachCard'
 import CoachShareButton from '@/components/invites/CoachShareButton'
 import { BrandSelect } from '@/components/ui/BrandSelect'
+import { useLang } from '@/lib/lang-context'
 
 interface Game { id: string; name: string }
 
 export default function CoachingPage() {
+  const { t } = useLang()
   const [coaches, setCoaches] = useState<CoachCardData[]>([])
   const [games, setGames] = useState<Game[]>([])
   const [loading, setLoading] = useState(true)
@@ -44,10 +46,10 @@ export default function CoachingPage() {
       <div className="flex items-start justify-between mb-8">
         <div>
           <p className="font-mono text-[10px] tracking-[0.2em] text-purple uppercase mb-1">
-            Coaching
+            {t('coaching.eyebrow')}
           </p>
-          <h1 className="font-mono text-3xl font-bold text-text mb-1">Coaches</h1>
-          <p className="text-text-dim text-sm">Word beter met hulp van de beste spelers.</p>
+          <h1 className="font-mono text-3xl font-bold text-text mb-1">{t('coaching.title')}</h1>
+          <p className="text-text-dim text-sm">{t('coaching.subtitle')}</p>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
           <CoachShareButton />
@@ -55,7 +57,7 @@ export default function CoachingPage() {
             href="/coaching/apply"
             className="px-5 py-2.5 border border-border text-text-dim font-mono text-xs uppercase tracking-wider rounded-lg hover:border-purple hover:text-text transition-colors duration-200"
           >
-            Word coach
+            {t('coaching.becomeCoach')}
           </Link>
         </div>
       </div>
@@ -65,9 +67,9 @@ export default function CoachingPage() {
           <BrandSelect
             value={gameFilter}
             onChange={setGameFilter}
-            placeholder="Alle games"
+            placeholder={t('coaching.allGames')}
             options={[
-              { value: '', label: 'Alle games' },
+              { value: '', label: t('coaching.allGames') },
               ...games.map(g => ({ value: g.id, label: g.name })),
             ]}
           />
@@ -77,9 +79,9 @@ export default function CoachingPage() {
           <BrandSelect
             value={language}
             onChange={setLanguage}
-            placeholder="Alle talen"
+            placeholder={t('coaching.allLanguages')}
             options={[
-              { value: '', label: 'Alle talen' },
+              { value: '', label: t('coaching.allLanguages') },
               { value: 'nl', label: 'Nederlands' },
               { value: 'en', label: 'English' },
             ]}
@@ -88,9 +90,9 @@ export default function CoachingPage() {
 
         <div className="flex gap-1 bg-surface border border-border rounded-lg p-1">
           {[
-            { key: 'rating', label: 'Rating' },
-            { key: 'sessions', label: 'Sessies' },
-            { key: 'newest', label: 'Nieuw' },
+            { key: 'rating', label: t('coaching.sortRating') },
+            { key: 'sessions', label: t('coaching.sortSessions') },
+            { key: 'newest', label: t('coaching.sortNewest') },
           ].map(s => (
             <button
               key={s.key}
@@ -114,14 +116,14 @@ export default function CoachingPage() {
       ) : coaches.length === 0 ? (
         <div className="text-center py-16">
           <p className="font-mono text-[10px] tracking-[0.2em] text-text-dim/60 uppercase mb-3">
-            Leeg
+            {t('coaching.emptyEyebrow')}
           </p>
-          <p className="text-text-dim text-sm mb-6">Nog geen coaches beschikbaar.</p>
+          <p className="text-text-dim text-sm mb-6">{t('coaching.emptyText')}</p>
           <Link
             href="/coaching/apply"
             className="px-5 py-2.5 bg-purple text-white font-mono text-sm rounded-lg hover:bg-purple/85 transition-colors"
           >
-            Word de eerste coach
+            {t('coaching.emptyCta')}
           </Link>
         </div>
       ) : (

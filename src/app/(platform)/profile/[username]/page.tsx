@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
+import { useLang } from '@/lib/lang-context'
 import { getLevelFromXP, getXPProgress } from '@/types'
 import type { Profile, Post, Clip, Game, UserGame } from '@/types'
 import Link from 'next/link'
@@ -32,6 +33,7 @@ export default function ProfilePage() {
   const params = useParams()
   const router = useRouter()
   const supabase = createClient()
+  const { t } = useLang()
   const username = params.username as string
 
   const [profile, setProfile] = useState<Profile | null>(null)
@@ -417,10 +419,10 @@ export default function ProfilePage() {
 
   function timeAgo(date: string) {
     const seconds = Math.floor((Date.now() - new Date(date).getTime()) / 1000)
-    if (seconds < 60) return 'just now'
-    if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`
-    if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`
-    if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`
+    if (seconds < 60) return t('profile.time.justNow')
+    if (seconds < 3600) return `${Math.floor(seconds / 60)}${t('profile.time.minutesShort')}`
+    if (seconds < 3600 * 24) return `${Math.floor(seconds / 3600)}${t('profile.time.hoursShort')}`
+    if (seconds < 604800) return `${Math.floor(seconds / 86400)}${t('profile.time.daysShort')}`
     return new Date(date).toLocaleDateString('en', { month: 'short', day: 'numeric' })
   }
 
@@ -443,9 +445,9 @@ export default function ProfilePage() {
       <div className="max-w-md mx-auto mt-12">
         <EmptyState
           icon={User}
-          title="User not found"
-          description="This profile doesn't exist or has been removed."
-          cta={{ label: 'Back to feed', href: '/feed' }}
+          title={t('profile.notFound.title')}
+          description={t('profile.notFound.description')}
+          cta={{ label: t('profile.notFound.cta'), href: '/feed' }}
         />
       </div>
     )
@@ -547,31 +549,31 @@ export default function ProfilePage() {
                 {!isOwn && (profile as any).last_seen_at && (
                   Date.now() - new Date((profile as any).last_seen_at).getTime() < 5 * 60 * 1000 ? (
                     <span className="flex items-center gap-1 text-[9px] text-success">
-                      <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" /> Online
+                      <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" /> {t('profile.status.online')}
                     </span>
                   ) : (
                     <span className="text-[9px] text-text-dim">
-                      Last seen {(() => {
+                      {t('profile.status.lastSeen')} {(() => {
                         const diff = Date.now() - new Date((profile as any).last_seen_at).getTime()
-                        if (diff < 3600_000) return `${Math.floor(diff / 60_000)}m ago`
-                        if (diff < 86400_000) return `${Math.floor(diff / 3600_000)}h ago`
-                        return `${Math.floor(diff / 86400_000)}d ago`
+                        if (diff < 3600_000) return `${Math.floor(diff / 60_000)}${t('profile.time.minutesShort')}`
+                        if (diff < 86400_000) return `${Math.floor(diff / 3600_000)}${t('profile.time.hoursShort')}`
+                        return `${Math.floor(diff / 86400_000)}${t('profile.time.daysShort')}`
                       })()}
                     </span>
                   )
                 )}
                 {profile.is_inner_circle && (
                   <span className="vs-badge vs-badge-purple text-[9px]">
-                    <Star size={8} /> Inner Circle
+                    <Star size={8} /> {t('profile.badge.innerCircle')}
                   </span>
                 )}
                 {profile.is_verified && (
                   <span className="vs-badge vs-badge-cyan text-[9px]">
-                    <Shield size={8} /> Verified
+                    <Shield size={8} /> {t('profile.badge.verified')}
                   </span>
                 )}
                 {profile.is_coach && (
-                  <span className="vs-badge text-[9px] bg-success/15 text-success">Coach</span>
+                  <span className="vs-badge text-[9px] bg-success/15 text-success">{t('profile.badge.coach')}</span>
                 )}
               </div>
               <p className="text-sm text-text-dim">@{profile.username}</p>
@@ -592,16 +594,16 @@ export default function ProfilePage() {
                   <>
                     <ProfileQR username={profile.username} displayName={profile.display_name} />
                     <button onClick={startEditing} className="vs-btn vs-btn-ghost text-xs">
-                      <Edit3 size={13} /> Edit Profile
+                      <Edit3 size={13} /> {t('profile.action.editProfile')}
                     </button>
                   </>
                 ) : (
                   <div className="flex gap-2">
                     <button onClick={() => setEditing(false)} className="vs-btn vs-btn-ghost text-xs">
-                      <X size={13} /> Cancel
+                      <X size={13} /> {t('profile.action.cancel')}
                     </button>
                     <button onClick={saveProfile} disabled={saving} className="vs-btn vs-btn-primary text-xs">
-                      {saving ? <div className="w-3 h-3 border-2 border-white/40 border-t-white rounded-full animate-spin" /> : <><Save size={13} /> Save</>}
+                      {saving ? <div className="w-3 h-3 border-2 border-white/40 border-t-white rounded-full animate-spin" /> : <><Save size={13} /> {t('profile.action.save')}</>}
                     </button>
                   </div>
                 )
@@ -618,22 +620,22 @@ export default function ProfilePage() {
                   />
                   {buddyStatus === 'none' && (
                     <button onClick={sendBuddyRequest} className="vs-btn vs-btn-cyan text-xs">
-                      <Users size={13} /> Add Buddy
+                      <Users size={13} /> {t('profile.buddy.add')}
                     </button>
                   )}
                   {buddyStatus === 'pending_sent' && (
                     <span className="vs-btn vs-btn-ghost text-xs cursor-default opacity-60">
-                      <Clock size={13} /> Request Sent
+                      <Clock size={13} /> {t('profile.buddy.requestSent')}
                     </span>
                   )}
                   {buddyStatus === 'pending_received' && (
                     <button onClick={acceptBuddyRequest} className="vs-btn vs-btn-primary text-xs">
-                      <UserCheck size={13} /> Accept Buddy
+                      <UserCheck size={13} /> {t('profile.buddy.accept')}
                     </button>
                   )}
                   {buddyStatus === 'accepted' && (
                     <span className="vs-badge vs-badge-cyan text-xs py-1.5 px-3">
-                      <Users size={12} /> Buddies
+                      <Users size={12} /> {t('profile.buddy.buddies')}
                     </span>
                   )}
                 </>
@@ -657,7 +659,7 @@ export default function ProfilePage() {
                   </span>
                 )}
                 <span className="flex items-center gap-1">
-                  <Calendar size={11} /> Joined {memberSince}
+                  <Calendar size={11} /> {t('profile.meta.joined')} {memberSince}
                 </span>
                 {profile.platforms.length > 0 && (
                   <span className="flex items-center gap-1">
@@ -669,7 +671,7 @@ export default function ProfilePage() {
           ) : (
             <div className="space-y-3 mt-2">
               <div>
-                <label className="vs-label block mb-1">DISPLAY NAME</label>
+                <label className="vs-label block mb-1">{t('profile.edit.displayName')}</label>
                 <input
                   value={editDisplayName}
                   onChange={e => setEditDisplayName(e.target.value)}
@@ -678,40 +680,40 @@ export default function ProfilePage() {
                 />
               </div>
               <div>
-                <label className="vs-label block mb-1">BIO</label>
+                <label className="vs-label block mb-1">{t('profile.edit.bio')}</label>
                 <textarea
                   value={editBio}
                   onChange={e => setEditBio(e.target.value)}
                   className="vs-input text-sm resize-none min-h-[60px]"
                   maxLength={250}
-                  placeholder="Tell the community about yourself..."
+                  placeholder={t('profile.edit.bioPlaceholder')}
                 />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="vs-label block mb-1">STATUS</label>
+                  <label className="vs-label block mb-1">{t('profile.edit.status')}</label>
                   <input
                     value={editStatus}
                     onChange={e => setEditStatus(e.target.value)}
                     className="vs-input text-sm"
-                    placeholder="What are you up to?"
+                    placeholder={t('profile.edit.statusPlaceholder')}
                     maxLength={50}
                   />
                 </div>
                 <div>
-                  <label className="vs-label block mb-1">AVAILABILITY</label>
+                  <label className="vs-label block mb-1">{t('profile.edit.availability')}</label>
                   <BrandSelect
                     value={editAvailability}
                     onChange={setEditAvailability}
-                    placeholder="Not set"
+                    placeholder={t('profile.availability.notSet')}
                     options={[
-                      { value: '', label: 'Not set' },
-                      { value: 'Online', label: 'Online' },
-                      { value: 'Away', label: 'Away' },
-                      { value: 'In Game', label: 'In Game' },
-                      { value: 'LFG', label: 'LFG' },
-                      { value: 'Do Not Disturb', label: 'Do Not Disturb' },
-                      { value: 'Offline', label: 'Offline' },
+                      { value: '', label: t('profile.availability.notSet') },
+                      { value: 'Online', label: t('profile.availability.online') },
+                      { value: 'Away', label: t('profile.availability.away') },
+                      { value: 'In Game', label: t('profile.availability.inGame') },
+                      { value: 'LFG', label: t('profile.availability.lfg') },
+                      { value: 'Do Not Disturb', label: t('profile.availability.dnd') },
+                      { value: 'Offline', label: t('profile.availability.offline') },
                     ]}
                   />
                 </div>
@@ -719,7 +721,7 @@ export default function ProfilePage() {
 
               {/* Gamertags */}
               <div>
-                <label className="vs-label block mb-1">GAMERTAGS</label>
+                <label className="vs-label block mb-1">{t('profile.section.gamertags')}</label>
                 <div className="space-y-2">
                   {['PSN', 'Xbox Live', 'Steam', 'Riot ID', 'Epic Games', 'Battle.net'].map(platform => (
                     <div key={platform} className="flex items-center gap-2">
@@ -728,7 +730,7 @@ export default function ProfilePage() {
                         value={editGamertags[platform] || ''}
                         onChange={e => setEditGamertags(prev => ({ ...prev, [platform]: e.target.value }))}
                         className="vs-input text-xs py-1.5 flex-1"
-                        placeholder={`Your ${platform} tag`}
+                        placeholder={`${t('profile.edit.gamertagPlaceholderPrefix')} ${platform} ${t('profile.edit.gamertagPlaceholderSuffix')}`}
                       />
                     </div>
                   ))}
@@ -737,7 +739,7 @@ export default function ProfilePage() {
 
               {/* Socials */}
               <div>
-                <label className="vs-label block mb-1">SOCIALS</label>
+                <label className="vs-label block mb-1">{t('profile.section.socials')}</label>
                 <div className="space-y-2">
                   {['Discord', 'Twitter', 'Twitch', 'YouTube', 'TikTok'].map(social => (
                     <div key={social} className="flex items-center gap-2">
@@ -746,7 +748,7 @@ export default function ProfilePage() {
                         value={editSocials[social] || ''}
                         onChange={e => setEditSocials(prev => ({ ...prev, [social]: e.target.value }))}
                         className="vs-input text-xs py-1.5 flex-1"
-                        placeholder={`Your ${social}`}
+                        placeholder={`${t('profile.edit.socialPlaceholderPrefix')} ${social}`}
                       />
                     </div>
                   ))}
@@ -755,11 +757,11 @@ export default function ProfilePage() {
 
               {/* Personalize */}
               <div className="col-span-full border-t border-border pt-4 mt-2">
-                <label className="vs-label block mb-3">PERSONALIZE YOUR PROFILE</label>
-                
+                <label className="vs-label block mb-3">{t('profile.personalize.heading')}</label>
+
                 {/* Accent color */}
                 <div className="mb-4">
-                  <p className="text-xs text-text-dim mb-2">Accent Color</p>
+                  <p className="text-xs text-text-dim mb-2">{t('profile.personalize.accentColor')}</p>
                   <div className="flex items-center gap-2 flex-wrap">
                     {['#6B3FE0', '#00C8F0', '#E8593C', '#22C55E', '#EAB308', '#EC4899', '#F97316', '#8B5CF6', '#06B6D4', '#FFFFFF'].map(color => (
                       <button key={color} onClick={() => setEditAccentColor(color)}
@@ -767,17 +769,17 @@ export default function ProfilePage() {
                         style={{ backgroundColor: color }} />
                     ))}
                     <input type="color" value={editAccentColor} onChange={e => setEditAccentColor(e.target.value)}
-                      className="w-8 h-8 rounded-lg cursor-pointer border-0 bg-transparent" title="Custom color" />
+                      className="w-8 h-8 rounded-lg cursor-pointer border-0 bg-transparent" title={t('profile.personalize.customColor')} />
                   </div>
                 </div>
 
                 {/* Name color */}
                 <div className="mb-4">
-                  <p className="text-xs text-text-dim mb-2">Name Color</p>
+                  <p className="text-xs text-text-dim mb-2">{t('profile.personalize.nameColor')}</p>
                   <div className="flex items-center gap-2 flex-wrap">
                     <button onClick={() => setEditNameColor('')}
                       className={`px-3 py-1.5 rounded-lg text-[10px] border transition-colors duration-200 ${!editNameColor ? 'border-white bg-white/10 text-white' : 'border-border text-text-dim'}`}>
-                      Default
+                      {t('profile.personalize.default')}
                     </button>
                     {['#6B3FE0', '#00C8F0', '#E8593C', '#22C55E', '#EAB308', '#EC4899', '#F97316', '#FF6B6B', '#00FFB2', '#FFD700'].map(color => (
                       <button key={color} onClick={() => setEditNameColor(color)}
@@ -785,19 +787,19 @@ export default function ProfilePage() {
                         style={{ backgroundColor: color }} />
                     ))}
                     <input type="color" value={editNameColor || '#ffffff'} onChange={e => setEditNameColor(e.target.value)}
-                      className="w-7 h-7 rounded-lg cursor-pointer border-0 bg-transparent" title="Custom color" />
+                      className="w-7 h-7 rounded-lg cursor-pointer border-0 bg-transparent" title={t('profile.personalize.customColor')} />
                   </div>
                 </div>
 
                 {/* Profile theme */}
                 <div className="mb-4">
-                  <p className="text-xs text-text-dim mb-2">Profile Theme</p>
+                  <p className="text-xs text-text-dim mb-2">{t('profile.personalize.profileTheme')}</p>
                   <div className="flex items-center gap-2 flex-wrap">
                     {[
-                      { id: 'default', label: 'Default' },
-                      { id: 'minimal', label: 'Minimal' },
-                      { id: 'neon', label: 'Neon' },
-                      { id: 'glass', label: 'Glass' },
+                      { id: 'default', label: t('profile.theme.default') },
+                      { id: 'minimal', label: t('profile.theme.minimal') },
+                      { id: 'neon', label: t('profile.theme.neon') },
+                      { id: 'glass', label: t('profile.theme.glass') },
                     ].map(theme => (
                       <button key={theme.id} onClick={() => setEditProfileTheme(theme.id)}
                         className={`px-3 py-1.5 rounded-lg text-[10px] border transition-colors duration-200 ${editProfileTheme === theme.id ? 'border-purple bg-purple/15 text-purple' : 'border-border text-text-dim hover:border-border-hover'}`}>
@@ -809,13 +811,13 @@ export default function ProfilePage() {
 
                 {/* Profile effect */}
                 <div className="mb-4">
-                  <p className="text-xs text-text-dim mb-2">Background Effect</p>
+                  <p className="text-xs text-text-dim mb-2">{t('profile.personalize.backgroundEffect')}</p>
                   <div className="flex items-center gap-2 flex-wrap">
                     {[
-                      { id: 'none', label: 'None' },
-                      { id: 'glow', label: 'Glow' },
-                      { id: 'scanlines', label: 'Scanlines' },
-                      { id: 'grid', label: 'Grid' },
+                      { id: 'none', label: t('profile.effect.none') },
+                      { id: 'glow', label: t('profile.effect.glow') },
+                      { id: 'scanlines', label: t('profile.effect.scanlines') },
+                      { id: 'grid', label: t('profile.effect.grid') },
                     ].map(fx => (
                       <button key={fx.id} onClick={() => setEditProfileEffect(fx.id)}
                         className={`px-3 py-1.5 rounded-lg text-[10px] border transition-colors duration-200 ${editProfileEffect === fx.id ? 'border-cyan bg-cyan/15 text-cyan' : 'border-border text-text-dim hover:border-border-hover'}`}>
@@ -827,13 +829,13 @@ export default function ProfilePage() {
 
                 {/* Bio font */}
                 <div className="mb-4">
-                  <p className="text-xs text-text-dim mb-2">Bio Font</p>
+                  <p className="text-xs text-text-dim mb-2">{t('profile.personalize.bioFont')}</p>
                   <div className="flex items-center gap-2 flex-wrap">
                     {[
-                      { id: 'default', label: 'Default', cls: '' },
-                      { id: 'mono', label: 'Monospace', cls: 'font-mono' },
-                      { id: 'serif', label: 'Serif', cls: 'font-serif' },
-                      { id: 'handwritten', label: 'Handwritten', cls: 'italic' },
+                      { id: 'default', label: t('profile.font.default'), cls: '' },
+                      { id: 'mono', label: t('profile.font.mono'), cls: 'font-mono' },
+                      { id: 'serif', label: t('profile.font.serif'), cls: 'font-serif' },
+                      { id: 'handwritten', label: t('profile.font.handwritten'), cls: 'italic' },
                     ].map(f => (
                       <button key={f.id} onClick={() => setEditBioFont(f.id)}
                         className={`px-3 py-1.5 rounded-lg text-[10px] border transition-colors duration-200 ${f.cls} ${editBioFont === f.id ? 'border-purple bg-purple/15 text-purple' : 'border-border text-text-dim hover:border-border-hover'}`}>
@@ -845,7 +847,7 @@ export default function ProfilePage() {
 
                 {/* Show XP bar toggle */}
                 <div className="flex items-center justify-between">
-                  <p className="text-xs text-text-dim">Show XP bar on profile</p>
+                  <p className="text-xs text-text-dim">{t('profile.personalize.showXpBar')}</p>
                   <button onClick={() => setEditShowXpBar(!editShowXpBar)}
                     className={`w-10 h-5 rounded-full transition-colors relative ${editShowXpBar ? 'bg-purple' : 'bg-surface-2'}`}>
                     <div className={`w-4 h-4 rounded-full bg-white absolute top-0.5 transition-colors duration-200 ${editShowXpBar ? 'left-[22px]' : 'left-0.5'}`} />
@@ -859,32 +861,32 @@ export default function ProfilePage() {
           <div className="flex flex-wrap items-center gap-4 md:gap-5 mt-4 pt-4 border-t border-border">
             <div className="text-center">
               <p className="text-lg font-medium tabular-nums" style={{ color: accentColor }}>{level.name}</p>
-              <p className="vs-counter text-[10px] text-text-dim mt-0.5">LEVEL {level.level}</p>
+              <p className="vs-counter text-[10px] text-text-dim mt-0.5">{t('profile.stats.level')} {level.level}</p>
             </div>
             <div className="h-8 w-px bg-border" />
             <div className="text-center">
               <p className="text-lg font-medium tabular-nums vs-counter">{profile.xp.toLocaleString()}</p>
-              <p className="vs-counter text-[10px] text-text-dim mt-0.5">XP</p>
+              <p className="vs-counter text-[10px] text-text-dim mt-0.5">{t('profile.stats.xp')}</p>
             </div>
             <div className="h-8 w-px bg-border" />
             <button onClick={() => openFollowersList('followers')} className="text-center hover:opacity-80 transition-opacity">
               <p className="text-lg font-medium tabular-nums vs-counter">{followerCount}</p>
-              <p className="vs-counter text-[10px] text-text-dim mt-0.5">FOLLOWERS</p>
+              <p className="vs-counter text-[10px] text-text-dim mt-0.5">{t('profile.stats.followers')}</p>
             </button>
             <div className="h-8 w-px bg-border" />
             <button onClick={() => openFollowersList('following')} className="text-center hover:opacity-80 transition-opacity">
               <p className="text-lg font-medium tabular-nums vs-counter">{followingCount}</p>
-              <p className="vs-counter text-[10px] text-text-dim mt-0.5">FOLLOWING</p>
+              <p className="vs-counter text-[10px] text-text-dim mt-0.5">{t('profile.stats.following')}</p>
             </button>
             <div className="h-8 w-px bg-border" />
             <button onClick={() => setActiveTab('posts')} className="text-center hover:opacity-80 transition-opacity">
               <p className="text-lg font-medium tabular-nums vs-counter">{postCount}</p>
-              <p className="vs-counter text-[10px] text-text-dim mt-0.5">POSTS</p>
+              <p className="vs-counter text-[10px] text-text-dim mt-0.5">{t('profile.stats.posts')}</p>
             </button>
             <div className="h-8 w-px bg-border" />
             <button onClick={() => setActiveTab('clips')} className="text-center hover:opacity-80 transition-opacity">
               <p className="text-lg font-medium tabular-nums vs-counter">{clipCount}</p>
-              <p className="vs-counter text-[10px] text-text-dim mt-0.5">CLIPS</p>
+              <p className="vs-counter text-[10px] text-text-dim mt-0.5">{t('profile.stats.clips')}</p>
             </button>
             {/* XP progress */}
             {showXpBar && (
@@ -892,7 +894,7 @@ export default function ProfilePage() {
                 <div className="h-1.5 bg-void rounded-full overflow-hidden">
                   <div className="h-full rounded-full transition-colors duration-200" style={{ width: `${xpProgress.percentage}%`, backgroundColor: accentColor, boxShadow: `0 0 8px ${accentColor}80` }} />
                 </div>
-                <p className="vs-counter text-[9px] text-text-dim mt-1 text-right tabular-nums">{profile.xp}/{xpProgress.next} XP</p>
+                <p className="vs-counter text-[9px] text-text-dim mt-1 text-right tabular-nums">{profile.xp}/{xpProgress.next} {t('profile.stats.xp')}</p>
               </div>
             )}
           </div>
@@ -911,10 +913,10 @@ export default function ProfilePage() {
           {/* Tabs */}
           <div className="flex items-center gap-2 mb-4">
             {[
-              { id: 'posts' as ProfileTab, label: 'Posts', icon: Newspaper, count: postCount },
-              { id: 'clips' as ProfileTab, label: 'Clips', icon: Film, count: clipCount },
-              { id: 'games' as ProfileTab, label: 'Games', icon: Gamepad2, count: userGames.length },
-              { id: 'achievements' as ProfileTab, label: 'Achievements', icon: Trophy, count: 0 },
+              { id: 'posts' as ProfileTab, label: t('profile.tab.posts'), icon: Newspaper, count: postCount },
+              { id: 'clips' as ProfileTab, label: t('profile.tab.clips'), icon: Film, count: clipCount },
+              { id: 'games' as ProfileTab, label: t('profile.tab.games'), icon: Gamepad2, count: userGames.length },
+              { id: 'achievements' as ProfileTab, label: t('profile.tab.achievements'), icon: Trophy, count: 0 },
             ].map(tab => (
               <button
                 key={tab.id}
@@ -937,9 +939,9 @@ export default function ProfilePage() {
             posts.length === 0 ? (
               <EmptyState
                 icon={Newspaper}
-                title={isOwn ? "You haven't posted yet" : 'No posts yet'}
-                description={isOwn ? 'Share what you\'re playing, looking for, or thinking about.' : `${profile.display_name || profile.username} hasn't posted yet.`}
-                cta={isOwn ? { label: 'Create post', href: '/feed' } : undefined}
+                title={isOwn ? t('profile.empty.postsOwnTitle') : t('profile.empty.postsTitle')}
+                description={isOwn ? t('profile.empty.postsOwnDescription') : `${profile.display_name || profile.username} ${t('profile.empty.postsOtherSuffix')}`}
+                cta={isOwn ? { label: t('profile.empty.postsCta'), href: '/feed' } : undefined}
               />
             ) : (
               <div className="space-y-3">
@@ -1003,13 +1005,13 @@ export default function ProfilePage() {
                               value={commentText}
                               onChange={e => setCommentText(e.target.value)}
                               onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitComment(post.id) } }}
-                              placeholder="Write a comment..."
+                              placeholder={t('profile.comment.placeholder')}
                               className="vs-input text-xs py-1.5 flex-1"
                               maxLength={500}
                             />
                             <button onClick={() => submitComment(post.id)} disabled={!commentText.trim() || submittingComment}
                               className="vs-btn vs-btn-primary text-[10px] px-3 py-1.5 disabled:opacity-40 shrink-0">
-                              Post
+                              {t('profile.comment.submit')}
                             </button>
                           </div>
                         )}
@@ -1023,9 +1025,9 @@ export default function ProfilePage() {
             clips.length === 0 ? (
               <EmptyState
                 icon={Film}
-                title={isOwn ? 'No clips uploaded yet' : 'No clips yet'}
-                description={isOwn ? 'Upload your best plays — clips of the week get featured.' : `${profile.display_name || profile.username} hasn't shared any clips yet.`}
-                cta={isOwn ? { label: 'Upload clip', href: '/clips' } : undefined}
+                title={isOwn ? t('profile.empty.clipsOwnTitle') : t('profile.empty.clipsTitle')}
+                description={isOwn ? t('profile.empty.clipsOwnDescription') : `${profile.display_name || profile.username} ${t('profile.empty.clipsOtherSuffix')}`}
+                cta={isOwn ? { label: t('profile.empty.clipsCta'), href: '/clips' } : undefined}
               />
             ) : (
               <div className="grid grid-cols-2 gap-3">
@@ -1069,9 +1071,9 @@ export default function ProfilePage() {
             userGames.length === 0 ? (
               <EmptyState
                 icon={Gamepad2}
-                title={isOwn ? 'No games added yet' : 'No games added'}
-                description={isOwn ? 'Add the games you play so squads can find you.' : `${profile.display_name || profile.username} hasn't added any games yet.`}
-                cta={isOwn ? { label: 'Add games', href: '/games' } : undefined}
+                title={isOwn ? t('profile.empty.gamesOwnTitle') : t('profile.empty.gamesTitle')}
+                description={isOwn ? t('profile.empty.gamesOwnDescription') : `${profile.display_name || profile.username} ${t('profile.empty.gamesOtherSuffix')}`}
+                cta={isOwn ? { label: t('profile.empty.gamesCta'), href: '/games' } : undefined}
               />
             ) : (
               <div className="space-y-2">
@@ -1107,8 +1109,8 @@ export default function ProfilePage() {
             ) : !achievementsData ? (
               <EmptyState
                 icon={Trophy}
-                title="Geen achievements geladen"
-                description="Probeer het opnieuw door te wisselen van tab."
+                title={t('profile.empty.achievementsTitle')}
+                description={t('profile.empty.achievementsDescription')}
               />
             ) : (
               <AchievementGrid grouped={achievementsData.grouped} stats={achievementsData.stats} />
@@ -1121,7 +1123,7 @@ export default function ProfilePage() {
           {/* Gamertags card */}
           {!editing && profile.gamertags && Object.values(profile.gamertags).some(v => v) && (
             <div className="vs-card vs-lit">
-              <p className="vs-label mb-3">GAMERTAGS</p>
+              <p className="vs-label mb-3">{t('profile.section.gamertags')}</p>
               <div className="space-y-2">
                 {Object.entries(profile.gamertags)
                   .filter(([, v]) => v)
@@ -1138,7 +1140,7 @@ export default function ProfilePage() {
           {/* Socials card */}
           {!editing && profile.socials && Object.values(profile.socials).some(v => v) && (
             <div className="vs-card vs-lit">
-              <p className="vs-label mb-3">SOCIALS</p>
+              <p className="vs-label mb-3">{t('profile.section.socials')}</p>
               <div className="space-y-2">
                 {Object.entries(profile.socials)
                   .filter(([, v]) => v)
@@ -1155,7 +1157,7 @@ export default function ProfilePage() {
           {/* Games quick list */}
           {userGames.length > 0 && (
             <div className="vs-card vs-lit">
-              <p className="vs-label mb-3">GAMES ({userGames.length})</p>
+              <p className="vs-label mb-3">{t('profile.section.games')} ({userGames.length})</p>
               <div className="space-y-1.5">
                 {userGames.map(ug => (
                   <div key={ug.id} className="flex items-center justify-between text-sm">
@@ -1170,16 +1172,16 @@ export default function ProfilePage() {
           {/* Level card */}
           <div className="vs-card vs-lit">
             <div className="flex items-center justify-between mb-3">
-              <p className="vs-label">RANK</p>
-              <span className="vs-counter text-[9px] text-text-dim tabular-nums">LV {String(level.level).padStart(2, '0')}</span>
+              <p className="vs-label">{t('profile.rank.title')}</p>
+              <span className="vs-counter text-[9px] text-text-dim tabular-nums">{t('profile.rank.lvShort')} {String(level.level).padStart(2, '0')}</span>
             </div>
             <div className="text-center">
               <p className="text-2xl font-bold tracking-tight" style={{ color: accentColor }}>{level.name}</p>
-              <p className="vs-counter text-[10px] text-text-dim mt-1.5 tabular-nums">{profile.xp.toLocaleString()} XP</p>
+              <p className="vs-counter text-[10px] text-text-dim mt-1.5 tabular-nums">{profile.xp.toLocaleString()} {t('profile.stats.xp')}</p>
               <div className="h-1.5 bg-void rounded-full overflow-hidden mt-3">
                 <div className="h-full rounded-full transition-colors duration-200" style={{ width: `${xpProgress.percentage}%`, backgroundColor: accentColor, boxShadow: `0 0 8px ${accentColor}80` }} />
               </div>
-              <p className="vs-counter text-[9px] text-text-dim mt-1.5 tabular-nums">{(xpProgress.next - profile.xp).toLocaleString()} XP TO NEXT</p>
+              <p className="vs-counter text-[9px] text-text-dim mt-1.5 tabular-nums">{(xpProgress.next - profile.xp).toLocaleString()} {t('profile.rank.xpToNext')}</p>
             </div>
           </div>
         </div>

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import CategoryCard, { type CategoryCardData } from '@/components/forums/CategoryCard'
+import { useLang } from '@/lib/lang-context'
 
 interface SearchResult {
   id: string
@@ -13,6 +14,7 @@ interface SearchResult {
 
 export default function ForumsPage() {
   const router = useRouter()
+  const { t } = useLang()
   const [categories, setCategories] = useState<CategoryCardData[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -48,10 +50,10 @@ export default function ForumsPage() {
     <div className="max-w-4xl mx-auto px-4 py-8">
       <div className="mb-8">
         <p className="font-mono text-[10px] tracking-[0.2em] text-purple uppercase mb-1">
-          Community
+          {t('forums.eyebrow')}
         </p>
-        <h1 className="font-mono text-3xl font-bold text-text mb-1">Forums</h1>
-        <p className="text-text-dim text-sm">Discussieer met de community.</p>
+        <h1 className="font-mono text-3xl font-bold text-text mb-1">{t('forums.title')}</h1>
+        <p className="text-text-dim text-sm">{t('forums.subtitle')}</p>
       </div>
 
       <div className="mb-6">
@@ -59,7 +61,7 @@ export default function ForumsPage() {
           type="text"
           value={search}
           onChange={e => setSearch(e.target.value)}
-          placeholder="Zoek in forums..."
+          placeholder={t('forums.search_placeholder')}
           className="w-full bg-surface border border-border rounded-xl px-4 py-3 text-text text-sm font-mono placeholder-text-dim/60 focus:outline-none focus:border-purple transition-colors"
         />
       </div>
@@ -74,12 +76,12 @@ export default function ForumsPage() {
             </div>
           ) : searchResults.length === 0 ? (
             <p className="text-text-dim font-mono text-sm text-center py-6">
-              Geen resultaten voor &ldquo;{search}&rdquo;
+              {t('forums.no_results')} &ldquo;{search}&rdquo;
             </p>
           ) : (
             <div className="space-y-2">
               <p className="font-mono text-[10px] text-text-dim uppercase tracking-wider mb-3">
-                {searchResults.length} resultaten
+                {searchResults.length} {t('forums.results')}
               </p>
               {searchResults.map(thread => (
                 <button
@@ -95,7 +97,7 @@ export default function ForumsPage() {
                       {thread.category?.name}
                     </span>
                     <span className="font-mono text-[10px] text-text-dim/60">
-                      {thread.reply_count} replies
+                      {thread.reply_count} {t('forums.replies')}
                     </span>
                   </div>
                 </button>

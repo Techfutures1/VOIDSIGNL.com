@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase-browser'
 import BuddyCard, { type BuddyCardUser } from '@/components/buddy/BuddyCard'
 import BuddyRequestItem, { type BuddyRequestItemData } from '@/components/buddy/BuddyRequestItem'
 import { BrandSelect } from '@/components/ui/BrandSelect'
+import { useLang } from '@/lib/lang-context'
 
 type Tab = 'zoeken' | 'requests' | 'mijn-buddies'
 
@@ -22,6 +23,7 @@ const PLAYTIMES = ['ochtend', 'middag', 'avond', 'nacht']
 const PLATFORMS = ['PC', 'PlayStation', 'Xbox', 'Mobile']
 
 function BuddiesPageContent() {
+  const { t } = useLang()
   const supabase = createClient()
   const searchParams = useSearchParams()
   const initialGameId = searchParams.get('game') ?? ''
@@ -101,19 +103,19 @@ function BuddiesPageContent() {
   }
 
   const TABS: { key: Tab; label: string }[] = [
-    { key: 'zoeken', label: 'Zoeken' },
-    { key: 'requests', label: `Requests${requests.length > 0 ? ` (${requests.length})` : ''}` },
-    { key: 'mijn-buddies', label: 'Mijn Buddies' },
+    { key: 'zoeken', label: t('buddies.tab_search') },
+    { key: 'requests', label: `${t('buddies.tab_requests')}${requests.length > 0 ? ` (${requests.length})` : ''}` },
+    { key: 'mijn-buddies', label: t('buddies.tab_my_buddies') },
   ]
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
       <div className="mb-8">
         <p className="font-mono text-[10px] tracking-[0.2em] text-purple uppercase mb-1">
-          Community
+          {t('buddies.eyebrow')}
         </p>
-        <h1 className="font-mono text-3xl font-bold text-text mb-1">Buddies</h1>
-        <p className="text-text-dim text-sm">Vind je gaming squad.</p>
+        <h1 className="font-mono text-3xl font-bold text-text mb-1">{t('buddies.title')}</h1>
+        <p className="text-text-dim text-sm">{t('buddies.subtitle')}</p>
       </div>
 
       <div className="flex gap-1 bg-surface border border-border rounded-xl p-1 mb-6">
@@ -137,18 +139,18 @@ function BuddiesPageContent() {
               value={gameId}
               onChange={setGameId}
               searchable
-              placeholder="Alle games"
+              placeholder={t('buddies.filter_all_games')}
               options={[
-                { value: '', label: 'Alle games' },
+                { value: '', label: t('buddies.filter_all_games') },
                 ...games.map(g => ({ value: g.id, label: g.name })),
               ]}
             />
             <BrandSelect
               value={language}
               onChange={setLanguage}
-              placeholder="Alle talen"
+              placeholder={t('buddies.filter_all_languages')}
               options={[
-                { value: '', label: 'Alle talen' },
+                { value: '', label: t('buddies.filter_all_languages') },
                 { value: 'nl', label: 'Nederlands' },
                 { value: 'en', label: 'English' },
               ]}
@@ -156,42 +158,42 @@ function BuddiesPageContent() {
             <BrandSelect
               value={platform}
               onChange={setPlatform}
-              placeholder="Alle platforms"
+              placeholder={t('buddies.filter_all_platforms')}
               options={[
-                { value: '', label: 'Alle platforms' },
+                { value: '', label: t('buddies.filter_all_platforms') },
                 ...PLATFORMS.map(p => ({ value: p, label: p })),
               ]}
             />
             <BrandSelect
               value={playtime}
               onChange={setPlaytime}
-              placeholder="Alle tijden"
+              placeholder={t('buddies.filter_all_times')}
               options={[
-                { value: '', label: 'Alle tijden' },
-                ...PLAYTIMES.map(t => ({ value: t, label: t[0].toUpperCase() + t.slice(1) })),
+                { value: '', label: t('buddies.filter_all_times') },
+                ...PLAYTIMES.map(pt => ({ value: pt, label: t(`buddies.playtime_${pt}`) })),
               ]}
             />
             <BrandSelect
               value={minLevel}
               onChange={setMinLevel}
-              placeholder="Min level"
+              placeholder={t('buddies.filter_min_level')}
               options={[
-                { value: '', label: 'Min level' },
+                { value: '', label: t('buddies.filter_min_level') },
                 ...[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(l => ({
                   value: String(l),
-                  label: `Level ${l}`,
+                  label: `${t('buddies.level')} ${l}`,
                 })),
               ]}
             />
             <BrandSelect
               value={maxLevel}
               onChange={setMaxLevel}
-              placeholder="Max level"
+              placeholder={t('buddies.filter_max_level')}
               options={[
-                { value: '', label: 'Max level' },
+                { value: '', label: t('buddies.filter_max_level') },
                 ...[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(l => ({
                   value: String(l),
-                  label: `Level ${l}`,
+                  label: `${t('buddies.level')} ${l}`,
                 })),
               ]}
             />
@@ -206,10 +208,10 @@ function BuddiesPageContent() {
           ) : results.length === 0 ? (
             <div className="text-center py-16">
               <p className="font-mono text-[10px] tracking-[0.2em] text-text-dim/60 uppercase mb-3">
-                Geen resultaten
+                {t('buddies.empty_search_title')}
               </p>
               <p className="text-text-dim text-sm">
-                Geen spelers gevonden met deze filters.
+                {t('buddies.empty_search_desc')}
               </p>
             </div>
           ) : (
@@ -233,9 +235,9 @@ function BuddiesPageContent() {
           {requests.length === 0 ? (
             <div className="text-center py-16">
               <p className="font-mono text-[10px] tracking-[0.2em] text-text-dim/60 uppercase mb-3">
-                Leeg
+                {t('buddies.empty_label')}
               </p>
-              <p className="text-text-dim text-sm">Geen openstaande buddy requests.</p>
+              <p className="text-text-dim text-sm">{t('buddies.empty_requests_desc')}</p>
             </div>
           ) : (
             requests.map(r => (
@@ -255,10 +257,10 @@ function BuddiesPageContent() {
           {buddies.length === 0 ? (
             <div className="col-span-2 text-center py-16">
               <p className="font-mono text-[10px] tracking-[0.2em] text-text-dim/60 uppercase mb-3">
-                Leeg
+                {t('buddies.empty_label')}
               </p>
               <p className="text-text-dim text-sm">
-                Nog geen buddies. Zoek iemand op de zoekpagina.
+                {t('buddies.empty_buddies_desc')}
               </p>
             </div>
           ) : (

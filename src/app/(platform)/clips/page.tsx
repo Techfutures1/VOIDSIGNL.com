@@ -6,6 +6,7 @@ import ClipUploadModal from '@/components/clips/ClipUploadModal'
 import ClipPlayer from '@/components/clips/ClipPlayer'
 import type { ClipData } from '@/components/clips/ClipModal'
 import { BrandSelect } from '@/components/ui/BrandSelect'
+import { useLang } from '@/lib/lang-context'
 
 type SortOption = 'newest' | 'likes' | 'views'
 
@@ -14,6 +15,7 @@ interface Game { id: string; name: string }
 const PAGE_SIZE = 20
 
 export default function ClipsPage() {
+  const { t } = useLang()
   const [clips, setClips] = useState<ClipData[]>([])
   const [cotw, setCotw] = useState<ClipData | null>(null)
   const [games, setGames] = useState<Game[]>([])
@@ -52,22 +54,22 @@ export default function ClipsPage() {
 
       <div className="flex items-start justify-between mb-8">
         <div>
-          <p className="font-mono text-[10px] tracking-[0.2em] text-purple uppercase mb-1">Community</p>
-          <h1 className="font-mono text-3xl font-bold text-text mb-1">Clips</h1>
-          <p className="text-text-dim text-sm">{total > 0 ? `${total.toLocaleString()} clips` : ''}</p>
+          <p className="font-mono text-[10px] tracking-[0.2em] text-purple uppercase mb-1">{t('clips.eyebrow')}</p>
+          <h1 className="font-mono text-3xl font-bold text-text mb-1">{t('clips.title')}</h1>
+          <p className="text-text-dim text-sm">{total > 0 ? `${total.toLocaleString()} ${t('clips.countSuffix')}` : ''}</p>
         </div>
         <button
           onClick={() => setShowUpload(true)}
           className="px-5 py-2.5 bg-purple text-white font-mono text-xs uppercase tracking-wider rounded-lg hover:bg-purple/85 transition-colors"
         >
-          + Clip
+          {t('clips.addShort')}
         </button>
       </div>
 
       {cotw && (
         <div className="mb-8">
           <p className="font-mono text-[10px] tracking-[0.2em] text-cyan uppercase mb-3">
-            ★ Clip of the Week
+            ★ {t('clips.clipOfTheWeek')}
           </p>
           <div className="bg-surface border border-cyan/30 rounded-2xl overflow-hidden">
             <div className="p-5">
@@ -82,7 +84,7 @@ export default function ClipsPage() {
                 </div>
                 <div className="text-right">
                   <p className="font-mono text-sm text-cyan font-bold">♥ {cotw.like_count?.toLocaleString()}</p>
-                  <p className="font-mono text-[10px] text-text-dim">{cotw.view_count?.toLocaleString()} views</p>
+                  <p className="font-mono text-[10px] text-text-dim">{cotw.view_count?.toLocaleString()} {t('clips.views')}</p>
                 </div>
               </div>
             </div>
@@ -95,9 +97,9 @@ export default function ClipsPage() {
           <BrandSelect
             value={gameFilter}
             onChange={(v) => { setGameFilter(v); setPage(1) }}
-            placeholder="Alle games"
+            placeholder={t('clips.allGames')}
             options={[
-              { value: '', label: 'Alle games' },
+              { value: '', label: t('clips.allGames') },
               ...games.map(g => ({ value: g.id, label: g.name })),
             ]}
           />
@@ -112,7 +114,7 @@ export default function ClipsPage() {
                 sort === s ? 'bg-purple text-white' : 'text-text-dim hover:text-text'
               }`}
             >
-              {s === 'newest' ? 'Nieuwste' : s === 'likes' ? 'Likes' : 'Views'}
+              {s === 'newest' ? t('clips.sortNewest') : s === 'likes' ? t('clips.sortLikes') : t('clips.sortViews')}
             </button>
           ))}
         </div>
@@ -126,13 +128,13 @@ export default function ClipsPage() {
         </div>
       ) : clips.length === 0 ? (
         <div className="text-center py-16">
-          <p className="font-mono text-[10px] tracking-[0.2em] text-text-dim/60 uppercase mb-3">Leeg</p>
-          <p className="text-text-dim text-sm mb-6">Nog geen clips. Wees de eerste.</p>
+          <p className="font-mono text-[10px] tracking-[0.2em] text-text-dim/60 uppercase mb-3">{t('clips.emptyEyebrow')}</p>
+          <p className="text-text-dim text-sm mb-6">{t('clips.emptyMessage')}</p>
           <button
             onClick={() => setShowUpload(true)}
             className="px-5 py-2.5 bg-purple text-white font-mono text-sm rounded-lg hover:bg-purple/85 transition-colors"
           >
-            + Clip toevoegen
+            {t('clips.addClip')}
           </button>
         </div>
       ) : (
@@ -148,7 +150,7 @@ export default function ClipsPage() {
             disabled={page === 1}
             className="px-4 py-2 border border-border text-text-dim font-mono text-xs rounded-lg hover:border-purple hover:text-text transition-colors duration-200 disabled:opacity-30"
           >
-            ← Vorige
+            ← {t('clips.previous')}
           </button>
           <span className="font-mono text-xs text-text-dim">{page} / {totalPages}</span>
           <button
@@ -156,7 +158,7 @@ export default function ClipsPage() {
             disabled={page === totalPages}
             className="px-4 py-2 border border-border text-text-dim font-mono text-xs rounded-lg hover:border-purple hover:text-text transition-colors duration-200 disabled:opacity-30"
           >
-            Volgende →
+            {t('clips.next')} →
           </button>
         </div>
       )}

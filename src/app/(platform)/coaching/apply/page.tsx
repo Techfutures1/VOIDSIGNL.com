@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useLang } from '@/lib/lang-context'
 
 const SPECIALIZATIONS = [
   'Aim training', 'Game sense', 'Rank climb', 'Mental coaching',
@@ -12,6 +13,7 @@ interface Game { id: string; name: string }
 
 export default function CoachApplyPage() {
   const router = useRouter()
+  const { t } = useLang()
   const [games, setGames] = useState<Game[]>([])
   const [bio, setBio] = useState('')
   const [selectedSpecs, setSelectedSpecs] = useState<string[]>([])
@@ -37,10 +39,10 @@ export default function CoachApplyPage() {
     e.preventDefault()
     setError('')
 
-    if (bio.length < 50) { setError('Bio moet minimaal 50 tekens zijn.'); return }
-    if (selectedSpecs.length === 0) { setError('Kies minimaal 1 specialisatie.'); return }
-    if (selectedGames.length === 0) { setError('Kies minimaal 1 game.'); return }
-    if (!discordHandle.trim()) { setError('Discord handle is verplicht.'); return }
+    if (bio.length < 50) { setError(t('coachApply.errorBioMin')); return }
+    if (selectedSpecs.length === 0) { setError(t('coachApply.errorSpecMin')); return }
+    if (selectedGames.length === 0) { setError(t('coachApply.errorGameMin')); return }
+    if (!discordHandle.trim()) { setError(t('coachApply.errorDiscordRequired')); return }
 
     setLoading(true)
     try {
@@ -57,10 +59,10 @@ export default function CoachApplyPage() {
         }),
       })
       const json = await res.json()
-      if (!res.ok) throw new Error(json.error ?? 'Indienen mislukt')
+      if (!res.ok) throw new Error(json.error ?? t('coachApply.errorSubmitFailed'))
       setSuccess(true)
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Er ging iets mis.'
+      const msg = err instanceof Error ? err.message : t('coachApply.errorGeneric')
       setError(msg)
     } finally {
       setLoading(false)
@@ -71,19 +73,19 @@ export default function CoachApplyPage() {
     return (
       <div className="max-w-lg mx-auto px-4 py-20 text-center">
         <p className="font-mono text-[10px] tracking-[0.2em] text-success uppercase mb-4">
-          Aanvraag ingediend
+          {t('coachApply.successEyebrow')}
         </p>
         <h1 className="font-mono text-2xl font-bold text-text mb-3">
-          We nemen je aanvraag door.
+          {t('coachApply.successTitle')}
         </h1>
         <p className="text-text-dim text-sm mb-8 leading-relaxed">
-          Een admin beoordeelt je aanvraag. Je krijgt een notificatie zodra je goedgekeurd bent.
+          {t('coachApply.successBody')}
         </p>
         <button
           onClick={() => router.push('/coaching')}
           className="px-6 py-3 bg-purple text-white font-mono text-sm rounded-lg hover:bg-purple/85 transition-colors"
         >
-          Terug naar coaches
+          {t('coachApply.successBack')}
         </button>
       </div>
     )
@@ -93,21 +95,21 @@ export default function CoachApplyPage() {
     <div className="max-w-2xl mx-auto px-4 py-8">
       <div className="mb-8">
         <p className="font-mono text-[10px] tracking-[0.2em] text-purple uppercase mb-1">
-          Coaching
+          {t('coachApply.eyebrow')}
         </p>
-        <h1 className="font-mono text-3xl font-bold text-text mb-1">Word coach</h1>
-        <p className="text-text-dim text-sm">Deel je kennis. Help andere spelers beter worden.</p>
+        <h1 className="font-mono text-3xl font-bold text-text mb-1">{t('coachApply.title')}</h1>
+        <p className="text-text-dim text-sm">{t('coachApply.subtitle')}</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
           <label className="font-mono text-xs text-text-dim uppercase tracking-widest block mb-2">
-            Over jezelf *
+            {t('coachApply.bioLabel')}
           </label>
           <textarea
             value={bio}
             onChange={e => setBio(e.target.value)}
-            placeholder="Vertel over je ervaring, speelstijl en wat je studenten kunt leren... (min. 50 tekens)"
+            placeholder={t('coachApply.bioPlaceholder')}
             rows={5}
             maxLength={1000}
             className="w-full bg-void border border-border rounded-lg px-4 py-3 text-text text-sm font-mono placeholder-text-dim/60 focus:outline-none focus:border-purple transition-colors resize-none"
@@ -119,20 +121,20 @@ export default function CoachApplyPage() {
 
         <div>
           <label className="font-mono text-xs text-text-dim uppercase tracking-widest block mb-2">
-            Discord handle *
+            {t('coachApply.discordLabel')}
           </label>
           <input
             type="text"
             value={discordHandle}
             onChange={e => setDiscordHandle(e.target.value)}
-            placeholder="username#0000 of username"
+            placeholder={t('coachApply.discordPlaceholder')}
             className="w-full bg-void border border-border rounded-lg px-4 py-3 text-text text-sm font-mono placeholder-text-dim/60 focus:outline-none focus:border-purple transition-colors"
           />
         </div>
 
         <div>
           <label className="font-mono text-xs text-text-dim uppercase tracking-widest block mb-3">
-            Games die je coacht *
+            {t('coachApply.gamesLabel')}
           </label>
           <div className="flex flex-wrap gap-2">
             {games.map(g => (
@@ -154,7 +156,7 @@ export default function CoachApplyPage() {
 
         <div>
           <label className="font-mono text-xs text-text-dim uppercase tracking-widest block mb-3">
-            Specialisaties *
+            {t('coachApply.specsLabel')}
           </label>
           <div className="flex flex-wrap gap-2">
             {SPECIALIZATIONS.map(s => (
@@ -176,7 +178,7 @@ export default function CoachApplyPage() {
 
         <div>
           <label className="font-mono text-xs text-text-dim uppercase tracking-widest block mb-3">
-            Talen
+            {t('coachApply.languagesLabel')}
           </label>
           <div className="flex gap-3">
             {['nl', 'en'].map(lang => (
@@ -190,7 +192,7 @@ export default function CoachApplyPage() {
                     : 'bg-void text-text-dim border border-border hover:border-purple'
                 }`}
               >
-                {lang === 'nl' ? 'Nederlands' : 'English'}
+                {lang === 'nl' ? t('coachApply.langNl') : t('coachApply.langEn')}
               </button>
             ))}
           </div>
@@ -198,25 +200,25 @@ export default function CoachApplyPage() {
 
         <div>
           <label className="font-mono text-xs text-text-dim uppercase tracking-widest block mb-3">
-            Sessie tier
+            {t('coachApply.tierLabel')}
           </label>
           <div className="flex gap-3">
             {[
-              { key: 'basic', label: 'Basic (€10)' },
-              { key: 'standard', label: 'Standard (€25)' },
-              { key: 'premium', label: 'Premium (€50)' },
-            ].map(t => (
+              { key: 'basic', label: t('coachApply.tierBasic') },
+              { key: 'standard', label: t('coachApply.tierStandard') },
+              { key: 'premium', label: t('coachApply.tierPremium') },
+            ].map(tierOption => (
               <button
-                key={t.key}
+                key={tierOption.key}
                 type="button"
-                onClick={() => setTier(t.key)}
+                onClick={() => setTier(tierOption.key)}
                 className={`flex-1 py-2 rounded-lg font-mono text-xs transition-colors duration-200 ${
-                  tier === t.key
+                  tier === tierOption.key
                     ? 'bg-purple text-white border border-purple'
                     : 'bg-void text-text-dim border border-border hover:border-purple'
                 }`}
               >
-                {t.label}
+                {tierOption.label}
               </button>
             ))}
           </div>
@@ -229,7 +231,7 @@ export default function CoachApplyPage() {
           disabled={loading}
           className="w-full py-3 bg-purple text-white font-mono text-sm uppercase tracking-wider rounded-lg hover:bg-purple/85 transition-colors duration-200 disabled:opacity-40"
         >
-          {loading ? 'Bezig...' : 'Aanvraag indienen'}
+          {loading ? t('coachApply.submitting') : t('coachApply.submit')}
         </button>
       </form>
     </div>

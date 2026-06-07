@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase-browser'
+import { useLang } from '@/lib/lang-context'
 import ClanCard from '@/components/clans/ClanCard'
 
 interface ClanRow {
@@ -22,6 +23,7 @@ interface ClanRow {
 const PAGE_SIZE = 20
 
 export default function ClansPage() {
+  const { t } = useLang()
   const supabase = createClient()
   const [clans, setClans] = useState<ClanRow[]>([])
   const [loading, setLoading] = useState(true)
@@ -65,17 +67,17 @@ export default function ClansPage() {
       <div className="flex items-start justify-between mb-8">
         <div>
           <p className="font-mono text-[10px] tracking-[0.2em] text-purple uppercase mb-1">
-            Community
+            {t('clans.eyebrow')}
           </p>
-          <h1 className="font-mono text-3xl font-bold text-text mb-1">Clans</h1>
-          <p className="text-text-dim text-sm">{total.toLocaleString()} clans</p>
+          <h1 className="font-mono text-3xl font-bold text-text mb-1">{t('clans.title')}</h1>
+          <p className="text-text-dim text-sm">{total.toLocaleString()} {t('clans.countLabel')}</p>
         </div>
         {!myClanId && (
           <Link
             href="/clans/new"
             className="px-5 py-2.5 bg-purple text-white font-mono text-xs uppercase tracking-wider rounded-lg hover:bg-purple/85 transition-colors"
           >
-            + Clan aanmaken
+            + {t('clans.create')}
           </Link>
         )}
       </div>
@@ -94,7 +96,7 @@ export default function ClansPage() {
                 : 'text-text-dim hover:text-text'
             }`}
           >
-            {key === 'xp' ? 'XP' : key === 'members' ? 'Leden' : 'Nieuwste'}
+            {key === 'xp' ? t('clans.sortXp') : key === 'members' ? t('clans.sortMembers') : t('clans.sortNewest')}
           </button>
         ))}
       </div>
@@ -108,14 +110,14 @@ export default function ClansPage() {
       ) : clans.length === 0 ? (
         <div className="text-center py-16">
           <p className="font-mono text-[10px] tracking-[0.2em] text-text-dim/60 uppercase mb-3">
-            Leeg
+            {t('clans.emptyEyebrow')}
           </p>
-          <p className="text-text-dim text-sm mb-6">Nog geen clans. Maak de eerste aan.</p>
+          <p className="text-text-dim text-sm mb-6">{t('clans.emptyMessage')}</p>
           <Link
             href="/clans/new"
             className="px-5 py-2.5 bg-purple text-white font-mono text-sm rounded-lg hover:bg-purple/85 transition-colors"
           >
-            + Clan aanmaken
+            + {t('clans.create')}
           </Link>
         </div>
       ) : (
@@ -138,7 +140,7 @@ export default function ClansPage() {
             disabled={page === 1}
             className="px-4 py-2 border border-border text-text-dim font-mono text-xs rounded-lg hover:border-purple hover:text-text transition-colors duration-200 disabled:opacity-30"
           >
-            ← Vorige
+            ← {t('clans.prev')}
           </button>
           <span className="font-mono text-xs text-text-dim">
             {page} / {totalPages}
@@ -148,7 +150,7 @@ export default function ClansPage() {
             disabled={page === totalPages}
             className="px-4 py-2 border border-border text-text-dim font-mono text-xs rounded-lg hover:border-purple hover:text-text transition-colors duration-200 disabled:opacity-30"
           >
-            Volgende →
+            {t('clans.next')} →
           </button>
         </div>
       )}

@@ -12,6 +12,7 @@ import { EmptyState } from '@/components/ui/empty-state'
 import { ScopeSpinner } from '@/components/ui/loader'
 import { usePullToRefresh } from '@/hooks/use-pull-to-refresh'
 import { PullIndicator } from '@/components/ui/pull-indicator'
+import { useLang } from '@/lib/lang-context'
 
 interface Notification {
   id: string
@@ -53,6 +54,7 @@ const TYPE_CONFIG: Record<string, { icon: any; color: string; category: string }
 }
 
 export default function NotificationsPage() {
+  const { t } = useLang()
   const supabase = createClient()
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [loading, setLoading] = useState(true)
@@ -97,10 +99,10 @@ export default function NotificationsPage() {
 
   function timeAgo(date: string) {
     const s = Math.floor((Date.now() - new Date(date).getTime()) / 1000)
-    if (s < 60) return 'just now'
-    if (s < 3600) return `${Math.floor(s / 60)}m ago`
-    if (s < 86400) return `${Math.floor(s / 3600)}h ago`
-    if (s < 604800) return `${Math.floor(s / 86400)}d ago`
+    if (s < 60) return t('notifications.timeJustNow')
+    if (s < 3600) return `${Math.floor(s / 60)}${t('notifications.timeMinutesShort')}`
+    if (s < 86400) return `${Math.floor(s / 3600)}${t('notifications.timeHoursShort')}`
+    if (s < 604800) return `${Math.floor(s / 86400)}${t('notifications.timeDaysShort')}`
     return new Date(date).toLocaleDateString('en', { month: 'short', day: 'numeric' })
   }
 
@@ -135,7 +137,7 @@ export default function NotificationsPage() {
         <div>
           <h1 className="text-xl font-semibold tracking-wide flex items-center gap-2">
             <Bell size={20} className="text-purple" />
-            Notifications
+            {t('notifications.title')}
             {unreadCount > 0 && (
               <span className="vs-counter px-1.5 h-[18px] min-w-[20px] rounded-full bg-danger text-white text-[10px] flex items-center justify-center font-medium tabular-nums">
                 {unreadCount > 99 ? '99+' : unreadCount}
@@ -143,12 +145,12 @@ export default function NotificationsPage() {
             )}
           </h1>
           <p className="vs-counter text-[11px] text-text-dim mt-1 tabular-nums">
-            {String(notifications.length).padStart(2, '0')} TOTAL · {String(unreadCount).padStart(2, '0')} UNREAD
+            {String(notifications.length).padStart(2, '0')} {t('notifications.totalLabel')} · {String(unreadCount).padStart(2, '0')} {t('notifications.unreadLabel')}
           </p>
         </div>
         {unreadCount > 0 && (
           <button onClick={markAllRead} className="vs-btn vs-btn-ghost text-xs">
-            <CheckCheck size={13} /> Mark all read
+            <CheckCheck size={13} /> {t('notifications.markAllRead')}
           </button>
         )}
       </div>
@@ -156,11 +158,11 @@ export default function NotificationsPage() {
       {/* Filters */}
       <div className="flex items-center gap-1.5 mb-5 overflow-x-auto pb-1">
         {[
-          { id: 'all' as NotifFilter, label: 'All', count: notifications.length },
-          { id: 'unread' as NotifFilter, label: 'Unread', count: unreadCount },
-          { id: 'social' as NotifFilter, label: 'Social', count: notifications.filter(n => getConfig(n.type).category === 'social').length },
-          { id: 'competitive' as NotifFilter, label: 'Competitive', count: notifications.filter(n => getConfig(n.type).category === 'competitive').length },
-          { id: 'system' as NotifFilter, label: 'System', count: notifications.filter(n => getConfig(n.type).category === 'system').length },
+          { id: 'all' as NotifFilter, label: t('notifications.filterAll'), count: notifications.length },
+          { id: 'unread' as NotifFilter, label: t('notifications.filterUnread'), count: unreadCount },
+          { id: 'social' as NotifFilter, label: t('notifications.filterSocial'), count: notifications.filter(n => getConfig(n.type).category === 'social').length },
+          { id: 'competitive' as NotifFilter, label: t('notifications.filterCompetitive'), count: notifications.filter(n => getConfig(n.type).category === 'competitive').length },
+          { id: 'system' as NotifFilter, label: t('notifications.filterSystem'), count: notifications.filter(n => getConfig(n.type).category === 'system').length },
         ].map(f => (
           <button
             key={f.id}
@@ -178,8 +180,8 @@ export default function NotificationsPage() {
       {filtered.length === 0 ? (
         <EmptyState
           icon={BellOff}
-          title={filter === 'unread' ? 'All caught up!' : 'No notifications yet'}
-          description={filter === 'unread' ? 'Geen ongelezen meldingen.' : 'Updates verschijnen hier zodra ze binnenkomen.'}
+          title={filter === 'unread' ? t('notifications.emptyUnreadTitle') : t('notifications.emptyTitle')}
+          description={filter === 'unread' ? t('notifications.emptyUnreadDescription') : t('notifications.emptyDescription')}
         />
       ) : (
         <div className="space-y-1">
@@ -219,7 +221,7 @@ export default function NotificationsPage() {
                 {!notif.is_read && (
                   <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); markAsRead(notif.id) }}
                     className="w-2.5 h-2.5 rounded-full bg-purple shrink-0 mt-2 hover:bg-purple-light transition-colors"
-                    title="Mark as read" />
+                    title={t('notifications.markAsRead')} />
                 )}
               </div>
             )
