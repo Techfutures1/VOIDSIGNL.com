@@ -7,7 +7,7 @@ export interface RankingRowUser {
   display_name?: string | null
   avatar_url?: string | null
   accent_color?: string | null
-  xp: number
+  xp?: number
   level_name: string
   rank?: number
   is_verified?: boolean
@@ -26,8 +26,14 @@ interface RankingRowProps {
   rank: number
   user: RankingRowUser
   isOwn?: boolean
-  /** XP van #1 — voor relatieve progressie-bar breedte. */
+  /** Score van #1 — voor relatieve progressie-bar breedte. */
   maxXp?: number
+  /** Overschrijft de getoonde score (default user.xp). */
+  metricValue?: number
+  /** Label onder de score (default 'XP'). */
+  metricLabel?: string
+  /** Extra meta-items naast de level-naam (bijv. likes/sessies per tab). */
+  metaItems?: string[]
 }
 
 function rankColor(rank: number) {
@@ -37,9 +43,18 @@ function rankColor(rank: number) {
   return 'rgba(255,255,255,0.25)'
 }
 
-export default function RankingRow({ rank, user, isOwn, maxXp = 1 }: RankingRowProps) {
+export default function RankingRow({
+  rank,
+  user,
+  isOwn,
+  maxXp = 1,
+  metricValue,
+  metricLabel,
+  metaItems,
+}: RankingRowProps) {
   const accent = user.accent_color ?? '#6B3FE0'
-  const barPct = Math.max(2, Math.round((user.xp / maxXp) * 100))
+  const value = metricValue ?? user.xp ?? 0
+  const barPct = Math.max(2, Math.round((value / (maxXp || 1)) * 100))
   const isOnline = user.last_seen_at
     ? Date.now() - new Date(user.last_seen_at).getTime() < 90_000
     : false
@@ -131,6 +146,12 @@ export default function RankingRow({ rank, user, isOwn, maxXp = 1 }: RankingRowP
               {user.level_name}
             </span>
 
+            {metaItems?.map((m, i) => (
+              <span key={i} className="text-[10px] text-text-dim">
+                {m}
+              </span>
+            ))}
+
             {(user.clip_count ?? 0) > 0 && (
               <span className="text-[10px] text-text-dim">
                 {user.clip_count} {user.clip_count === 1 ? 'clip' : 'clips'}
@@ -165,9 +186,11 @@ export default function RankingRow({ rank, user, isOwn, maxXp = 1 }: RankingRowP
             className="font-mono text-sm font-bold"
             style={{ color: isOwn ? accent : '#fff' }}
           >
-            {user.xp.toLocaleString()}
+            {value.toLocaleString()}
           </div>
-          <div className="font-mono text-[9px] text-text-dim uppercase">XP</div>
+          <div className="font-mono text-[9px] text-text-dim uppercase">
+            {metricLabel ?? 'XP'}
+          </div>
         </div>
       </div>
     </Link>

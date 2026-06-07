@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react'
 import { X } from 'lucide-react'
 import { BrandSelect } from '@/components/ui/BrandSelect'
+import { createClient } from '@/lib/supabase-browser'
 
 interface Game {
   id: string
@@ -17,7 +18,11 @@ interface ClipUploadModalProps {
 
 type UploadMode = 'link' | 'upload'
 
+const MAX_SIZE = 100 * 1024 * 1024
+const ALLOWED_TYPES = ['video/mp4', 'video/webm', 'video/quicktime']
+
 export default function ClipUploadModal({ games, onClose, onSuccess }: ClipUploadModalProps) {
+  const supabase = createClient()
   const [mode, setMode] = useState<UploadMode>('link')
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -47,15 +52,37 @@ export default function ClipUploadModal({ games, onClose, onSuccess }: ClipUploa
 
       if (mode === 'upload') {
         if (!file) { setError('Selecteer een bestand.'); setUploading(false); return }
-        setProgress(10)
-        const formData = new FormData()
-        formData.append('file', file)
-        const uploadRes = await fetch('/api/clips/upload', { method: 'POST', body: formData })
-        const uploadJson = await uploadRes.json()
-        if (!uploadRes.ok) throw new Error(uploadJson.error ?? 'Upload mislukt')
-        finalUrl = uploadJson.url
+        if (file.size > MAX_SIZE) {
+          setError('Bestand te groot (max 100MB).'); setUploading(false); return
+        }
+        if (!ALLOWED_TYPES.includes(file.type)) {
+          setError('Alleen MP4, WebM of MOV.'); setUploading(false); return
+        }
+
+        // Direct vanuit de browser naar Supabase Storage uploaden.
+        // Bewust NIET via een Next-route: Vercel-functions cappen de body op 4.5MB,
+        // waardoor echte video's anders falen.
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) {
+          setError('Je sessie is verlopen. Log opnieuw in.'); setUploading(false); return
+        }
+
+        setProgress(15)
+        const ext = file.name.split('.').pop() ?? 'mp4'
+        const path = `${user.id}/${Date.now()}.${ext}`
+
+        const { error: upErr } = await supabase.storage
+          .from('clips-videos')
+          .upload(path, file, { contentType: file.type, upsert: false })
+        if (upErr) throw new Error('Upload mislukt. Probeer het opnieuw.')
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('clips-videos')
+          .getPublicUrl(path)
+
+        finalUrl = publicUrl
         sourceType = 'upload'
-        setProgress(60)
+        setProgress(70)
       }
 
       if (!finalUrl) { setError('Voeg een link of bestand toe.'); setUploading(false); return }
@@ -166,6 +193,7 @@ export default function ClipUploadModal({ games, onClose, onSuccess }: ClipUploa
           <BrandSelect
             value={gameId}
             onChange={setGameId}
+            searchable
             placeholder="Game selecteren (optioneel)"
             options={[
               { value: '', label: 'Game selecteren (optioneel)' },

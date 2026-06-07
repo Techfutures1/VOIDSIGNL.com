@@ -70,11 +70,11 @@ export const clipCommentSchema = z.object({
 // Coach aanmelding (MD9)
 export const coachApplicationSchema = z.object({
   bio: z.string().min(50).max(1000),
-  specializations: z.array(z.string()).min(1).max(8),
+  specializations: z.array(z.string()).min(1).max(9),
   languages: z.array(z.enum(['nl', 'en'])).min(1),
   discord_handle: z.string().min(2).max(50),
   hourly_tier: z.enum(['basic', 'standard', 'premium']),
-  game_ids: z.array(z.string().uuid()).min(1).max(10),
+  game_ids: z.array(z.string().uuid()).min(1).max(20),
 })
 
 // Sessie boeken (MD9)

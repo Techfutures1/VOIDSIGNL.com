@@ -26,12 +26,12 @@ export async function POST(req: NextRequest) {
     const path = `${user.id}/${Date.now()}.${ext}`
 
     const { data, error } = await supabase.storage
-      .from('clips')
+      .from('clips-videos')
       .upload(path, file, { contentType: file.type, upsert: false })
 
     if (error) throw error
 
-    const { data: { publicUrl } } = supabase.storage.from('clips').getPublicUrl(data.path)
+    const { data: { publicUrl } } = supabase.storage.from('clips-videos').getPublicUrl(data.path)
 
     return NextResponse.json({ url: publicUrl, path: data.path })
 

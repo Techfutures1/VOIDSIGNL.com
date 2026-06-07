@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase-browser'
 import RankingRow, { type RankingRowUser } from '@/components/ranking/RankingRow'
+import ClanRankingRow, { type ClanRankingRowData } from '@/components/ranking/ClanRankingRow'
 import RankingTabs from '@/components/ranking/RankingTabs'
 import MyPositionBar from '@/components/ranking/MyPositionBar'
 import RankingSidebar, {
@@ -90,6 +91,40 @@ export default function RankingPage() {
 
   const totalPages = Math.ceil(total / PAGE_SIZE)
   const maxXp = rows[0]?.xp ?? 1
+
+  // Per-tab metric: elke leaderboard heeft een eigen score-kolom.
+  // (clips → clip_score, coaching → coaching_score, clans → xp_total, global → xp)
+  const metricOf = (r: RankingRowUser): number => {
+    switch (tab) {
+      case 'clips':
+        return (
+          (r as { clip_score?: number }).clip_score ??
+          (r as { total_likes?: number }).total_likes ??
+          0
+        )
+      case 'coaching':
+        return (r as { coaching_score?: number }).coaching_score ?? 0
+      case 'clans':
+        return (r as { xp_total?: number }).xp_total ?? 0
+      default:
+        return r.xp ?? 0
+    }
+  }
+  const maxMetric = metricOf(rows[0] ?? ({} as RankingRowUser)) || 1
+  const metricLabel = tab === 'clips' || tab === 'coaching' ? 'PT' : 'XP'
+  const metaItemsFor = (r: RankingRowUser): string[] | undefined => {
+    if (tab === 'clips') {
+      const clips = (r as { total_clips?: number }).total_clips ?? 0
+      const likes = (r as { total_likes?: number }).total_likes ?? 0
+      return [`${clips} clips`, `${likes} likes`]
+    }
+    if (tab === 'coaching') {
+      const rating = Number((r as { avg_rating?: number }).avg_rating ?? 0)
+      const sessions = (r as { total_sessions?: number }).total_sessions ?? 0
+      return [`★ ${rating.toFixed(1)}`, `${sessions} sessies`]
+    }
+    return undefined
+  }
 
   // Eigen positie + naar-volgende-rank info
   const myRowIdx = currentUser
@@ -188,13 +223,26 @@ export default function RankingPage() {
                   const absoluteRank = search
                     ? idx + 1
                     : u.rank ?? (page - 1) * PAGE_SIZE + idx + 1
+                  if (tab === 'clans') {
+                    return (
+                      <ClanRankingRow
+                        key={u.id}
+                        rank={absoluteRank}
+                        clan={u as unknown as ClanRankingRowData}
+                        maxXp={maxMetric}
+                      />
+                    )
+                  }
                   return (
                     <RankingRow
                       key={u.id}
                       rank={absoluteRank}
                       user={u}
                       isOwn={u.id === currentUser?.id}
-                      maxXp={maxXp}
+                      maxXp={maxMetric}
+                      metricValue={metricOf(u)}
+                      metricLabel={metricLabel}
+                      metaItems={metaItemsFor(u)}
                     />
                   )
                 })}
@@ -225,8 +273,8 @@ export default function RankingPage() {
           </>
         )}
 
-          {/* Mijn positie balk */}
-          {currentUser && myRank && myRow && (
+          {/* Mijn positie balk — alleen op global (andere tabs hebben geen eigen XP-positie) */}
+          {currentUser && myRank && myRow && tab === 'global' && (
             <MyPositionBar
               rank={myRank}
               totalRanks={total}

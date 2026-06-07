@@ -136,6 +136,7 @@ function BuddiesPageContent() {
             <BrandSelect
               value={gameId}
               onChange={setGameId}
+              searchable
               placeholder="Alle games"
               options={[
                 { value: '', label: 'Alle games' },

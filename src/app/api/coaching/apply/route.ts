@@ -15,7 +15,22 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json()
     const parsed = coachApplicationSchema.safeParse(body)
-    if (!parsed.success) return NextResponse.json({ error: 'Invalid input' }, { status: 400 })
+    if (!parsed.success) {
+      const fieldErrors = parsed.error.flatten().fieldErrors
+      const firstField = Object.keys(fieldErrors)[0]
+      const msgMap: Record<string, string> = {
+        bio: 'Je bio moet tussen 50 en 1000 tekens zijn.',
+        specializations: 'Kies 1 tot 9 specialisaties.',
+        languages: 'Kies minimaal één taal.',
+        discord_handle: 'Vul een Discord-handle in (2 tot 50 tekens).',
+        hourly_tier: 'Kies een geldig sessie-tarief.',
+        game_ids: 'Kies 1 tot 20 games.',
+      }
+      return NextResponse.json(
+        { error: msgMap[firstField] ?? 'Controleer je invoer en probeer het opnieuw.' },
+        { status: 400 },
+      )
+    }
 
     const { data: existing } = await supabase
       .from('coach_profiles')
