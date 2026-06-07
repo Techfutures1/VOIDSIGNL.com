@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { VoidsignlLogo } from '@/components/ui/logo'
 import { Loader2 } from 'lucide-react'
 import Link from 'next/link'
+import { mapAuthError } from '@/lib/auth-errors'
 
 export default function RegisterPage() {
   const [email, setEmail] = useState('')
@@ -13,24 +14,26 @@ export default function RegisterPage() {
   const [username, setUsername] = useState('')
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [canRetry, setCanRetry] = useState(false)
   const [loading, setLoading] = useState(false)
   const router = useRouter()
   const supabase = createClient()
 
-  async function handleRegister(e: React.FormEvent) {
-    e.preventDefault()
+  async function handleRegister(e?: React.FormEvent) {
+    e?.preventDefault()
     setLoading(true)
     setError('')
     setSuccess('')
+    setCanRetry(false)
 
     if (username.length < 3) {
-      setError('Username must be at least 3 characters')
+      setError('Kies een gebruikersnaam van minimaal 3 tekens.')
       setLoading(false)
       return
     }
 
     try {
-      // Check username availability
+      // Gebruikersnaam nog vrij?
       const { data: existing } = await supabase
         .from('profiles')
         .select('username')
@@ -38,7 +41,7 @@ export default function RegisterPage() {
         .maybeSingle()
 
       if (existing) {
-        setError('Username already taken')
+        setError('Deze gebruikersnaam is al bezet.')
         setLoading(false)
         return
       }
@@ -49,36 +52,58 @@ export default function RegisterPage() {
         options: {
           data: { username, display_name: username },
           emailRedirectTo: `${window.location.origin}/auth/callback`,
-        }
+        },
       })
 
       if (error) {
-        setError(error.message)
+        const mapped = mapAuthError(error)
+        console.error('[register] signUp:', error)
+        setError(mapped.message)
+        setCanRetry(mapped.retryable)
         setLoading(false)
         return
       }
 
-      // If session is returned, email confirmation is disabled - go straight to onboarding
+      // Sessie terug → e-mailbevestiging staat uit → direct naar onboarding
       if (data.session) {
         router.push('/onboarding')
         return
       }
 
-      // Otherwise email confirmation is required
-      setSuccess(`Check your email (${email}) to confirm your account. After confirming, you can sign in.`)
+      // Anders: e-mailbevestiging vereist
+      setSuccess(
+        `Check je inbox (${email}) om je account te bevestigen. Daarna kun je inloggen.`,
+      )
       setLoading(false)
-    } catch (err: any) {
-      setError(err?.message || 'Something went wrong. Please try again.')
+    } catch (err) {
+      const mapped = mapAuthError(err)
+      console.error('[register] onverwachte fout:', err)
+      setError(mapped.message)
+      setCanRetry(mapped.retryable)
       setLoading(false)
     }
   }
 
   async function handleDiscordRegister() {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'discord',
-      options: { redirectTo: `${window.location.origin}/auth/callback` }
-    })
-    if (error) setError(error.message)
+    setError('')
+    setCanRetry(false)
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'discord',
+        options: { redirectTo: `${window.location.origin}/auth/callback` },
+      })
+      if (error) {
+        const mapped = mapAuthError(error)
+        console.error('[register] discord oauth:', error)
+        setError(mapped.message)
+        setCanRetry(mapped.retryable)
+      }
+    } catch (err) {
+      const mapped = mapAuthError(err)
+      console.error('[register] discord oauth onverwacht:', err)
+      setError(mapped.message)
+      setCanRetry(mapped.retryable)
+    }
   }
 
   return (
@@ -103,8 +128,21 @@ export default function RegisterPage() {
 
         <form onSubmit={handleRegister} className="space-y-4 animate-slide-up vs-brackets">
           {error && (
-            <div className="bg-danger/10 border border-danger/20 rounded-lg px-4 py-3 text-sm text-danger">
-              {error}
+            <div
+              role="alert"
+              className="bg-danger/10 border border-danger/20 rounded-lg px-4 py-3 text-sm text-danger"
+            >
+              <p>{error}</p>
+              {canRetry && (
+                <button
+                  type="button"
+                  onClick={() => handleRegister()}
+                  disabled={loading}
+                  className="mt-2 text-xs underline underline-offset-2 hover:text-danger/80 disabled:opacity-60"
+                >
+                  Opnieuw proberen
+                </button>
+              )}
             </div>
           )}
 

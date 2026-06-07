@@ -6,59 +6,79 @@ import { useRouter } from 'next/navigation'
 import { VoidsignlLogo } from '@/components/ui/logo'
 import { Loader2 } from 'lucide-react'
 import Link from 'next/link'
+import { mapAuthError } from '@/lib/auth-errors'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [canRetry, setCanRetry] = useState(false)
   const [loading, setLoading] = useState(false)
   const router = useRouter()
   const supabase = createClient()
 
-  async function handleLogin(e: React.FormEvent) {
-    e.preventDefault()
+  async function handleLogin(e?: React.FormEvent) {
+    e?.preventDefault()
     setLoading(true)
     setError('')
+    setCanRetry(false)
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password })
 
-    if (error) {
-      if (error.message.toLowerCase().includes('email not confirmed')) {
-        setError('Please confirm your email first. Check your inbox for the confirmation link.')
-      } else if (error.message.toLowerCase().includes('invalid login credentials')) {
-        setError('Wrong email or password')
-      } else {
-        setError(error.message)
+      if (error) {
+        const mapped = mapAuthError(error)
+        console.error('[login] signInWithPassword:', error)
+        setError(mapped.message)
+        setCanRetry(mapped.retryable)
+        setLoading(false)
+        return
       }
-      setLoading(false)
-      return
-    }
 
-    // Check if user has completed onboarding
-    const { data: { user } } = await supabase.auth.getUser()
-    if (user) {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('is_onboarded')
-        .eq('id', user.id)
-        .maybeSingle()
+      // Onboarding-status bepalen → juiste bestemming
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('is_onboarded')
+          .eq('id', user.id)
+          .maybeSingle()
 
-      if (profile?.is_onboarded) {
+        router.push(profile?.is_onboarded ? '/dashboard' : '/onboarding')
+      } else {
         router.push('/dashboard')
-      } else {
-        router.push('/onboarding')
       }
-    } else {
-      router.push('/dashboard')
+    } catch (err) {
+      const mapped = mapAuthError(err)
+      console.error('[login] onverwachte fout:', err)
+      setError(mapped.message)
+      setCanRetry(mapped.retryable)
+      setLoading(false)
     }
   }
 
   async function handleDiscordLogin() {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'discord',
-      options: { redirectTo: `${window.location.origin}/auth/callback` }
-    })
-    if (error) setError(error.message)
+    setError('')
+    setCanRetry(false)
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'discord',
+        options: { redirectTo: `${window.location.origin}/auth/callback` },
+      })
+      if (error) {
+        const mapped = mapAuthError(error)
+        console.error('[login] discord oauth:', error)
+        setError(mapped.message)
+        setCanRetry(mapped.retryable)
+      }
+    } catch (err) {
+      const mapped = mapAuthError(err)
+      console.error('[login] discord oauth onverwacht:', err)
+      setError(mapped.message)
+      setCanRetry(mapped.retryable)
+    }
   }
 
   return (
@@ -85,8 +105,21 @@ export default function LoginPage() {
 
         <form onSubmit={handleLogin} className="space-y-4 animate-slide-up vs-brackets">
           {error && (
-            <div className="bg-danger/10 border border-danger/20 rounded-lg px-4 py-3 text-sm text-danger">
-              {error}
+            <div
+              role="alert"
+              className="bg-danger/10 border border-danger/20 rounded-lg px-4 py-3 text-sm text-danger"
+            >
+              <p>{error}</p>
+              {canRetry && (
+                <button
+                  type="button"
+                  onClick={() => handleLogin()}
+                  disabled={loading}
+                  className="mt-2 text-xs underline underline-offset-2 hover:text-danger/80 disabled:opacity-60"
+                >
+                  Opnieuw proberen
+                </button>
+              )}
             </div>
           )}
 
