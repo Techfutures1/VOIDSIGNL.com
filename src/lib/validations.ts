@@ -77,6 +77,18 @@ export const coachApplicationSchema = z.object({
   game_ids: z.array(z.string().uuid()).min(1).max(20),
 })
 
+// Coach-aanvraag beoordelen (admin: goedkeuren / afwijzen)
+export const coachApplicationReviewSchema = z
+  .object({
+    coach_id: z.string().uuid(),
+    action: z.enum(['approve', 'reject']),
+    reason: z.string().trim().max(300).optional(),
+  })
+  .refine(
+    (d) => d.action !== 'reject' || (d.reason?.trim().length ?? 0) >= 2,
+    { message: 'Reden is verplicht bij afwijzen', path: ['reason'] },
+  )
+
 // Sessie boeken (MD9)
 export const sessionBookSchema = z.object({
   coach_id: z.string().uuid(),
