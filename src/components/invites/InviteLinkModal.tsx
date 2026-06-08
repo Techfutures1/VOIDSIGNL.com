@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { X, Copy, Check, Send, Trash2 } from 'lucide-react'
+import { useLang } from '@/lib/lang-context'
 
 interface InviteCode {
   id: string
@@ -24,6 +25,7 @@ function inviteUrl(code: string) {
 }
 
 export default function InviteLinkModal({ clanSlug, clanName, onClose }: InviteLinkModalProps) {
+  const { t } = useLang()
   const [codes, setCodes] = useState<InviteCode[]>([])
   const [loading, setLoading] = useState(true)
   const [creating, setCreating] = useState(false)
@@ -60,17 +62,17 @@ export default function InviteLinkModal({ clanSlug, clanName, onClose }: InviteL
         }),
       })
       const json = await res.json()
-      if (!res.ok) throw new Error(json.error ?? 'Aanmaken mislukt')
+      if (!res.ok) throw new Error(json.error ?? t('invite.createFailed'))
       setCodes(prev => [json.data, ...prev])
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Er ging iets mis.')
+      setError(err instanceof Error ? err.message : t('invite.somethingWrong'))
     } finally {
       setCreating(false)
     }
   }
 
   async function handleDelete(id: string) {
-    if (!confirm('Link verwijderen? Bestaande uitnodigingen worden ongeldig.')) return
+    if (!confirm(t('invite.deleteConfirm'))) return
     const res = await fetch(`/api/clans/${clanSlug}/invite-link?id=${id}`, { method: 'DELETE' })
     if (res.ok) setCodes(prev => prev.filter(c => c.id !== id))
   }
@@ -83,7 +85,7 @@ export default function InviteLinkModal({ clanSlug, clanName, onClose }: InviteL
 
   async function handlePostToFeed(code: string) {
     const url = inviteUrl(code)
-    const content = `Join "${clanName}" via deze invite link → ${url}`
+    const content = `${t('invite.feedPostJoin')} "${clanName}" ${t('invite.feedPostVia')} → ${url}`
     const res = await fetch('/api/feed', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -103,9 +105,9 @@ export default function InviteLinkModal({ clanSlug, clanName, onClose }: InviteL
         <div className="flex items-center justify-between px-6 py-5 border-b border-border">
           <div>
             <p className="font-mono text-[10px] tracking-[0.2em] text-purple uppercase mb-0.5">
-              Clan invites
+              {t('invite.clanInvites')}
             </p>
-            <h2 className="font-mono text-lg font-bold text-text">Invite link delen</h2>
+            <h2 className="font-mono text-lg font-bold text-text">{t('invite.shareInviteLink')}</h2>
           </div>
           <button onClick={onClose} className="text-text-dim hover:text-text transition-colors">
             <X size={18} />
@@ -114,11 +116,11 @@ export default function InviteLinkModal({ clanSlug, clanName, onClose }: InviteL
 
         <div className="p-6 overflow-y-auto flex-1 space-y-5">
           <div className="bg-void border border-border rounded-lg p-4 space-y-3">
-            <p className="font-mono text-[10px] tracking-widest text-text-dim uppercase">Nieuwe link</p>
+            <p className="font-mono text-[10px] tracking-widest text-text-dim uppercase">{t('invite.newLink')}</p>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="font-mono text-[10px] text-text-dim block mb-1">Max joins (0 = ∞)</label>
+                <label className="font-mono text-[10px] text-text-dim block mb-1">{t('invite.maxJoins')}</label>
                 <input
                   type="number"
                   min={0}
@@ -129,7 +131,7 @@ export default function InviteLinkModal({ clanSlug, clanName, onClose }: InviteL
                 />
               </div>
               <div>
-                <label className="font-mono text-[10px] text-text-dim block mb-1">Verloopt na (dagen)</label>
+                <label className="font-mono text-[10px] text-text-dim block mb-1">{t('invite.expiresAfterDays')}</label>
                 <input
                   type="number"
                   min={0}
@@ -148,20 +150,20 @@ export default function InviteLinkModal({ clanSlug, clanName, onClose }: InviteL
               disabled={creating}
               className="w-full py-2.5 bg-purple text-white font-mono text-xs uppercase tracking-wider rounded-md hover:bg-purple/85 transition-colors disabled:opacity-40"
             >
-              {creating ? 'Bezig...' : '+ Genereer link'}
+              {creating ? t('invite.busy') : t('invite.generateLink')}
             </button>
           </div>
 
           <div>
             <p className="font-mono text-[10px] tracking-widest text-text-dim uppercase mb-2">
-              Actieve links {codes.length > 0 ? `(${codes.length})` : ''}
+              {t('invite.activeLinks')} {codes.length > 0 ? `(${codes.length})` : ''}
             </p>
 
             {loading ? (
               <div className="animate-pulse bg-void rounded-lg h-20" />
             ) : codes.length === 0 ? (
               <p className="font-mono text-xs text-text-dim/60 text-center py-6">
-                Nog geen links. Genereer hierboven je eerste.
+                {t('invite.noLinksYet')}
               </p>
             ) : (
               <div className="space-y-3">
@@ -181,20 +183,20 @@ export default function InviteLinkModal({ clanSlug, clanName, onClose }: InviteL
                         <button
                           onClick={() => handleDelete(c.id)}
                           className="text-text-dim/60 hover:text-danger transition-colors flex-shrink-0"
-                          title="Verwijderen"
+                          title={t('invite.delete')}
                         >
                           <Trash2 size={13} />
                         </button>
                       </div>
 
                       <div className="flex items-center gap-3 mb-3 font-mono text-[10px] text-text-dim">
-                        <span>{c.uses}{c.max_uses > 0 ? `/${c.max_uses}` : ''} joins</span>
+                        <span>{c.uses}{c.max_uses > 0 ? `/${c.max_uses}` : ''} {t('invite.joins')}</span>
                         {c.expires_at && (
                           <span>
-                            {expired ? 'Verlopen' : `Verloopt ${new Date(c.expires_at).toLocaleDateString('nl-NL')}`}
+                            {expired ? t('invite.expired') : `${t('invite.expiresOn')} ${new Date(c.expires_at).toLocaleDateString('nl-NL')}`}
                           </span>
                         )}
-                        {exhausted && <span className="text-danger">Vol</span>}
+                        {exhausted && <span className="text-danger">{t('invite.full')}</span>}
                       </div>
 
                       <div className="flex gap-2">
@@ -202,14 +204,14 @@ export default function InviteLinkModal({ clanSlug, clanName, onClose }: InviteL
                           onClick={() => handleCopy(c.code)}
                           className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-surface border border-border text-text-dim font-mono text-[10px] uppercase tracking-wider rounded-md hover:border-purple hover:text-text transition-colors"
                         >
-                          {copied === c.code ? <><Check size={11} /> Gekopieerd</> : <><Copy size={11} /> Kopieer</>}
+                          {copied === c.code ? <><Check size={11} /> {t('invite.copied')}</> : <><Copy size={11} /> {t('invite.copy')}</>}
                         </button>
                         <button
                           onClick={() => handlePostToFeed(c.code)}
                           disabled={dead}
                           className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-purple text-white font-mono text-[10px] uppercase tracking-wider rounded-md hover:bg-purple/85 transition-colors disabled:opacity-40"
                         >
-                          {posted === c.code ? <><Check size={11} /> Geplaatst</> : <><Send size={11} /> Post in feed</>}
+                          {posted === c.code ? <><Check size={11} /> {t('invite.posted')}</> : <><Send size={11} /> {t('invite.postInFeed')}</>}
                         </button>
                       </div>
                     </div>

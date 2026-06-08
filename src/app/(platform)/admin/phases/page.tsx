@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase-browser'
 import Link from 'next/link'
 import { ArrowLeft, Loader2 } from 'lucide-react'
+import { useLang } from '@/lib/lang-context'
 
 interface Phase {
   id: string
@@ -25,6 +26,7 @@ interface PhaseStats {
 }
 
 export default function AdminPhasesPage() {
+  const { t } = useLang()
   const supabase = createClient()
   const [phases, setPhases] = useState<Phase[]>([])
   const [stats, setStats] = useState<PhaseStats | null>(null)
@@ -55,7 +57,7 @@ export default function AdminPhasesPage() {
   async function activatePhase(phaseNum: number) {
     if (
       !confirm(
-        `Fase ${phaseNum} activeren? Dit deactiveert de huidige actieve fase.`,
+        `${t('adminManage.confirmActivatePrefix')} ${phaseNum} ${t('adminManage.confirmActivateSuffix')}`,
       )
     )
       return
@@ -90,28 +92,28 @@ export default function AdminPhasesPage() {
         className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-text-muted hover:text-text transition-colors duration-200"
       >
         <ArrowLeft size={12} />
-        Admin
+        {t('adminManage.adminLabel')}
       </Link>
 
       <div>
         <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-purple mb-1">
-          Admin
+          {t('adminManage.adminLabel')}
         </p>
         <h1 className="font-mono text-2xl font-bold text-text">
-          Phase beheer
+          {t('adminManage.phasesTitle')}
         </h1>
         <p className="text-text-muted text-sm mt-1">
-          Activeer welke fase open is voor nieuwe gebruikers.
+          {t('adminManage.phasesSubtitle')}
         </p>
       </div>
 
       {stats && (
         <div className="grid grid-cols-3 gap-4">
           {[
-            { label: 'Totaal members', value: stats.total_members },
-            { label: 'Inner Circle', value: stats.inner_circle_count },
+            { label: t('adminManage.totalMembers'), value: stats.total_members },
+            { label: t('adminManage.innerCircle'), value: stats.inner_circle_count },
             {
-              label: 'Resterend',
+              label: t('adminManage.remaining'),
               value:
                 stats.phase_remaining === null
                   ? '∞'
@@ -145,11 +147,11 @@ export default function AdminPhasesPage() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-3 mb-1 flex-wrap">
                   <p className="font-mono text-sm font-bold text-text">
-                    Fase {phase.phase}: {phase.name}
+                    {t('adminManage.phasePrefix')} {phase.phase}: {phase.name}
                   </p>
                   {phase.is_active && (
                     <span className="font-mono text-[9px] uppercase px-2 py-0.5 rounded-full bg-success/10 border border-success/25 text-success">
-                      Actief
+                      {t('adminManage.activeBadge')}
                     </span>
                   )}
                 </div>
@@ -159,9 +161,9 @@ export default function AdminPhasesPage() {
                   </p>
                 )}
                 <p className="font-mono text-[10px] text-text-dim mt-1">
-                  Limiet:{' '}
+                  {t('adminManage.limit')}:{' '}
                   {phase.limit_count === 0
-                    ? 'Onbeperkt'
+                    ? t('adminManage.unlimited')
                     : phase.limit_count.toLocaleString()}
                 </p>
               </div>
@@ -171,7 +173,7 @@ export default function AdminPhasesPage() {
                   disabled={activating !== null}
                   className="px-4 py-2 border border-border text-text-muted font-mono text-xs uppercase tracking-widest rounded-lg hover:border-purple/40 hover:text-text transition-colors duration-200 disabled:opacity-50"
                 >
-                  {activating === phase.phase ? '...' : 'Activeren'}
+                  {activating === phase.phase ? '...' : t('adminManage.activate')}
                 </button>
               )}
             </div>

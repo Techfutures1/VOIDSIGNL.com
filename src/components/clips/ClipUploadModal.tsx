@@ -4,6 +4,7 @@ import { useState, useRef } from 'react'
 import { X } from 'lucide-react'
 import { BrandSelect } from '@/components/ui/BrandSelect'
 import { createClient } from '@/lib/supabase-browser'
+import { useLang } from '@/lib/lang-context'
 
 interface Game {
   id: string
@@ -22,6 +23,7 @@ const MAX_SIZE = 100 * 1024 * 1024
 const ALLOWED_TYPES = ['video/mp4', 'video/webm', 'video/quicktime']
 
 export default function ClipUploadModal({ games, onClose, onSuccess }: ClipUploadModalProps) {
+  const { t } = useLang()
   const supabase = createClient()
   const [mode, setMode] = useState<UploadMode>('link')
   const [title, setTitle] = useState('')
@@ -43,7 +45,7 @@ export default function ClipUploadModal({ games, onClose, onSuccess }: ClipUploa
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
-    if (!title.trim()) { setError('Geef een titel op.'); return }
+    if (!title.trim()) { setError(t('clipsUi.errorTitleRequired')); return }
 
     setUploading(true)
     try {
@@ -51,12 +53,12 @@ export default function ClipUploadModal({ games, onClose, onSuccess }: ClipUploa
       let sourceType: 'upload' | 'youtube' | 'twitch' = detectSourceType(finalUrl)
 
       if (mode === 'upload') {
-        if (!file) { setError('Selecteer een bestand.'); setUploading(false); return }
+        if (!file) { setError(t('clipsUi.errorFileRequired')); setUploading(false); return }
         if (file.size > MAX_SIZE) {
-          setError('Bestand te groot (max 100MB).'); setUploading(false); return
+          setError(t('clipsUi.errorFileTooLarge')); setUploading(false); return
         }
         if (!ALLOWED_TYPES.includes(file.type)) {
-          setError('Alleen MP4, WebM of MOV.'); setUploading(false); return
+          setError(t('clipsUi.errorFileType')); setUploading(false); return
         }
 
         // Direct vanuit de browser naar Supabase Storage uploaden.
@@ -64,7 +66,7 @@ export default function ClipUploadModal({ games, onClose, onSuccess }: ClipUploa
         // waardoor echte video's anders falen.
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) {
-          setError('Je sessie is verlopen. Log opnieuw in.'); setUploading(false); return
+          setError(t('clipsUi.errorSessionExpired')); setUploading(false); return
         }
 
         setProgress(15)
@@ -74,7 +76,7 @@ export default function ClipUploadModal({ games, onClose, onSuccess }: ClipUploa
         const { error: upErr } = await supabase.storage
           .from('clips-videos')
           .upload(path, file, { contentType: file.type, upsert: false })
-        if (upErr) throw new Error('Upload mislukt. Probeer het opnieuw.')
+        if (upErr) throw new Error(t('clipsUi.errorUploadFailed'))
 
         const { data: { publicUrl } } = supabase.storage
           .from('clips-videos')
@@ -85,7 +87,7 @@ export default function ClipUploadModal({ games, onClose, onSuccess }: ClipUploa
         setProgress(70)
       }
 
-      if (!finalUrl) { setError('Voeg een link of bestand toe.'); setUploading(false); return }
+      if (!finalUrl) { setError(t('clipsUi.errorLinkOrFileRequired')); setUploading(false); return }
 
       const res = await fetch('/api/clips', {
         method: 'POST',
@@ -99,13 +101,13 @@ export default function ClipUploadModal({ games, onClose, onSuccess }: ClipUploa
         }),
       })
       const json = await res.json()
-      if (!res.ok) throw new Error(json.error ?? 'Aanmaken mislukt')
+      if (!res.ok) throw new Error(json.error ?? t('clipsUi.errorCreateFailed'))
 
       setProgress(100)
       onSuccess()
       onClose()
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Er ging iets mis.'
+      const msg = err instanceof Error ? err.message : t('clipsUi.errorGeneric')
       setError(msg)
     } finally {
       setUploading(false)
@@ -120,8 +122,8 @@ export default function ClipUploadModal({ games, onClose, onSuccess }: ClipUploa
 
         <div className="flex items-center justify-between px-6 py-5 border-b border-border">
           <div>
-            <p className="font-mono text-[10px] tracking-[0.2em] text-purple uppercase mb-0.5">Clips</p>
-            <h2 className="font-mono text-lg font-bold text-text">Clip toevoegen</h2>
+            <p className="font-mono text-[10px] tracking-[0.2em] text-purple uppercase mb-0.5">{t('clipsUi.eyebrow')}</p>
+            <h2 className="font-mono text-lg font-bold text-text">{t('clipsUi.addClipTitle')}</h2>
           </div>
           <button onClick={onClose} className="text-text-dim hover:text-text transition-colors">
             <X size={18} />
@@ -139,7 +141,7 @@ export default function ClipUploadModal({ games, onClose, onSuccess }: ClipUploa
                   mode === m ? 'bg-purple text-white' : 'text-text-dim hover:text-text'
                 }`}
               >
-                {m === 'link' ? 'YouTube / Twitch link' : 'Bestand uploaden'}
+                {m === 'link' ? t('clipsUi.modeLink') : t('clipsUi.modeUpload')}
               </button>
             ))}
           </div>
@@ -148,7 +150,7 @@ export default function ClipUploadModal({ games, onClose, onSuccess }: ClipUploa
             type="text"
             value={title}
             onChange={e => setTitle(e.target.value)}
-            placeholder="Clip titel *"
+            placeholder={t('clipsUi.titlePlaceholder')}
             maxLength={100}
             required
             className="w-full bg-void border border-border rounded-lg px-4 py-3 text-text text-sm font-mono placeholder-text-dim/60 focus:outline-none focus:border-purple transition-colors"
@@ -157,7 +159,7 @@ export default function ClipUploadModal({ games, onClose, onSuccess }: ClipUploa
           <textarea
             value={description}
             onChange={e => setDescription(e.target.value)}
-            placeholder="Beschrijving (optioneel)"
+            placeholder={t('clipsUi.descriptionPlaceholder')}
             maxLength={500}
             rows={2}
             className="w-full bg-void border border-border rounded-lg px-4 py-3 text-text text-sm font-mono placeholder-text-dim/60 focus:outline-none focus:border-purple transition-colors resize-none"
@@ -168,7 +170,7 @@ export default function ClipUploadModal({ games, onClose, onSuccess }: ClipUploa
               type="url"
               value={videoUrl}
               onChange={e => setVideoUrl(e.target.value)}
-              placeholder="https://youtube.com/... of https://twitch.tv/..."
+              placeholder={t('clipsUi.linkPlaceholder')}
               className="w-full bg-void border border-border rounded-lg px-4 py-3 text-text text-sm font-mono placeholder-text-dim/60 focus:outline-none focus:border-purple transition-colors"
             />
           ) : (
@@ -185,7 +187,7 @@ export default function ClipUploadModal({ games, onClose, onSuccess }: ClipUploa
                 onClick={() => fileRef.current?.click()}
                 className="w-full py-4 border-2 border-dashed border-border rounded-lg font-mono text-xs text-text-dim hover:border-purple hover:text-text transition-colors duration-200"
               >
-                {file ? file.name : '↑ Klik om video te selecteren (max 100MB)'}
+                {file ? file.name : t('clipsUi.fileSelectPrompt')}
               </button>
             </div>
           )}
@@ -194,9 +196,9 @@ export default function ClipUploadModal({ games, onClose, onSuccess }: ClipUploa
             value={gameId}
             onChange={setGameId}
             searchable
-            placeholder="Game selecteren (optioneel)"
+            placeholder={t('clipsUi.gameSelectPlaceholder')}
             options={[
-              { value: '', label: 'Game selecteren (optioneel)' },
+              { value: '', label: t('clipsUi.gameSelectPlaceholder') },
               ...games.map(g => ({ value: g.id, label: g.name })),
             ]}
           />
@@ -214,7 +216,7 @@ export default function ClipUploadModal({ games, onClose, onSuccess }: ClipUploa
             disabled={uploading}
             className="w-full py-3 bg-purple text-white font-mono text-sm uppercase tracking-wider rounded-lg hover:bg-purple/85 transition-colors duration-200 disabled:opacity-40"
           >
-            {uploading ? 'Bezig...' : 'Clip plaatsen'}
+            {uploading ? t('clipsUi.submitting') : t('clipsUi.submit')}
           </button>
         </form>
       </div>

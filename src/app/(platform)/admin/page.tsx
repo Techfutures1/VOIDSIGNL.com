@@ -11,10 +11,12 @@ import {
   TrendingUp, Zap, ShieldCheck, Sparkles, GraduationCap, Activity, Layers,
 } from 'lucide-react'
 import { BrandSelect } from '@/components/ui/BrandSelect'
+import { useLang } from '@/lib/lang-context'
 
 type AdminTab = 'overview' | 'users' | 'content' | 'games' | 'tournaments'
 
 export default function AdminPage() {
+  const { t } = useLang()
   const supabase = createClient()
   const router = useRouter()
   const [authorized, setAuthorized] = useState(false)
@@ -208,27 +210,27 @@ export default function AdminPage() {
 
   function timeAgo(date: string) {
     const s = Math.floor((Date.now() - new Date(date).getTime()) / 1000)
-    if (s < 60) return 'just now'
-    if (s < 3600) return `${Math.floor(s / 60)}m ago`
-    if (s < 86400) return `${Math.floor(s / 3600)}h ago`
-    return `${Math.floor(s / 86400)}d ago`
+    if (s < 60) return t('adminMain.timeJustNow')
+    if (s < 3600) return `${Math.floor(s / 60)}${t('adminMain.timeMinutesAgo')}`
+    if (s < 86400) return `${Math.floor(s / 3600)}${t('adminMain.timeHoursAgo')}`
+    return `${Math.floor(s / 86400)}${t('adminMain.timeDaysAgo')}`
   }
 
   const filteredUsers = userSearch
     ? users.filter(u => u.username.toLowerCase().includes(userSearch.toLowerCase()) || (u.display_name || '').toLowerCase().includes(userSearch.toLowerCase()))
     : users
 
-  if (loading) return <div className="flex items-center justify-center h-64"><div className="text-text-dim text-sm animate-pulse">Checking access...</div></div>
+  if (loading) return <div className="flex items-center justify-center h-64"><div className="text-text-dim text-sm animate-pulse">{t('adminMain.checkingAccess')}</div></div>
 
   const isAdmin = (currentUser as any)?.role === 'admin'
   const canGrantXP = isAdmin || (currentUser as any)?.is_inner_circle
 
   const TABS: { id: AdminTab; label: string; icon: any; adminOnly?: boolean }[] = [
-    { id: 'overview', label: 'Overview', icon: BarChart3 },
-    { id: 'users', label: 'Users', icon: Users },
-    { id: 'content', label: 'Content', icon: Newspaper },
-    { id: 'games', label: 'Games', icon: Gamepad2, adminOnly: true },
-    { id: 'tournaments', label: 'Tournaments', icon: Trophy },
+    { id: 'overview', label: t('adminMain.tabOverview'), icon: BarChart3 },
+    { id: 'users', label: t('adminMain.tabUsers'), icon: Users },
+    { id: 'content', label: t('adminMain.tabContent'), icon: Newspaper },
+    { id: 'games', label: t('adminMain.tabGames'), icon: Gamepad2, adminOnly: true },
+    { id: 'tournaments', label: t('adminMain.tabTournaments'), icon: Trophy },
   ]
 
   return (
@@ -237,10 +239,10 @@ export default function AdminPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-xl font-semibold tracking-wide flex items-center gap-2">
-            <Shield size={20} className="text-purple" /> Admin Dashboard
+            <Shield size={20} className="text-purple" /> {t('adminMain.dashboardTitle')}
           </h1>
           <p className="text-sm text-text-dim mt-0.5">
-            Logged in as <span className="text-cyan">{currentUser?.username}</span> · {(currentUser as any)?.role}
+            {t('adminMain.loggedInAs')} <span className="text-cyan">{currentUser?.username}</span> · {(currentUser as any)?.role}
           </p>
         </div>
       </div>
@@ -259,27 +261,27 @@ export default function AdminPage() {
         ))}
         {isAdmin && (
           <Link href="/admin/coaches" className="vs-tab whitespace-nowrap">
-            <GraduationCap size={13} /> Coaches
+            <GraduationCap size={13} /> {t('adminMain.navCoaches')}
           </Link>
         )}
         {isAdmin && (
           <Link href="/admin/games" className="vs-tab whitespace-nowrap">
-            <Gamepad2 size={13} /> Game Aanvragen
+            <Gamepad2 size={13} /> {t('adminMain.navGameRequests')}
           </Link>
         )}
         {isAdmin && (
           <Link href="/admin/infra" className="vs-tab whitespace-nowrap">
-            <ShieldCheck size={13} /> Infra
+            <ShieldCheck size={13} /> {t('adminMain.navInfra')}
           </Link>
         )}
         {isAdmin && (
           <Link href="/admin/system" className="vs-tab whitespace-nowrap">
-            <Activity size={13} /> System
+            <Activity size={13} /> {t('adminMain.navSystem')}
           </Link>
         )}
         {isAdmin && (
           <Link href="/admin/phases" className="vs-tab whitespace-nowrap">
-            <Layers size={13} /> Phases
+            <Layers size={13} /> {t('adminMain.navPhases')}
           </Link>
         )}
       </div>
@@ -289,10 +291,10 @@ export default function AdminPage() {
         <div className="space-y-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
-              { label: 'Total Members', value: stats.members, icon: Users, color: 'text-cyan' },
-              { label: 'Total Posts', value: stats.posts, icon: Newspaper, color: 'text-purple' },
-              { label: 'Total Clips', value: stats.clips, icon: Film, color: 'text-cyan' },
-              { label: 'Tournaments', value: stats.tournaments, icon: Trophy, color: 'text-purple' },
+              { label: t('adminMain.statTotalMembers'), value: stats.members, icon: Users, color: 'text-cyan' },
+              { label: t('adminMain.statTotalPosts'), value: stats.posts, icon: Newspaper, color: 'text-purple' },
+              { label: t('adminMain.statTotalClips'), value: stats.clips, icon: Film, color: 'text-cyan' },
+              { label: t('adminMain.statTournaments'), value: stats.tournaments, icon: Trophy, color: 'text-purple' },
             ].map(s => (
               <div key={s.label} className="vs-card">
                 <div className="flex items-center justify-between mb-2">
@@ -306,13 +308,13 @@ export default function AdminPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="vs-card">
-              <p className="vs-label mb-1">NEW MEMBERS (7D)</p>
+              <p className="vs-label mb-1">{t('adminMain.newMembers7d')}</p>
               <p className="text-xl font-semibold text-success flex items-center gap-2">
                 +{stats.new_members_7d} <TrendingUp size={14} />
               </p>
             </div>
             <div className="vs-card">
-              <p className="vs-label mb-1">NEW POSTS (7D)</p>
+              <p className="vs-label mb-1">{t('adminMain.newPosts7d')}</p>
               <p className="text-xl font-semibold text-success flex items-center gap-2">
                 +{stats.new_posts_7d} <TrendingUp size={14} />
               </p>
@@ -327,7 +329,7 @@ export default function AdminPage() {
           <div className="flex items-center gap-3 mb-4">
             <div className="relative flex-1 max-w-xs">
               <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-dim" />
-              <input value={userSearch} onChange={e => setUserSearch(e.target.value)} placeholder="Search users..." className="vs-input text-xs pl-8 py-1.5" />
+              <input value={userSearch} onChange={e => setUserSearch(e.target.value)} placeholder={t('adminMain.searchUsersPlaceholder')} className="vs-input text-xs pl-8 py-1.5" />
             </div>
             <div className="w-44">
               <BrandSelect
@@ -335,19 +337,19 @@ export default function AdminPage() {
                 onChange={(v) => { setUserRoleFilter(v); setTimeout(loadTabData, 0) }}
                 size="sm"
                 options={[
-                  { value: 'all', label: 'All roles' },
-                  { value: 'member', label: 'Members' },
-                  { value: 'moderator', label: 'Moderators' },
-                  { value: 'admin', label: 'Admins' },
+                  { value: 'all', label: t('adminMain.roleFilterAll') },
+                  { value: 'member', label: t('adminMain.roleFilterMembers') },
+                  { value: 'moderator', label: t('adminMain.roleFilterModerators') },
+                  { value: 'admin', label: t('adminMain.roleFilterAdmins') },
                 ]}
               />
             </div>
-            <span className="text-xs text-text-dim">{filteredUsers.length} users</span>
+            <span className="text-xs text-text-dim">{filteredUsers.length} {t('adminMain.usersCountSuffix')}</span>
           </div>
 
           <div className="bg-surface rounded-xl border border-border overflow-hidden">
             <div className="grid grid-cols-[1fr_80px_80px] md:grid-cols-[1fr_100px_100px_80px_120px] px-4 py-2.5 border-b border-border text-[10px] text-text-dim tracking-wider uppercase">
-              <span>User</span><span>Role</span><span className="hidden md:block">Level</span><span className="hidden md:block">XP</span><span className="hidden md:block">Actions</span>
+              <span>{t('adminMain.colUser')}</span><span>{t('adminMain.colRole')}</span><span className="hidden md:block">{t('adminMain.colLevel')}</span><span className="hidden md:block">{t('adminMain.colXp')}</span><span className="hidden md:block">{t('adminMain.colActions')}</span>
             </div>
             {filteredUsers.map(user => (
               <div key={user.id} className="grid grid-cols-[1fr_80px_80px] md:grid-cols-[1fr_100px_100px_80px_120px] px-4 py-3 border-b border-border/50 items-center hover:bg-surface-2/50 transition-colors">
@@ -385,14 +387,14 @@ export default function AdminPage() {
                   {canGrantXP && (
                     <button onClick={() => setXpModal({ userId: user.id, username: user.display_name || user.username })}
                       className="p-1.5 rounded text-[10px] text-cyan hover:text-cyan hover:bg-cyan/10 transition-colors"
-                      title="Grant XP">
+                      title={t('adminMain.grantXp')}>
                       <Zap size={11} />
                     </button>
                   )}
                   {isAdmin && (
                     <button onClick={() => toggleFounder(user.id, user.is_inner_circle)}
                       className={`p-1.5 rounded text-[10px] transition-colors ${user.is_inner_circle ? 'text-purple bg-purple/10' : 'text-text-dim hover:text-purple'}`}
-                      title={user.is_inner_circle ? 'Remove from Inner Circle' : 'Add to Inner Circle'}>
+                      title={user.is_inner_circle ? t('adminMain.removeInnerCircle') : t('adminMain.addInnerCircle')}>
                       <Star size={11} fill={user.is_inner_circle ? 'currentColor' : 'none'} />
                     </button>
                   )}
@@ -403,7 +405,7 @@ export default function AdminPage() {
                       className={`p-1.5 rounded text-[10px] transition-colors ${
                         spotlightId === user.id ? 'text-cyan bg-cyan/10 cursor-default' : 'text-text-dim hover:text-cyan'
                       }`}
-                      title={spotlightId === user.id ? 'Currently featured' : 'Feature in homepage spotlight'}
+                      title={spotlightId === user.id ? t('adminMain.currentlyFeatured') : t('adminMain.featureInSpotlight')}
                     >
                       <Sparkles size={11} fill={spotlightId === user.id ? 'currentColor' : 'none'} />
                     </button>
@@ -429,17 +431,17 @@ export default function AdminPage() {
                 </div>
                 <p className="text-xs text-text-muted line-clamp-2">{post.content}</p>
                 <div className="flex gap-3 mt-1.5 text-[10px] text-text-dim">
-                  <span>{post.like_count} likes</span>
-                  <span>{post.comment_count} comments</span>
+                  <span>{post.like_count} {t('adminMain.likesLabel')}</span>
+                  <span>{post.comment_count} {t('adminMain.commentsLabel')}</span>
                 </div>
               </div>
-              <button onClick={() => { if (confirm('Delete this post?')) deletePost(post.id) }}
-                className="text-text-dim hover:text-danger transition-colors p-1.5 shrink-0" title="Delete post">
+              <button onClick={() => { if (confirm(t('adminMain.deletePostConfirm'))) deletePost(post.id) }}
+                className="text-text-dim hover:text-danger transition-colors p-1.5 shrink-0" title={t('adminMain.deletePostTitle')}>
                 <Trash2 size={13} />
               </button>
             </div>
           ))}
-          {posts.length === 0 && <div className="vs-card text-center py-8"><p className="text-sm text-text-dim">No posts yet</p></div>}
+          {posts.length === 0 && <div className="vs-card text-center py-8"><p className="text-sm text-text-dim">{t('adminMain.noPostsYet')}</p></div>}
         </div>
       )}
 
@@ -447,17 +449,17 @@ export default function AdminPage() {
       {activeTab === 'games' && isAdmin && (
         <div>
           <div className="vs-card mb-4">
-            <p className="vs-label mb-3">ADD GAME</p>
+            <p className="vs-label mb-3">{t('adminMain.addGameLabel')}</p>
             <div className="flex gap-2">
-              <input value={newGameName} onChange={e => setNewGameName(e.target.value)} placeholder="Game name" className="vs-input text-sm flex-1" />
-              <input value={newGameSlug} onChange={e => setNewGameSlug(e.target.value)} placeholder="slug (auto)" className="vs-input text-sm w-40" />
-              <button onClick={addGame} disabled={!newGameName.trim()} className="vs-btn vs-btn-primary text-xs px-4 disabled:opacity-40">Add</button>
+              <input value={newGameName} onChange={e => setNewGameName(e.target.value)} placeholder={t('adminMain.gameNamePlaceholder')} className="vs-input text-sm flex-1" />
+              <input value={newGameSlug} onChange={e => setNewGameSlug(e.target.value)} placeholder={t('adminMain.gameSlugPlaceholder')} className="vs-input text-sm w-40" />
+              <button onClick={addGame} disabled={!newGameName.trim()} className="vs-btn vs-btn-primary text-xs px-4 disabled:opacity-40">{t('adminMain.addButton')}</button>
             </div>
           </div>
 
           <div className="bg-surface rounded-xl border border-border overflow-hidden">
             <div className="grid grid-cols-[1fr_80px_60px] md:grid-cols-[1fr_120px_80px_80px] px-4 py-2.5 border-b border-border text-[10px] text-text-dim tracking-wider uppercase">
-              <span>Game</span><span className="hidden md:block">Slug</span><span>Status</span><span className="hidden md:block">Actions</span>
+              <span>{t('adminMain.colGame')}</span><span className="hidden md:block">{t('adminMain.colSlug')}</span><span>{t('adminMain.colStatus')}</span><span className="hidden md:block">{t('adminMain.colActions')}</span>
             </div>
             {games.map(game => (
               <div key={game.id} className="grid grid-cols-[1fr_80px_60px] md:grid-cols-[1fr_120px_80px_80px] px-4 py-3 border-b border-border/50 items-center hover:bg-surface-2/50 transition-colors">
@@ -465,9 +467,9 @@ export default function AdminPage() {
                 <span className="text-xs text-text-dim font-mono hidden md:block">{game.slug}</span>
                 <button onClick={() => toggleGameApproval(game.id, game.is_approved)}
                   className={`text-[10px] px-2 py-0.5 rounded ${game.is_approved ? 'bg-success/15 text-success' : 'bg-danger/15 text-danger'}`}>
-                  {game.is_approved ? 'Approved' : 'Hidden'}
+                  {game.is_approved ? t('adminMain.statusApproved') : t('adminMain.statusHidden')}
                 </button>
-                <button onClick={() => { if (confirm(`Delete ${game.name}?`)) deleteGame(game.id) }}
+                <button onClick={() => { if (confirm(`${t('adminMain.deleteGamePrefix')} ${game.name}?`)) deleteGame(game.id) }}
                   className="text-text-dim hover:text-danger transition-colors hidden md:block"><Trash2 size={12} /></button>
               </div>
             ))}
@@ -478,24 +480,24 @@ export default function AdminPage() {
       {/* Tournaments */}
       {activeTab === 'tournaments' && (
         <div className="space-y-2">
-          {tournaments.map((t: any) => (
-            <div key={t.id} className="vs-card flex items-center gap-4">
+          {tournaments.map((tour: any) => (
+            <div key={tour.id} className="vs-card flex items-center gap-4">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-0.5">
-                  <span className="text-sm font-medium">{t.name}</span>
+                  <span className="text-sm font-medium">{tour.name}</span>
                   <span className={`text-[9px] px-1.5 py-0.5 rounded ${
-                    t.status === 'in_progress' ? 'bg-warning/15 text-warning' :
-                    t.status === 'registration' ? 'bg-success/15 text-success' :
-                    t.status === 'completed' ? 'bg-purple/15 text-purple' : 'bg-text-dim/15 text-text-dim'
-                  }`}>{t.status}</span>
-                  {t.game?.name && <span className="text-[10px] text-text-dim">{t.game.name}</span>}
+                    tour.status === 'in_progress' ? 'bg-warning/15 text-warning' :
+                    tour.status === 'registration' ? 'bg-success/15 text-success' :
+                    tour.status === 'completed' ? 'bg-purple/15 text-purple' : 'bg-text-dim/15 text-text-dim'
+                  }`}>{tour.status}</span>
+                  {tour.game?.name && <span className="text-[10px] text-text-dim">{tour.game.name}</span>}
                 </div>
-                <p className="text-[10px] text-text-dim">by @{t.organizer?.username} · {new Date(t.starts_at).toLocaleDateString()}</p>
+                <p className="text-[10px] text-text-dim">{t('adminMain.tournamentByPrefix')} @{tour.organizer?.username} · {new Date(tour.starts_at).toLocaleDateString()}</p>
               </div>
               <div className="w-36">
                 <BrandSelect
-                  value={t.status}
-                  onChange={(v) => updateTournamentStatus(t.id, v)}
+                  value={tour.status}
+                  onChange={(v) => updateTournamentStatus(tour.id, v)}
                   size="sm"
                   options={[
                     { value: 'upcoming', label: 'upcoming' },
@@ -508,7 +510,7 @@ export default function AdminPage() {
               </div>
             </div>
           ))}
-          {tournaments.length === 0 && <div className="vs-card text-center py-8"><p className="text-sm text-text-dim">No tournaments</p></div>}
+          {tournaments.length === 0 && <div className="vs-card text-center py-8"><p className="text-sm text-text-dim">{t('adminMain.noTournaments')}</p></div>}
         </div>
       )}
 
@@ -518,17 +520,17 @@ export default function AdminPage() {
           <div className="bg-surface border border-border rounded-xl w-full max-w-sm mx-4 max-h-[85vh] overflow-y-auto animate-slide-up" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between p-4 border-b border-border">
               <h3 className="text-sm font-medium flex items-center gap-2">
-                <Zap size={16} className="text-cyan" /> Grant XP
+                <Zap size={16} className="text-cyan" /> {t('adminMain.grantXp')}
               </h3>
               <button onClick={() => setXpModal(null)} className="text-text-dim hover:text-text"><X size={16} /></button>
             </div>
             <div className="p-4 space-y-4">
               <div className="text-center pb-3 border-b border-border">
-                <p className="text-sm">Grant XP to <span className="font-semibold text-purple">{xpModal.username}</span></p>
+                <p className="text-sm">{t('adminMain.grantXpTo')} <span className="font-semibold text-purple">{xpModal.username}</span></p>
               </div>
 
               <div>
-                <label className="vs-label block mb-2">AMOUNT</label>
+                <label className="vs-label block mb-2">{t('adminMain.amountLabel')}</label>
                 <div className="grid grid-cols-4 gap-2 mb-2">
                   {[5, 10, 25, 50].map(n => (
                     <button key={n} onClick={() => setXpAmount(n)}
@@ -560,13 +562,13 @@ export default function AdminPage() {
               </div>
 
               <div>
-                <label className="vs-label block mb-1">REASON (OPTIONAL)</label>
+                <label className="vs-label block mb-1">{t('adminMain.reasonLabel')}</label>
                 <input
                   type="text"
                   value={xpReason}
                   onChange={e => setXpReason(e.target.value)}
                   className="vs-input text-sm"
-                  placeholder="e.g. Won community event, great contribution..."
+                  placeholder={t('adminMain.reasonPlaceholder')}
                   maxLength={200}
                 />
               </div>
@@ -577,7 +579,7 @@ export default function AdminPage() {
                   <div className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
                 ) : (
                   <>
-                    <Zap size={14} /> Grant +{xpAmount} XP
+                    <Zap size={14} /> {t('adminMain.grantButtonPrefix')} +{xpAmount} XP
                   </>
                 )}
               </button>

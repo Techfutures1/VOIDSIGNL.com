@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { createClient } from '@/lib/supabase-browser'
+import { useLang } from '@/lib/lang-context'
 import Image from 'next/image'
 
 interface ChatUser {
@@ -27,6 +28,7 @@ interface ClanChatProps {
 
 export default function ClanChat({ clanSlug, clanId }: ClanChatProps) {
   const supabase = createClient()
+  const { t } = useLang()
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
@@ -106,7 +108,7 @@ export default function ClanChat({ clanSlug, clanId }: ClanChatProps) {
   return (
     <div className="flex flex-col h-80 bg-surface border border-border rounded-xl overflow-hidden">
       <div className="px-4 py-3 border-b border-border">
-        <p className="font-mono text-[10px] tracking-[0.2em] text-purple uppercase">Clan Chat</p>
+        <p className="font-mono text-[10px] tracking-[0.2em] text-purple uppercase">{t('clans2.clanChat')}</p>
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2">
@@ -168,7 +170,7 @@ export default function ClanChat({ clanSlug, clanId }: ClanChatProps) {
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Bericht..."
+          placeholder={t('clans2.messagePlaceholder')}
           maxLength={1000}
           className="flex-1 bg-void border border-border rounded-full px-4 py-2 text-text text-xs font-mono placeholder-text-dim/60 focus:outline-none focus:border-purple transition-colors"
         />

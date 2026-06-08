@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react'
 import Image from 'next/image'
 import { ImageIcon, X } from 'lucide-react'
+import { useLang } from '@/lib/lang-context'
 import type { FeedPost } from './PostCard'
 
 interface CreatePostBoxProps {
@@ -15,6 +16,7 @@ interface CreatePostBoxProps {
 }
 
 export default function CreatePostBox({ user, onPost }: CreatePostBoxProps) {
+  const { t } = useLang()
   const [content, setContent] = useState('')
   const [images, setImages] = useState<string[]>([])
   const [uploading, setUploading] = useState(false)
@@ -26,7 +28,7 @@ export default function CreatePostBox({ user, onPost }: CreatePostBoxProps) {
 
   async function handleImageUpload(files: FileList) {
     if (images.length + files.length > 4) {
-      alert('Maximaal 4 afbeeldingen per post.')
+      alert(t('feed2.max_images'))
       return
     }
     setUploading(true)
@@ -84,7 +86,7 @@ export default function CreatePostBox({ user, onPost }: CreatePostBoxProps) {
             value={content}
             onChange={e => setContent(e.target.value)}
             onFocus={() => setExpanded(true)}
-            placeholder="Wat speelde je vandaag?"
+            placeholder={t('feed2.compose_placeholder')}
             rows={expanded ? 3 : 1}
             maxLength={2000}
             className="w-full bg-void border border-border rounded-lg px-4 py-3 text-text text-sm font-mono placeholder-text-dim/60 focus:outline-none focus:border-purple transition-colors duration-200 resize-none"
@@ -124,7 +126,7 @@ export default function CreatePostBox({ user, onPost }: CreatePostBoxProps) {
                   disabled={uploading || images.length >= 4}
                   className="flex items-center gap-1 font-mono text-xs text-text-dim hover:text-text transition-colors disabled:opacity-40"
                 >
-                  <ImageIcon size={12} /> {uploading ? 'Uploaden...' : `${images.length}/4`}
+                  <ImageIcon size={12} /> {uploading ? t('feed2.uploading') : `${images.length}/4`}
                 </button>
               </div>
 
@@ -134,14 +136,14 @@ export default function CreatePostBox({ user, onPost }: CreatePostBoxProps) {
                   onClick={() => { setExpanded(false); setContent(''); setImages([]) }}
                   className="px-3 py-1.5 border border-border text-text-dim font-mono text-xs uppercase tracking-wider rounded-lg hover:border-purple hover:text-text transition-colors duration-200"
                 >
-                  Annuleer
+                  {t('feed2.cancel')}
                 </button>
                 <button
                   type="submit"
                   disabled={loading || (!content.trim() && images.length === 0)}
                   className="px-4 py-1.5 bg-purple text-white font-mono text-xs uppercase tracking-wider rounded-lg hover:bg-purple/85 transition-colors duration-200 disabled:opacity-40"
                 >
-                  {loading ? '...' : 'Posten'}
+                  {loading ? '...' : t('feed2.post')}
                 </button>
               </div>
             </div>

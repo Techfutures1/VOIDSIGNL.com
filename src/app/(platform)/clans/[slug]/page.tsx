@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase-browser'
+import { useLang } from '@/lib/lang-context'
 import ClanChat from '@/components/clans/ClanChat'
 import ClanWarCard from '@/components/clans/ClanWarCard'
 import ClanOverviewTab from '@/components/clans/ClanOverviewTab'
@@ -116,25 +117,25 @@ interface CurrentUser {
   accent_color?: string | null
 }
 
-const TABS: { key: Tab; label: string }[] = [
-  { key: 'overview', label: 'Overview' },
-  { key: 'members', label: 'Leden' },
-  { key: 'quests', label: 'Quests' },
-  { key: 'war', label: 'War' },
-  { key: 'chat', label: 'Chat' },
-  { key: 'settings', label: 'Instellingen' },
+const TAB_KEYS: { key: Tab; labelKey: string }[] = [
+  { key: 'overview', labelKey: 'clans2.tabOverview' },
+  { key: 'members', labelKey: 'clans2.tabMembers' },
+  { key: 'quests', labelKey: 'clans2.tabQuests' },
+  { key: 'war', labelKey: 'clans2.tabWar' },
+  { key: 'chat', labelKey: 'clans2.tabChat' },
+  { key: 'settings', labelKey: 'clans2.tabSettings' },
 ]
 
-const ACTION_LABELS: Record<string, string> = {
-  clip_upload: 'Clip uploaden',
-  achievement_unlock: 'Achievement behalen',
-  cotw_win: 'Clip of the Week winnen',
-  forum_post: 'Forum post plaatsen',
-  forum_reply: 'Forum reply plaatsen',
-  buddy_accepted: 'Buddy request accepteren',
-  war_won: 'War winnen',
-  quest_completed: 'Quest voltooien',
-  daily_login: 'Dagelijks inloggen',
+const ACTION_LABEL_KEYS: Record<string, string> = {
+  clip_upload: 'clans2.actionClipUpload',
+  achievement_unlock: 'clans2.actionAchievementUnlock',
+  cotw_win: 'clans2.actionCotwWin',
+  forum_post: 'clans2.actionForumPost',
+  forum_reply: 'clans2.actionForumReply',
+  buddy_accepted: 'clans2.actionBuddyAccepted',
+  war_won: 'clans2.actionWarWon',
+  quest_completed: 'clans2.actionQuestCompleted',
+  daily_login: 'clans2.actionDailyLogin',
 }
 
 export default function ClanDetailPage({
@@ -145,6 +146,12 @@ export default function ClanDetailPage({
   const { slug } = use(params)
   const router = useRouter()
   const supabase = createClient()
+  const { t } = useLang()
+
+  const TABS = TAB_KEYS.map((tab) => ({ key: tab.key, label: t(tab.labelKey) }))
+  const ACTION_LABELS: Record<string, string> = Object.fromEntries(
+    Object.entries(ACTION_LABEL_KEYS).map(([action, key]) => [action, t(key)]),
+  )
 
   const [tab, setTab] = useState<Tab>('overview')
   const [data, setData] = useState<ClanApiResponse | null>(null)
@@ -193,13 +200,13 @@ export default function ClanDetailPage({
   }
 
   async function handleLeave() {
-    if (!confirm('Clan verlaten?')) return
+    if (!confirm(t('clans2.confirmLeave'))) return
     await fetch(`/api/clans/${slug}/leave`, { method: 'POST' })
     router.push('/clans')
   }
 
   async function handleWarChallenge() {
-    const clanId = prompt('Clan ID van tegenstander:')
+    const clanId = prompt(t('clans2.promptOpponentClanId'))
     if (!clanId) return
     const res = await fetch(`/api/clans/${slug}/war`, {
       method: 'POST',
@@ -290,7 +297,7 @@ export default function ClanDetailPage({
                       : 'bg-surface-2 border-border text-text-muted'
                   }`}
                 >
-                  {clan.is_open ? 'Open' : 'Gesloten'}
+                  {clan.is_open ? t('clans2.open') : t('clans2.closed')}
                 </span>
               </div>
 
@@ -303,20 +310,20 @@ export default function ClanDetailPage({
               {/* Stats */}
               <div className="flex items-center gap-5 flex-wrap mb-4">
                 {[
-                  { num: clan.member_count, label: 'Leden', color: '#fff' },
+                  { num: clan.member_count, label: t('clans2.statMembers'), color: '#fff' },
                   {
                     num: clan.xp_total.toLocaleString(),
-                    label: 'Clan XP',
+                    label: t('clans2.statClanXp'),
                     color: '#6B3FE0',
                   },
                   {
                     num: questsCompleted,
-                    label: 'Quests',
+                    label: t('clans2.statQuests'),
                     color: '#22c55e',
                   },
                   {
                     num: members.length,
-                    label: 'Actief',
+                    label: t('clans2.statActive'),
                     color: '#fff',
                   },
                 ].map((s, i) => (
@@ -348,8 +355,8 @@ export default function ClanDetailPage({
                     {joining
                       ? '...'
                       : clan.is_open
-                        ? '+ Joinen'
-                        : '+ Aanvragen'}
+                        ? t('clans2.join')
+                        : t('clans2.request')}
                   </button>
                 )}
                 {isOfficer && (
@@ -357,7 +364,7 @@ export default function ClanDetailPage({
                     onClick={handleWarChallenge}
                     className="px-4 py-2.5 border border-border text-text-muted font-mono text-xs uppercase tracking-wider rounded-lg hover:border-purple/40 hover:text-text transition-colors duration-200"
                   >
-                    ⚔ War uitdagen
+                    ⚔ {t('clans2.challengeWar')}
                   </button>
                 )}
                 {isMember && !isOwner && (
@@ -365,7 +372,7 @@ export default function ClanDetailPage({
                     onClick={handleLeave}
                     className="px-4 py-2.5 border border-border text-text-muted font-mono text-xs uppercase tracking-wider rounded-lg hover:border-danger/40 hover:text-danger transition-colors duration-200"
                   >
-                    Verlaten
+                    {t('clans2.leave')}
                   </button>
                 )}
               </div>
@@ -377,7 +384,7 @@ export default function ClanDetailPage({
             {clan.owner && (
               <div className="flex items-center gap-2">
                 <span className="font-mono text-[9px] text-text-dim uppercase tracking-widest">
-                  Owner
+                  {t('clans2.owner')}
                 </span>
                 <Link
                   href={`/profile/${clan.owner.username}`}
@@ -389,7 +396,7 @@ export default function ClanDetailPage({
             )}
             <div className="flex items-center gap-2">
               <span className="font-mono text-[9px] text-text-dim uppercase tracking-widest">
-                Opgericht
+                {t('clans2.founded')}
               </span>
               <span className="font-mono text-[10px] text-text-muted">
                 {new Date(clan.created_at).toLocaleDateString('nl-NL', {
@@ -401,7 +408,7 @@ export default function ClanDetailPage({
             </div>
             <div className="flex items-center gap-2">
               <span className="font-mono text-[9px] text-text-dim uppercase tracking-widest">
-                Capaciteit
+                {t('clans2.capacity')}
               </span>
               <span className="font-mono text-[10px] text-text-muted">
                 {clan.member_count}/{clan.max_members}
@@ -466,10 +473,10 @@ export default function ClanDetailPage({
           {quests.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-text-dim mb-2">
-                Geen quests
+                {t('clans2.noQuests')}
               </p>
               <p className="text-text-muted text-sm">
-                Quests worden wekelijks aangemaakt.
+                {t('clans2.questsWeekly')}
               </p>
             </div>
           ) : (
@@ -480,7 +487,7 @@ export default function ClanDetailPage({
           {xpHistory.length > 0 && (
             <div className="mt-6">
               <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-purple mb-3">
-                Recente clan XP
+                {t('clans2.recentClanXp')}
               </p>
               <div className="bg-surface border border-border rounded-xl overflow-hidden">
                 {xpHistory.map((event) => (
@@ -520,17 +527,17 @@ export default function ClanDetailPage({
           ) : (
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-text-dim mb-2">
-                Geen actieve war
+                {t('clans2.noActiveWar')}
               </p>
               <p className="text-text-muted text-sm mb-6">
-                Daag een andere clan uit.
+                {t('clans2.challengeOtherClan')}
               </p>
               {isOfficer && (
                 <button
                   onClick={handleWarChallenge}
                   className="px-5 py-2.5 bg-purple text-white font-mono text-xs uppercase rounded-lg hover:bg-purple/85 transition-colors duration-200"
                 >
-                  ⚔ War starten
+                  ⚔ {t('clans2.startWar')}
                 </button>
               )}
             </div>
@@ -549,18 +556,18 @@ export default function ClanDetailPage({
               <div className="flex items-start justify-between gap-4 mb-3">
                 <div>
                   <p className="font-mono text-[10px] tracking-[0.2em] text-purple uppercase mb-1">
-                    Invite links
+                    {t('clans2.inviteLinks')}
                   </p>
-                  <h3 className="font-mono text-lg font-bold text-text">Mensen uitnodigen</h3>
+                  <h3 className="font-mono text-lg font-bold text-text">{t('clans2.invitePeople')}</h3>
                   <p className="text-text-dim text-sm mt-1">
-                    Genereer een shareable link en deel hem in de global feed.
+                    {t('clans2.inviteDescription')}
                   </p>
                 </div>
                 <button
                   onClick={() => setShowInviteModal(true)}
                   className="flex items-center gap-2 px-4 py-2 bg-purple text-white font-mono text-xs uppercase tracking-wider rounded-lg hover:bg-purple/85 transition-colors flex-shrink-0"
                 >
-                  <Link2 size={13} /> Beheren
+                  <Link2 size={13} /> {t('clans2.manage')}
                 </button>
               </div>
             </div>

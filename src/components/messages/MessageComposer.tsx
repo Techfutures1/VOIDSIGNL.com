@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import Image from 'next/image'
 import { Smile, ImageIcon, Send } from 'lucide-react'
 import type { ChatMessage } from './MessageBubble'
+import { useLang } from '@/lib/lang-context'
 
 const TENOR_KEY = process.env.NEXT_PUBLIC_TENOR_API_KEY ?? ''
 
@@ -41,6 +42,7 @@ interface MessageComposerProps {
 }
 
 export default function MessageComposer({ conversationId, onSend, disabled }: MessageComposerProps) {
+  const { t } = useLang()
   const [text, setText] = useState('')
   const [panel, setPanel] = useState<MediaPanel>('none')
   const [gifSearch, setGifSearch] = useState('')
@@ -53,7 +55,7 @@ export default function MessageComposer({ conversationId, onSend, disabled }: Me
   useEffect(() => {
     if (panel !== 'gif' || !TENOR_KEY) return
     const query = gifSearch.trim() || 'gaming'
-    const t = setTimeout(async () => {
+    const timer = setTimeout(async () => {
       try {
         const res = await fetch(
           `https://tenor.googleapis.com/v2/search?q=${encodeURIComponent(query)}&key=${TENOR_KEY}&limit=12&media_filter=gif`
@@ -62,7 +64,7 @@ export default function MessageComposer({ conversationId, onSend, disabled }: Me
         setGifs(json.results ?? [])
       } catch { setGifs([]) }
     }, 300)
-    return () => clearTimeout(t)
+    return () => clearTimeout(timer)
   }, [gifSearch, panel])
 
   async function sendMessage(payload: Record<string, unknown>) {
@@ -137,7 +139,7 @@ export default function MessageComposer({ conversationId, onSend, disabled }: Me
                 type="text"
                 value={gifSearch}
                 onChange={e => setGifSearch(e.target.value)}
-                placeholder="Zoek GIFs..."
+                placeholder={t('messages2.searchGifs')}
                 className="w-full bg-void border border-border rounded-lg px-3 py-2 text-text text-xs font-mono placeholder-text-dim/60 focus:outline-none focus:border-purple mb-2 transition-colors"
               />
               <div className="grid grid-cols-4 gap-1">
@@ -155,7 +157,7 @@ export default function MessageComposer({ conversationId, onSend, disabled }: Me
                 })}
                 {gifs.length === 0 && (
                   <p className="col-span-4 text-center text-text-dim/60 font-mono text-xs py-4">
-                    {TENOR_KEY ? 'Zoek een GIF...' : 'Tenor API key ontbreekt'}
+                    {TENOR_KEY ? t('messages2.searchAGif') : t('messages2.tenorKeyMissing')}
                   </p>
                 )}
               </div>
@@ -187,7 +189,7 @@ export default function MessageComposer({ conversationId, onSend, disabled }: Me
             className={`p-1.5 rounded-full transition-colors duration-200 ${
               panel === 'emoji' ? 'text-purple' : 'text-text-dim hover:text-text'
             }`}
-            aria-label="Emoji"
+            aria-label={t('messages2.emoji')}
           >
             <Smile size={16} />
           </button>
@@ -196,7 +198,7 @@ export default function MessageComposer({ conversationId, onSend, disabled }: Me
             type="text"
             value={text}
             onChange={e => setText(e.target.value)}
-            placeholder={disabled ? 'Conversatie geblokkeerd' : 'Bericht'}
+            placeholder={disabled ? t('messages2.conversationBlocked') : t('messages2.messagePlaceholder')}
             disabled={disabled}
             className="flex-1 bg-transparent text-text text-sm placeholder-text-dim/60 focus:outline-none disabled:opacity-40 py-1.5"
           />
@@ -216,7 +218,7 @@ export default function MessageComposer({ conversationId, onSend, disabled }: Me
             className={`p-1.5 rounded-full transition-colors duration-200 ${
               panel === 'sticker' ? 'text-purple' : 'text-text-dim hover:text-text'
             }`}
-            aria-label="Sticker"
+            aria-label={t('messages2.sticker')}
           >
             <span className="text-[14px] leading-none">★</span>
           </button>
@@ -225,7 +227,7 @@ export default function MessageComposer({ conversationId, onSend, disabled }: Me
             onClick={() => fileRef.current?.click()}
             disabled={uploading}
             className="p-1.5 rounded-full text-text-dim hover:text-text transition-colors duration-200 disabled:opacity-40"
-            aria-label="Afbeelding"
+            aria-label={t('messages2.image')}
           >
             {uploading ? '...' : <ImageIcon size={16} />}
           </button>
@@ -242,7 +244,7 @@ export default function MessageComposer({ conversationId, onSend, disabled }: Me
           type="submit"
           disabled={!text.trim() || loading || disabled}
           className="w-10 h-10 bg-purple text-white rounded-full flex items-center justify-center hover:bg-purple/85 transition-colors duration-200 disabled:opacity-40 disabled:cursor-not-allowed flex-shrink-0 shadow-[0_2px_8px_rgba(107,63,224,0.35)]"
-          aria-label="Verstuur"
+          aria-label={t('messages2.send')}
         >
           <Send size={16} />
         </button>

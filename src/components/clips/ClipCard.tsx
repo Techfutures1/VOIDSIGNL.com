@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { useState } from 'react'
 import ClipModal, { type ClipData } from './ClipModal'
 import { Heart, Play } from 'lucide-react'
+import { useLang } from '@/lib/lang-context'
 
 interface ClipCardProps {
   clip: ClipData
@@ -11,6 +12,7 @@ interface ClipCardProps {
 }
 
 export default function ClipCard({ clip, isLiked: initialLiked = false }: ClipCardProps) {
+  const { t } = useLang()
   const [showModal, setShowModal] = useState(false)
   const [liked, setLiked] = useState(initialLiked)
   const [likeCount, setLikeCount] = useState(clip.like_count)
@@ -48,7 +50,7 @@ export default function ClipCard({ clip, isLiked: initialLiked = false }: ClipCa
           {clip.is_cotw && (
             <div className="absolute top-2 left-2">
               <span className="font-mono text-[9px] uppercase tracking-widest px-2 py-1 rounded-full bg-cyan text-void font-bold">
-                Clip of the Week
+                {t('clipsUi.cotwBadge')}
               </span>
             </div>
           )}
@@ -94,10 +96,10 @@ export default function ClipCard({ clip, isLiked: initialLiked = false }: ClipCa
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <span className="font-mono text-[10px] text-text-dim">
-                {clip.view_count.toLocaleString()} views
+                {clip.view_count.toLocaleString()} {t('clipsUi.views')}
               </span>
               <span className="font-mono text-[10px] text-text-dim">
-                {clip.comment_count} reacties
+                {clip.comment_count} {t('clipsUi.comments')}
               </span>
             </div>
             <button

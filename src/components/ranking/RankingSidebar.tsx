@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { LEVELS } from '@/lib/levels'
+import { useLang } from '@/lib/lang-context'
 
 export interface RankingSidebarStats {
   totalMembers: number
@@ -41,6 +42,7 @@ export default function RankingSidebar({
   currentUserLevelName,
   currentUserXp,
 }: RankingSidebarProps) {
+  const { t } = useLang()
   const currentLevelIdx = LEVELS.findIndex((l) => l.name === currentUserLevelName)
 
   return (
@@ -49,11 +51,13 @@ export default function RankingSidebar({
       <div className="bg-surface border border-border rounded-xl p-4">
         <div className="flex items-center justify-between mb-3">
           <p className="font-mono text-[10px] tracking-[0.15em] uppercase text-purple">
-            Void Pulse
+            {t('rankingUi.voidPulse')}
           </p>
           <div className="flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-success animate-void-pulse" />
-            <span className="font-mono text-[9px] text-success">Live</span>
+            <span className="font-mono text-[9px] text-success">
+              {t('rankingUi.live')}
+            </span>
           </div>
         </div>
 
@@ -61,26 +65,26 @@ export default function RankingSidebar({
           {[
             {
               num: stats.totalMembers,
-              label: 'Members',
-              sub: `${stats.activeToday} actief vandaag`,
+              label: t('rankingUi.statMembers'),
+              sub: `${stats.activeToday} ${t('rankingUi.statActiveToday')}`,
               color: '#fff',
             },
             {
               num: stats.totalClips,
-              label: 'Clips',
-              sub: `${stats.totalPosts} posts totaal`,
+              label: t('rankingUi.statClips'),
+              sub: `${stats.totalPosts} ${t('rankingUi.statPostsTotal')}`,
               color: '#6B3FE0',
             },
             {
               num: stats.totalClans,
-              label: 'Clans',
-              sub: 'Actief',
+              label: t('rankingUi.statClans'),
+              sub: t('rankingUi.statActive'),
               color: '#00C8F0',
             },
             {
               num: stats.achievementsToday,
-              label: 'Badges',
-              sub: 'Vandaag unlocked',
+              label: t('rankingUi.statBadges'),
+              sub: t('rankingUi.statUnlockedToday'),
               color: '#22c55e',
             },
           ].map((item) => (
@@ -108,20 +112,20 @@ export default function RankingSidebar({
         <div className="bg-surface border border-border rounded-xl p-4">
           <div className="flex items-center justify-between mb-3">
             <p className="font-mono text-[10px] tracking-[0.15em] uppercase text-purple">
-              Top Clip
+              {t('rankingUi.topClip')}
             </p>
             <Link
               href="/clips"
               className="font-mono text-[9px] text-text-muted hover:text-text transition-colors duration-200"
             >
-              Alle clips →
+              {t('rankingUi.allClips')} →
             </Link>
           </div>
 
           <Link href="/clips" className="block">
             <div className="bg-void border border-cyan/20 rounded-lg p-3 hover:border-cyan/40 transition-[border-color] duration-200">
               <p className="font-mono text-[9px] uppercase tracking-widest text-cyan mb-2">
-                ★ Meeste likes
+                ★ {t('rankingUi.mostLikes')}
               </p>
               <p className="font-mono text-xs text-text leading-relaxed mb-3 line-clamp-2">
                 {topClip.title}
@@ -144,13 +148,13 @@ export default function RankingSidebar({
         <div className="bg-surface border border-border rounded-xl p-4">
           <div className="flex items-center justify-between mb-3">
             <p className="font-mono text-[10px] tracking-[0.15em] uppercase text-purple">
-              Top Clan
+              {t('rankingUi.topClan')}
             </p>
             <Link
               href="/clans"
               className="font-mono text-[9px] text-text-muted hover:text-text transition-colors duration-200"
             >
-              Alle clans →
+              {t('rankingUi.allClans')} →
             </Link>
           </div>
 
@@ -176,7 +180,7 @@ export default function RankingSidebar({
                   {topClan.name}
                 </p>
                 <p className="font-mono text-[10px] text-text-muted">
-                  {topClan.member_count} leden
+                  {topClan.member_count} {t('rankingUi.members')}
                 </p>
               </div>
               <div className="text-right shrink-0">
@@ -184,7 +188,7 @@ export default function RankingSidebar({
                   {topClan.xp_total.toLocaleString()}
                 </p>
                 <p className="font-mono text-[9px] text-text-dim uppercase">
-                  Clan XP
+                  {t('rankingUi.clanXp')}
                 </p>
               </div>
             </div>
@@ -195,7 +199,7 @@ export default function RankingSidebar({
       {/* Level Gids */}
       <div className="bg-surface border border-border rounded-xl p-4">
         <p className="font-mono text-[10px] tracking-[0.15em] uppercase text-purple mb-3">
-          Level Gids
+          {t('rankingUi.levelGuide')}
         </p>
         <div className="space-y-0">
           {LEVELS.map((level, idx) => {
@@ -236,11 +240,13 @@ export default function RankingSidebar({
                 >
                   {level.name}
                   {isCurrent && (
-                    <span className="ml-1.5 text-[8px] opacity-60">← jij</span>
+                    <span className="ml-1.5 text-[8px] opacity-60">
+                      ← {t('rankingUi.you')}
+                    </span>
                   )}
                   {isNext && xpToNext !== null && (
                     <span className="ml-1.5 text-[8px] text-purple/50">
-                      nog {xpToNext.toLocaleString()} XP
+                      {t('rankingUi.xpToGo')} {xpToNext.toLocaleString()} XP
                     </span>
                   )}
                 </span>
@@ -264,10 +270,13 @@ export default function RankingSidebar({
           </div>
           <div>
             <p className="font-mono text-[10px] font-bold text-success">
-              {stats.achievementsToday} badge{stats.achievementsToday > 1 ? 's' : ''} vandaag unlocked
+              {stats.achievementsToday}{' '}
+              {stats.achievementsToday === 1
+                ? t('rankingUi.badgeUnlockedToday')
+                : t('rankingUi.badgesUnlockedToday')}
             </p>
             <p className="text-[11px] text-text-muted mt-0.5 leading-relaxed">
-              Unlock badges via posts, clips, volgers en meer.
+              {t('rankingUi.unlockBadgesHint')}
             </p>
           </div>
         </div>

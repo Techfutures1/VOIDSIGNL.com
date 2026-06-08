@@ -1,6 +1,8 @@
 'use client'
 
-const DAYS = ['Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za', 'Zo']
+import { useLang } from '@/lib/lang-context'
+
+const DAY_KEYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
 const TIME_SLOTS = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00',
   '16:00', '17:00', '18:00', '19:00', '20:00', '21:00', '22:00']
 
@@ -20,6 +22,7 @@ interface CoachAvailabilityCalendarProps {
 export default function CoachAvailabilityCalendar({
   slots, onSelectSlot, readonly = true,
 }: CoachAvailabilityCalendarProps) {
+  const { t } = useLang()
 
   function isAvailable(day: number, time: string) {
     return slots.some(s =>
@@ -35,9 +38,9 @@ export default function CoachAvailabilityCalendar({
       <div className="min-w-[500px]">
         <div className="grid grid-cols-8 gap-1 mb-2">
           <div />
-          {DAYS.map(day => (
+          {DAY_KEYS.map(day => (
             <div key={day} className="text-center font-mono text-[10px] text-text-dim uppercase tracking-wider py-1">
-              {day}
+              {t(`coachingUi.day_${day}`)}
             </div>
           ))}
         </div>
@@ -47,7 +50,7 @@ export default function CoachAvailabilityCalendar({
             <div className="font-mono text-[9px] text-text-dim/60 flex items-center pr-2">
               {time}
             </div>
-            {DAYS.map((_, dayIdx) => {
+            {DAY_KEYS.map((_, dayIdx) => {
               const available = isAvailable(dayIdx, time)
               return (
                 <button
@@ -67,7 +70,7 @@ export default function CoachAvailabilityCalendar({
 
         <div className="flex items-center gap-3 mt-3">
           <div className="w-4 h-4 rounded bg-purple/30 border border-purple/50" />
-          <span className="font-mono text-[10px] text-text-dim">Beschikbaar</span>
+          <span className="font-mono text-[10px] text-text-dim">{t('coachingUi.available')}</span>
         </div>
       </div>
     </div>

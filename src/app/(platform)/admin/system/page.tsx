@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { useLang } from '@/lib/lang-context'
 
 interface DbStats {
   total_users: number
@@ -117,6 +118,7 @@ function SectionHeader({ title, status }: { title: string; status?: Status }) {
 }
 
 export default function SystemMonitorPage() {
+  const { t } = useLang()
   const [metrics, setMetrics] = useState<Metrics | null>(null)
   const [loading, setLoading] = useState(true)
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null)
@@ -131,17 +133,17 @@ export default function SystemMonitorPage() {
       setLastUpdate(new Date())
 
       const next: string[] = []
-      if (json.errors_1h > 50) next.push(`Hoge error rate: ${json.errors_1h} errors laatste uur`)
-      if (json.errors_24h > 200) next.push(`${json.errors_24h} errors laatste 24 uur`)
-      if (json.db_stats?.pending_coaches > 10) next.push(`${json.db_stats.pending_coaches} coach aanvragen wachten`)
-      if (json.db_stats?.pending_games > 20) next.push(`${json.db_stats.pending_games} game aanvragen wachten`)
+      if (json.errors_1h > 50) next.push(`${t('adminMain.alertHighErrorRate')}: ${json.errors_1h} ${t('adminMain.alertErrorsLastHour')}`)
+      if (json.errors_24h > 200) next.push(`${json.errors_24h} ${t('adminMain.alertErrorsLast24h')}`)
+      if (json.db_stats?.pending_coaches > 10) next.push(`${json.db_stats.pending_coaches} ${t('adminMain.alertCoachRequestsWaiting')}`)
+      if (json.db_stats?.pending_games > 20) next.push(`${json.db_stats.pending_games} ${t('adminMain.alertGameRequestsWaiting')}`)
       setAlerts(next)
     } catch (err) {
       console.error('Metrics fetch error:', err)
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [t])
 
   useEffect(() => {
     fetchMetrics()
@@ -165,12 +167,12 @@ export default function SystemMonitorPage() {
   if (!metrics) {
     return (
       <div className="text-center py-20">
-        <p className="font-mono text-xs text-text-muted">Metrics niet beschikbaar.</p>
+        <p className="font-mono text-xs text-text-muted">{t('adminMain.metricsUnavailable')}</p>
         <button
           onClick={fetchMetrics}
           className="mt-4 px-4 py-2 bg-purple text-white font-mono text-xs rounded-lg hover:bg-purple/85 transition-colors duration-200"
         >
-          Opnieuw proberen
+          {t('adminMain.retry')}
         </button>
       </div>
     )
@@ -187,11 +189,11 @@ export default function SystemMonitorPage() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-purple mb-1">Admin</p>
-          <h1 className="font-mono text-2xl font-bold text-text">System Monitor</h1>
+          <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-purple mb-1">{t('adminMain.eyebrowAdmin')}</p>
+          <h1 className="font-mono text-2xl font-bold text-text">{t('adminMain.systemMonitorTitle')}</h1>
           {lastUpdate && (
             <p className="font-mono text-[10px] text-text-dim mt-1">
-              Laatste update: {lastUpdate.toLocaleTimeString('nl-NL')} · auto-refresh 30s
+              {t('adminMain.lastUpdate')}: {lastUpdate.toLocaleTimeString('nl-NL')} · {t('adminMain.autoRefresh30s')}
             </p>
           )}
         </div>
@@ -199,7 +201,7 @@ export default function SystemMonitorPage() {
           onClick={fetchMetrics}
           className="px-4 py-2 border border-border text-text-muted font-mono text-xs rounded-lg hover:border-purple hover:text-text transition-[border-color,color] duration-200"
         >
-          ↻ Vernieuwen
+          ↻ {t('adminMain.refresh')}
         </button>
       </div>
 
@@ -207,7 +209,7 @@ export default function SystemMonitorPage() {
       {alerts.length > 0 && (
         <div className="bg-danger/8 border border-danger/30 rounded-xl p-4">
           <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-danger mb-3">
-            ⚠ Aandacht vereist
+            ⚠ {t('adminMain.attentionRequired')}
           </p>
           <div className="space-y-1.5">
             {alerts.map((alert, i) => (
@@ -221,51 +223,51 @@ export default function SystemMonitorPage() {
 
       {/* Live */}
       <div>
-        <SectionHeader title="Live" status="green" />
+        <SectionHeader title={t('adminMain.sectionLive')} status="green" />
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <StatCard
-            label="Online nu"
+            label={t('adminMain.statOnlineNow')}
             value={metrics.online_now}
-            sub="Laatste 90 sec actief"
+            sub={t('adminMain.subActiveLast90s')}
             status="green"
             large
           />
           <StatCard
-            label="Actief vandaag"
+            label={t('adminMain.statActiveToday')}
             value={metrics.db_stats.active_today.toLocaleString()}
-            sub="Laatste 24 uur"
+            sub={t('adminMain.subLast24h')}
           />
-          <StatCard label="Posts vandaag" value={metrics.db_stats.posts_today.toLocaleString()} />
-          <StatCard label="Clips vandaag" value={metrics.db_stats.clips_today.toLocaleString()} />
+          <StatCard label={t('adminMain.statPostsToday')} value={metrics.db_stats.posts_today.toLocaleString()} />
+          <StatCard label={t('adminMain.statClipsToday')} value={metrics.db_stats.clips_today.toLocaleString()} />
         </div>
       </div>
 
       {/* Platform */}
       <div>
-        <SectionHeader title="Platform" />
+        <SectionHeader title={t('adminMain.sectionPlatform')} />
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <StatCard label="Totaal users" value={metrics.db_stats.total_users.toLocaleString()} />
+          <StatCard label={t('adminMain.statTotalUsers')} value={metrics.db_stats.total_users.toLocaleString()} />
           <StatCard
-            label="Nieuw deze week"
+            label={t('adminMain.statNewThisWeek')}
             value={metrics.db_stats.signups_week.toLocaleString()}
-            sub={`${metrics.db_stats.signups_today} vandaag`}
+            sub={`${metrics.db_stats.signups_today} ${t('adminMain.subTodaySuffix')}`}
           />
-          <StatCard label="Totaal posts" value={metrics.db_stats.total_posts.toLocaleString()} />
-          <StatCard label="Totaal clips" value={metrics.db_stats.total_clips.toLocaleString()} />
+          <StatCard label={t('adminMain.statTotalPostsSys')} value={metrics.db_stats.total_posts.toLocaleString()} />
+          <StatCard label={t('adminMain.statTotalClipsSys')} value={metrics.db_stats.total_clips.toLocaleString()} />
           <StatCard
-            label="Clans"
+            label={t('adminMain.statClans')}
             value={metrics.db_stats.total_clans.toLocaleString()}
-            sub={`${metrics.db_stats.active_wars} actieve wars`}
+            sub={`${metrics.db_stats.active_wars} ${t('adminMain.subActiveWars')}`}
           />
           <StatCard
-            label="Coaching sessies"
+            label={t('adminMain.statCoachingSessions')}
             value={metrics.db_stats.total_sessions.toLocaleString()}
           />
-          <StatCard label="Berichten" value={metrics.db_stats.total_messages.toLocaleString()} />
+          <StatCard label={t('adminMain.statMessages')} value={metrics.db_stats.total_messages.toLocaleString()} />
           <StatCard
-            label="Forum threads"
+            label={t('adminMain.statForumThreads')}
             value={metrics.db_stats.forum_threads_week.toLocaleString()}
-            sub="Deze week"
+            sub={t('adminMain.subThisWeek')}
           />
         </div>
       </div>
@@ -274,7 +276,7 @@ export default function SystemMonitorPage() {
       {(metrics.db_stats.pending_coaches > 0 || metrics.db_stats.pending_games > 0) && (
         <div>
           <SectionHeader
-            title="Openstaande acties"
+            title={t('adminMain.sectionPendingActions')}
             status={
               metrics.db_stats.pending_coaches > 5 || metrics.db_stats.pending_games > 10
                 ? 'orange'
@@ -284,17 +286,17 @@ export default function SystemMonitorPage() {
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {metrics.db_stats.pending_coaches > 0 && (
               <StatCard
-                label="Coach aanvragen"
+                label={t('adminMain.statCoachRequests')}
                 value={metrics.db_stats.pending_coaches}
-                sub="Wachten op goedkeuring"
+                sub={t('adminMain.subWaitingApproval')}
                 status={metrics.db_stats.pending_coaches > 10 ? 'orange' : 'green'}
               />
             )}
             {metrics.db_stats.pending_games > 0 && (
               <StatCard
-                label="Game aanvragen"
+                label={t('adminMain.statGameRequests')}
                 value={metrics.db_stats.pending_games}
-                sub="Wachten op goedkeuring"
+                sub={t('adminMain.subWaitingApproval')}
                 status={metrics.db_stats.pending_games > 20 ? 'orange' : 'green'}
               />
             )}
@@ -304,24 +306,24 @@ export default function SystemMonitorPage() {
 
       {/* Errors */}
       <div>
-        <SectionHeader title="Errors & Stabiliteit" status={errorStatus} />
+        <SectionHeader title={t('adminMain.sectionErrors')} status={errorStatus} />
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
           <StatCard
-            label="Errors laatste uur"
+            label={t('adminMain.statErrorsLastHour')}
             value={metrics.errors_1h}
             status={getStatus(metrics.errors_1h, 10, 50)}
-            sub="< 10 = normaal"
+            sub={t('adminMain.subErrorsNormal')}
           />
           <StatCard
-            label="Errors laatste 24u"
+            label={t('adminMain.statErrorsLast24h')}
             value={metrics.errors_24h}
             status={getStatus(metrics.errors_24h, 50, 200)}
           />
           <StatCard
-            label="Error rate"
+            label={t('adminMain.statErrorRate')}
             value={`${errorRate24h}%`}
             status={getStatus(errorRate24h, 1, 5)}
-            sub="< 1% = groen"
+            sub={t('adminMain.subErrorRateGreen')}
           />
         </div>
 
@@ -329,7 +331,7 @@ export default function SystemMonitorPage() {
           <div className="bg-surface border border-border rounded-xl overflow-hidden">
             <div className="px-4 py-3 border-b border-border">
               <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-text-muted">
-                Recente errors
+                {t('adminMain.recentErrors')}
               </p>
             </div>
             <div className="divide-y divide-border max-h-48 overflow-y-auto">
@@ -361,17 +363,17 @@ export default function SystemMonitorPage() {
 
       {/* Database */}
       <div>
-        <SectionHeader title="Database" />
+        <SectionHeader title={t('adminMain.sectionDatabase')} />
         <div className="bg-surface border border-border rounded-xl overflow-hidden">
           <div className="px-4 py-3 border-b border-border grid grid-cols-3 gap-4">
             <span className="font-mono text-[10px] uppercase tracking-widest text-text-dim">
-              Tabel
+              {t('adminMain.colTable')}
             </span>
             <span className="font-mono text-[10px] uppercase tracking-widest text-text-dim text-right">
-              Rijen
+              {t('adminMain.colRows')}
             </span>
             <span className="font-mono text-[10px] uppercase tracking-widest text-text-dim text-right">
-              Grootte
+              {t('adminMain.colSize')}
             </span>
           </div>
           <div className="divide-y divide-border max-h-80 overflow-y-auto">
@@ -404,7 +406,7 @@ export default function SystemMonitorPage() {
       {/* Storage */}
       {metrics.storage && metrics.storage.length > 0 && (
         <div>
-          <SectionHeader title="Storage Buckets" />
+          <SectionHeader title={t('adminMain.sectionStorageBuckets')} />
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {metrics.storage.map((bucket) => (
               <div key={bucket.name} className="bg-surface border border-border rounded-xl p-4">
@@ -414,7 +416,7 @@ export default function SystemMonitorPage() {
                 <p className="font-mono text-2xl font-bold text-text">
                   {bucket.file_count.toLocaleString()}
                 </p>
-                <p className="font-mono text-[10px] text-text-dim mt-1">bestanden</p>
+                <p className="font-mono text-[10px] text-text-dim mt-1">{t('adminMain.filesLabel')}</p>
               </div>
             ))}
           </div>
@@ -423,24 +425,24 @@ export default function SystemMonitorPage() {
 
       {/* Capaciteit */}
       <div>
-        <SectionHeader title="Capaciteit & Schaalbaarheid" />
+        <SectionHeader title={t('adminMain.sectionCapacity')} />
         <div className="space-y-3">
           <div className="bg-surface border border-border rounded-xl p-4">
             <div className="flex items-start justify-between mb-3">
-              <p className="font-mono text-xs font-bold text-text">Vercel (Hosting)</p>
+              <p className="font-mono text-xs font-bold text-text">{t('adminMain.vercelHosting')}</p>
               <div className="flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-success" />
-                <span className="font-mono text-[10px] text-success">Operationeel</span>
+                <span className="font-mono text-[10px] text-success">{t('adminMain.operational')}</span>
               </div>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
               {[
-                { label: 'Serverless functions', value: 'Auto-scaling', status: 'green' as Status },
-                { label: 'CDN', value: 'Wereldwijd', status: 'green' as Status },
-                { label: 'DDoS basis', value: 'Ingebouwd', status: 'green' as Status },
-                { label: 'Cloudflare', value: 'Zie infra checklist', status: 'orange' as Status },
-                { label: 'Rate limiting', value: 'In-memory actief', status: 'orange' as Status },
-                { label: 'Upstash Redis', value: 'Zie infra checklist', status: 'orange' as Status },
+                { label: t('adminMain.capServerlessFunctions'), value: t('adminMain.capAutoScaling'), status: 'green' as Status },
+                { label: t('adminMain.capCdn'), value: t('adminMain.capWorldwide'), status: 'green' as Status },
+                { label: t('adminMain.capDdosBasis'), value: t('adminMain.capBuiltIn'), status: 'green' as Status },
+                { label: t('adminMain.capCloudflare'), value: t('adminMain.capSeeInfraChecklist'), status: 'orange' as Status },
+                { label: t('adminMain.capRateLimiting'), value: t('adminMain.capInMemoryActive'), status: 'orange' as Status },
+                { label: t('adminMain.capUpstashRedis'), value: t('adminMain.capSeeInfraChecklist'), status: 'orange' as Status },
               ].map((item) => (
                 <div key={item.label}>
                   <p className="font-mono text-[10px] text-text-muted mb-0.5">{item.label}</p>
@@ -454,20 +456,20 @@ export default function SystemMonitorPage() {
 
           <div className="bg-surface border border-border rounded-xl p-4">
             <div className="flex items-start justify-between mb-3">
-              <p className="font-mono text-xs font-bold text-text">Supabase (Database)</p>
+              <p className="font-mono text-xs font-bold text-text">{t('adminMain.supabaseDatabase')}</p>
               <div className="flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-success" />
-                <span className="font-mono text-[10px] text-success">Operationeel</span>
+                <span className="font-mono text-[10px] text-success">{t('adminMain.operational')}</span>
               </div>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
               {[
-                { label: 'Regio', value: 'eu-central-1' },
+                { label: t('adminMain.capRegion'), value: 'eu-central-1' },
                 { label: 'PostgreSQL', value: '17.6' },
-                { label: 'RLS', value: 'Actief op alle tabellen' },
-                { label: 'Realtime', value: 'Actief' },
-                { label: 'Connection pooling', value: 'PgBouncer' },
-                { label: 'Backups', value: 'Zie infra checklist' },
+                { label: 'RLS', value: t('adminMain.capRlsActiveAllTables') },
+                { label: t('adminMain.capRealtime'), value: t('adminMain.capActive') },
+                { label: t('adminMain.capConnectionPooling'), value: 'PgBouncer' },
+                { label: t('adminMain.capBackups'), value: t('adminMain.capSeeInfraChecklist') },
               ].map((item) => (
                 <div key={item.label}>
                   <p className="font-mono text-[10px] text-text-muted mb-0.5">{item.label}</p>
@@ -479,26 +481,26 @@ export default function SystemMonitorPage() {
 
           <div className="bg-purple/6 border border-purple/20 rounded-xl p-4">
             <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-purple mb-3">
-              Schaalbaarheid inschatting
+              {t('adminMain.scalabilityEstimate')}
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {[
                 {
-                  tier: 'Huidige staat',
+                  tier: t('adminMain.tierCurrentState'),
                   users: '0 – 10.000',
-                  desc: 'Supabase gratis tier + Vercel hobby. Pauzeert bij inactiviteit.',
+                  desc: t('adminMain.tierCurrentDesc'),
                   status: 'orange' as Status,
                 },
                 {
-                  tier: 'Groei fase',
+                  tier: t('adminMain.tierGrowthPhase'),
                   users: '10.000 – 100.000',
-                  desc: 'Supabase Pro ($25/mo) + Vercel Pro + Cloudflare + Upstash Redis.',
+                  desc: t('adminMain.tierGrowthDesc'),
                   status: 'orange' as Status,
                 },
                 {
-                  tier: 'Schaal',
+                  tier: t('adminMain.tierScale'),
                   users: '100.000+',
-                  desc: 'Supabase Team + read replicas + CDN optimalisatie + Sentry.',
+                  desc: t('adminMain.tierScaleDesc'),
                   status: 'red' as Status,
                 },
               ].map((tier) => (
@@ -507,7 +509,7 @@ export default function SystemMonitorPage() {
                     <span className={`w-2 h-2 rounded-full shrink-0 ${statusDot[tier.status]}`} />
                     <p className="font-mono text-xs font-bold text-text">{tier.tier}</p>
                   </div>
-                  <p className="font-mono text-[10px] text-purple mb-1">{tier.users} users</p>
+                  <p className="font-mono text-[10px] text-purple mb-1">{tier.users} {t('adminMain.usersSuffix')}</p>
                   <p className="text-text-muted text-xs leading-relaxed">{tier.desc}</p>
                 </div>
               ))}
@@ -518,22 +520,22 @@ export default function SystemMonitorPage() {
 
       {/* Performance benchmarks */}
       <div>
-        <SectionHeader title="Performance Benchmarks" />
+        <SectionHeader title={t('adminMain.sectionPerformance')} />
         <div className="bg-surface border border-border rounded-xl overflow-hidden">
           <div className="px-4 py-3 border-b border-border">
             <p className="font-mono text-[10px] text-text-muted">
-              Drempelwaarden: &lt;500ms groen · 500ms–2s oranje · &gt;2s rood
+              {t('adminMain.thresholdsLabel')}: &lt;500ms {t('adminMain.thresholdGreen')} · 500ms–2s {t('adminMain.thresholdOrange')} · &gt;2s {t('adminMain.thresholdRed')}
             </p>
           </div>
           <div className="divide-y divide-border">
             {[
-              { endpoint: 'GET /api/feed', target: '<500ms', note: 'Paginering + joins' },
-              { endpoint: 'GET /api/ranking', target: '<300ms', note: 'DB view' },
-              { endpoint: 'GET /api/clips', target: '<400ms', note: 'Met thumbnail URLs' },
-              { endpoint: 'POST /api/feed', target: '<200ms', note: 'Insert + trigger' },
-              { endpoint: 'GET /api/forums/[slug]', target: '<500ms', note: 'Thread lijst' },
-              { endpoint: 'GET /api/messages/[id]', target: '<300ms', note: '50 berichten' },
-              { endpoint: 'GET /api/games/search', target: '<800ms', note: 'IGDB externe API' },
+              { endpoint: 'GET /api/feed', target: '<500ms', note: t('adminMain.notePaginationJoins') },
+              { endpoint: 'GET /api/ranking', target: '<300ms', note: t('adminMain.noteDbView') },
+              { endpoint: 'GET /api/clips', target: '<400ms', note: t('adminMain.noteThumbnailUrls') },
+              { endpoint: 'POST /api/feed', target: '<200ms', note: t('adminMain.noteInsertTrigger') },
+              { endpoint: 'GET /api/forums/[slug]', target: '<500ms', note: t('adminMain.noteThreadList') },
+              { endpoint: 'GET /api/messages/[id]', target: '<300ms', note: t('adminMain.note50Messages') },
+              { endpoint: 'GET /api/games/search', target: '<800ms', note: t('adminMain.noteIgdbExternalApi') },
             ].map((item) => (
               <div
                 key={item.endpoint}
@@ -555,14 +557,14 @@ export default function SystemMonitorPage() {
       {/* Footer info */}
       <div className="bg-surface border border-border rounded-xl p-4">
         <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-text-dim mb-2">
-          Systeem info
+          {t('adminMain.systemInfo')}
         </p>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {[
-            { label: 'Supabase Project', value: 'dfppzlixnmznlqlmthxy' },
-            { label: 'Vercel Project', value: 'voidsignl' },
-            { label: 'Framework', value: 'Next.js 16.2.4' },
-            { label: 'Metrics bijgewerkt', value: lastUpdate?.toLocaleTimeString('nl-NL') ?? '—' },
+            { label: t('adminMain.supabaseProject'), value: 'dfppzlixnmznlqlmthxy' },
+            { label: t('adminMain.vercelProject'), value: 'voidsignl' },
+            { label: t('adminMain.framework'), value: 'Next.js 16.2.4' },
+            { label: t('adminMain.metricsUpdated'), value: lastUpdate?.toLocaleTimeString('nl-NL') ?? '—' },
           ].map((item) => (
             <div key={item.label}>
               <p className="font-mono text-[10px] text-text-dim mb-0.5">{item.label}</p>

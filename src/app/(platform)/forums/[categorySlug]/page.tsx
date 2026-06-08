@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useLang } from '@/lib/lang-context'
 import ThreadRow, { type ThreadRowData } from '@/components/forums/ThreadRow'
 
 const PAGE_SIZE = 20
@@ -17,6 +18,7 @@ interface CategoryData {
 export default function CategoryPage() {
   const params = useParams()
   const router = useRouter()
+  const { t } = useLang()
   const slug = (params?.categorySlug as string) ?? ''
 
   const [category, setCategory] = useState<CategoryData | null>(null)
@@ -49,7 +51,7 @@ export default function CategoryPage() {
     <div className="max-w-4xl mx-auto px-4 py-8">
       <div className="flex items-center gap-2 mb-6">
         <Link href="/forums" className="font-mono text-xs text-text-dim hover:text-text transition-colors">
-          Forums
+          {t('forums2.breadcrumb_forums')}
         </Link>
         <span className="text-text-dim/60 font-mono text-xs">→</span>
         <span className="font-mono text-xs text-text">{category?.name ?? '...'}</span>
@@ -66,7 +68,7 @@ export default function CategoryPage() {
           href={`/forums/${slug}/new`}
           className="px-5 py-2.5 bg-purple text-white font-mono text-xs uppercase tracking-wider rounded-lg hover:bg-purple/85 transition-colors flex-shrink-0"
         >
-          + Nieuwe thread
+          {t('forums2.new_thread')}
         </Link>
       </div>
 
@@ -84,13 +86,13 @@ export default function CategoryPage() {
         </div>
       ) : threads.length === 0 && pinned.length === 0 ? (
         <div className="bg-surface border border-border rounded-xl text-center py-16">
-          <p className="font-mono text-[10px] tracking-[0.2em] text-text-dim/60 uppercase mb-3">Leeg</p>
-          <p className="text-text-dim text-sm mb-6">Nog geen threads. Start de discussie.</p>
+          <p className="font-mono text-[10px] tracking-[0.2em] text-text-dim/60 uppercase mb-3">{t('forums2.empty_label')}</p>
+          <p className="text-text-dim text-sm mb-6">{t('forums2.empty_message')}</p>
           <Link
             href={`/forums/${slug}/new`}
             className="px-5 py-2.5 bg-purple text-white font-mono text-sm uppercase tracking-wider rounded-lg hover:bg-purple/85 transition-colors duration-200"
           >
-            + Nieuwe thread
+            {t('forums2.new_thread')}
           </Link>
         </div>
       ) : (
@@ -111,7 +113,7 @@ export default function CategoryPage() {
             disabled={page === 1}
             className="px-4 py-2 border border-border text-text-dim font-mono text-xs rounded-lg hover:border-purple hover:text-text transition-colors duration-200 disabled:opacity-30"
           >
-            ← Vorige
+            {t('forums2.pagination_prev')}
           </button>
           <span className="font-mono text-xs text-text-dim">{page} / {totalPages}</span>
           <button
@@ -119,7 +121,7 @@ export default function CategoryPage() {
             disabled={page === totalPages}
             className="px-4 py-2 border border-border text-text-dim font-mono text-xs rounded-lg hover:border-purple hover:text-text transition-colors duration-200 disabled:opacity-30"
           >
-            Volgende →
+            {t('forums2.pagination_next')}
           </button>
         </div>
       )}

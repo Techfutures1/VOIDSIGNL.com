@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase-browser'
+import { useLang } from '@/lib/lang-context'
 import ReplyCard, { type ReplyCardData } from '@/components/forums/ReplyCard'
 
 const PAGE_SIZE = 30
@@ -32,6 +33,7 @@ export default function ThreadPage() {
   const params = useParams()
   const router = useRouter()
   const supabase = createClient()
+  const { t } = useLang()
   const slug = (params?.categorySlug as string) ?? ''
   const threadId = (params?.threadId as string) ?? ''
 
@@ -125,7 +127,7 @@ export default function ThreadPage() {
     <div className="max-w-4xl mx-auto px-4 py-8">
       <div className="flex items-center gap-2 mb-6 flex-wrap">
         <Link href="/forums" className="font-mono text-xs text-text-dim hover:text-text transition-colors">
-          Forums
+          {t('forums2.breadcrumb_forums')}
         </Link>
         <span className="text-text-dim/60 font-mono text-xs">→</span>
         <Link href={`/forums/${slug}`} className="font-mono text-xs text-text-dim hover:text-text transition-colors">
@@ -144,12 +146,12 @@ export default function ThreadPage() {
               <div className="flex items-center gap-2 mb-2 flex-wrap">
                 {thread.is_pinned && (
                   <span className="font-mono text-[8px] uppercase tracking-widest px-1.5 py-0.5 rounded-full bg-purple/15 text-purple">
-                    Gepind
+                    {t('forums2.badge_pinned')}
                   </span>
                 )}
                 {thread.is_locked && (
                   <span className="font-mono text-[8px] uppercase tracking-widest px-1.5 py-0.5 rounded-full bg-text-dim/10 text-text-dim">
-                    Gesloten
+                    {t('forums2.badge_locked')}
                   </span>
                 )}
               </div>
@@ -162,19 +164,19 @@ export default function ThreadPage() {
                   onClick={() => handleMod(thread.is_pinned ? 'unpin' : 'pin', thread.id)}
                   className="px-3 py-1.5 border border-border text-text-dim font-mono text-[10px] rounded-lg hover:border-purple transition-colors duration-200"
                 >
-                  {thread.is_pinned ? 'Losgemaakt' : 'Pinnen'}
+                  {thread.is_pinned ? t('forums2.mod_unpin') : t('forums2.mod_pin')}
                 </button>
                 <button
                   onClick={() => handleMod(thread.is_locked ? 'unlock' : 'lock', thread.id)}
                   className="px-3 py-1.5 border border-border text-text-dim font-mono text-[10px] rounded-lg hover:border-purple transition-colors duration-200"
                 >
-                  {thread.is_locked ? 'Openen' : 'Sluiten'}
+                  {thread.is_locked ? t('forums2.mod_unlock') : t('forums2.mod_lock')}
                 </button>
                 <button
                   onClick={() => handleMod('delete', thread.id)}
                   className="px-3 py-1.5 border border-danger text-danger font-mono text-[10px] rounded-lg hover:bg-danger/10 transition-colors duration-200"
                 >
-                  Verwijderen
+                  {t('forums2.mod_delete')}
                 </button>
               </div>
             )}
@@ -196,7 +198,7 @@ export default function ThreadPage() {
 
           <div className="flex items-center gap-4 mt-4 pt-4 border-t border-border px-5">
             <span className="font-mono text-[10px] text-text-dim/60">
-              {total.toLocaleString()} replies · {thread.view_count?.toLocaleString()} views
+              {total.toLocaleString()} {t('forums2.replies')} · {thread.view_count?.toLocaleString()} {t('forums2.views')}
             </span>
           </div>
         </div>
@@ -224,7 +226,7 @@ export default function ThreadPage() {
             onClick={() => setPage(p => p + 1)}
             className="px-5 py-2.5 border border-border text-text-dim font-mono text-xs rounded-lg hover:border-purple hover:text-text transition-colors duration-200"
           >
-            Meer laden ({total - replies.length} resterend)
+            {t('forums2.load_more')} ({total - replies.length} {t('forums2.remaining')})
           </button>
         </div>
       )}
@@ -232,13 +234,13 @@ export default function ThreadPage() {
       {thread && !thread.is_locked && (
         <div className="bg-surface border border-border rounded-xl p-5">
           <p className="font-mono text-[10px] tracking-[0.2em] text-purple uppercase mb-4">
-            Reageer
+            {t('forums2.reply_heading')}
           </p>
           <form onSubmit={handleReply} className="space-y-3">
             <textarea
               value={newReply}
               onChange={e => setNewReply(e.target.value)}
-              placeholder="Schrijf een reactie..."
+              placeholder={t('forums2.reply_placeholder')}
               rows={4}
               maxLength={5000}
               className="w-full bg-void border border-border rounded-xl px-4 py-3 text-text text-sm font-mono placeholder-text-dim/60 focus:outline-none focus:border-purple transition-colors resize-none"
@@ -252,7 +254,7 @@ export default function ThreadPage() {
                 disabled={posting || !newReply.trim()}
                 className="px-6 py-2.5 bg-purple text-white font-mono text-xs uppercase tracking-wider rounded-lg hover:bg-purple/85 transition-colors duration-200 disabled:opacity-40"
               >
-                {posting ? 'Bezig...' : 'Plaatsen'}
+                {posting ? t('forums2.posting') : t('forums2.post')}
               </button>
             </div>
           </form>
@@ -262,7 +264,7 @@ export default function ThreadPage() {
       {thread?.is_locked && (
         <div className="text-center py-6 border border-border rounded-xl">
           <p className="font-mono text-xs text-text-dim">
-            Deze thread is gesloten. Reageren is niet meer mogelijk.
+            {t('forums2.locked_notice')}
           </p>
         </div>
       )}

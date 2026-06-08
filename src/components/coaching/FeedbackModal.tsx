@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useLang } from '@/lib/lang-context'
 
 interface FeedbackModalProps {
   session: {
@@ -16,9 +17,10 @@ interface FeedbackModalProps {
   onSubmit: () => void
 }
 
-const RATING_LABELS = ['', 'Slecht', 'Matig', 'Goed', 'Heel goed', 'Uitstekend']
+const RATING_LABEL_KEYS = ['', 'rating_1', 'rating_2', 'rating_3', 'rating_4', 'rating_5']
 
 export default function FeedbackModal({ session, onClose, onSubmit }: FeedbackModalProps) {
+  const { t } = useLang()
   const [rating, setRating] = useState(0)
   const [hovered, setHovered] = useState(0)
   const [content, setContent] = useState('')
@@ -27,8 +29,8 @@ export default function FeedbackModal({ session, onClose, onSubmit }: FeedbackMo
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (rating === 0) { setError('Geef een beoordeling.'); return }
-    if (content.length < 10) { setError('Schrijf minimaal 10 tekens.'); return }
+    if (rating === 0) { setError(t('coachingUi.error_no_rating')); return }
+    if (content.length < 10) { setError(t('coachingUi.error_min_chars')); return }
 
     setLoading(true)
     try {
@@ -43,11 +45,11 @@ export default function FeedbackModal({ session, onClose, onSubmit }: FeedbackMo
         }),
       })
       const json = await res.json()
-      if (!res.ok) throw new Error(json.error ?? 'Indienen mislukt')
+      if (!res.ok) throw new Error(json.error ?? t('coachingUi.error_submit_failed'))
       onSubmit()
       onClose()
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Er ging iets mis.'
+      const msg = err instanceof Error ? err.message : t('coachingUi.error_generic')
       setError(msg)
     } finally {
       setLoading(false)
@@ -60,17 +62,17 @@ export default function FeedbackModal({ session, onClose, onSubmit }: FeedbackMo
       <div className="relative z-10 w-full max-w-md bg-surface border border-border rounded-2xl overflow-hidden">
         <div className="px-6 py-5 border-b border-border">
           <p className="font-mono text-[10px] tracking-[0.2em] text-purple uppercase mb-0.5">
-            Sessie afgerond
+            {t('coachingUi.session_completed')}
           </p>
-          <h2 className="font-mono text-lg font-bold text-text">Hoe was je sessie?</h2>
+          <h2 className="font-mono text-lg font-bold text-text">{t('coachingUi.how_was_session')}</h2>
           <p className="text-text-dim text-xs mt-1">
-            Met {session.coach.display_name ?? session.coach.username}
+            {t('coachingUi.with')} {session.coach.display_name ?? session.coach.username}
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
           <div className="text-center">
-            <p className="font-mono text-xs text-text-dim mb-3">Beoordeling</p>
+            <p className="font-mono text-xs text-text-dim mb-3">{t('coachingUi.rating')}</p>
             <div className="flex justify-center gap-3">
               {[1,2,3,4,5].map(star => (
                 <button
@@ -88,7 +90,7 @@ export default function FeedbackModal({ session, onClose, onSubmit }: FeedbackMo
             </div>
             {rating > 0 && (
               <p className="font-mono text-xs text-text-dim mt-2">
-                {RATING_LABELS[rating]}
+                {t(`coachingUi.${RATING_LABEL_KEYS[rating]}`)}
               </p>
             )}
           </div>
@@ -96,7 +98,7 @@ export default function FeedbackModal({ session, onClose, onSubmit }: FeedbackMo
           <textarea
             value={content}
             onChange={e => setContent(e.target.value)}
-            placeholder="Vertel over je ervaring... (minimaal 10 tekens)"
+            placeholder={t('coachingUi.feedback_placeholder')}
             rows={4}
             maxLength={1000}
             className="w-full bg-void border border-border rounded-lg px-4 py-3 text-text text-sm font-mono placeholder-text-dim/60 focus:outline-none focus:border-purple transition-colors resize-none"
@@ -110,14 +112,14 @@ export default function FeedbackModal({ session, onClose, onSubmit }: FeedbackMo
               onClick={onClose}
               className="flex-1 py-2.5 border border-border text-text-dim font-mono text-xs uppercase tracking-wider rounded-lg hover:border-purple hover:text-text transition-colors duration-200"
             >
-              Later
+              {t('coachingUi.later')}
             </button>
             <button
               type="submit"
               disabled={loading}
               className="flex-1 py-2.5 bg-purple text-white font-mono text-xs uppercase tracking-wider rounded-lg hover:bg-purple/85 transition-colors duration-200 disabled:opacity-40"
             >
-              {loading ? '...' : 'Review plaatsen'}
+              {loading ? '...' : t('coachingUi.submit_review')}
             </button>
           </div>
         </form>

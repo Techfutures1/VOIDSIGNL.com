@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase-browser'
 import { Avatar } from '@/components/ui/avatar'
+import { useLang } from '@/lib/lang-context'
 
 interface Buddy {
   id: string
@@ -18,6 +19,7 @@ interface Buddy {
  * Toont max 6 buddies + "Bekijk alle" link naar /buddies.
  */
 export function ProfileBuddiesStrip({ userId }: { userId: string }) {
+  const { t } = useLang()
   const supabase = createClient()
   const [buddies, setBuddies] = useState<Buddy[]>([])
   const [count, setCount] = useState(0)
@@ -61,10 +63,10 @@ export function ProfileBuddiesStrip({ userId }: { userId: string }) {
     <div className="vs-card mb-5">
       <div className="flex items-center justify-between mb-3">
         <p className="vs-counter text-[10px] text-text-dim tabular-nums">
-          BUDDIES · {count}
+          {t('buddyUi.buddiesLabel')} · {count}
         </p>
         <Link href="/buddies" className="font-mono text-[10px] text-purple hover:text-purple/85 transition-colors">
-          Bekijk alle →
+          {t('buddyUi.viewAll')} →
         </Link>
       </div>
       <div className="flex items-center gap-2 flex-wrap">

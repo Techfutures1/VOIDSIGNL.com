@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import ClipPlayer from './ClipPlayer'
 import { X, Heart, MessageCircle, Send } from 'lucide-react'
+import { useLang } from '@/lib/lang-context'
 
 export interface ClipUser {
   id: string
@@ -44,6 +45,7 @@ interface ClipModalProps {
 }
 
 export default function ClipModal({ clip, onClose }: ClipModalProps) {
+  const { t } = useLang()
   const [comments, setComments] = useState<ClipComment[]>([])
   const [newComment, setNewComment] = useState('')
   const [loading, setLoading] = useState(false)
@@ -138,7 +140,7 @@ export default function ClipModal({ clip, onClose }: ClipModalProps) {
             </span>
             {clip.is_cotw && (
               <span className="font-mono text-xs text-cyan ml-auto">
-                ★ Clip of the Week
+                ★ {t('clipsUi.cotwBadge')}
               </span>
             )}
           </div>
@@ -179,7 +181,7 @@ export default function ClipModal({ clip, onClose }: ClipModalProps) {
 
             {comments.length === 0 && (
               <p className="text-center text-text-dim/60 font-mono text-xs py-4">
-                Nog geen reacties.
+                {t('clipsUi.noComments')}
               </p>
             )}
           </div>
@@ -190,7 +192,7 @@ export default function ClipModal({ clip, onClose }: ClipModalProps) {
             type="text"
             value={newComment}
             onChange={e => setNewComment(e.target.value)}
-            placeholder="Reactie plaatsen..."
+            placeholder={t('clipsUi.commentPlaceholder')}
             maxLength={1000}
             className="flex-1 bg-void border border-border rounded-lg px-4 py-2.5 text-text text-sm font-mono placeholder-text-dim/60 focus:outline-none focus:border-purple transition-colors"
           />

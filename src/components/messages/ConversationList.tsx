@@ -2,6 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
+import { useLang } from '@/lib/lang-context'
 
 export interface ConversationItem {
   id: string
@@ -31,24 +32,26 @@ function isOnline(lastSeen?: string | null) {
   return Date.now() - new Date(lastSeen).getTime() < 90000
 }
 
-function timeAgo(date?: string | null) {
+function timeAgo(date: string | null | undefined, t: (key: string) => string) {
   if (!date) return ''
   const diff = Date.now() - new Date(date).getTime()
   const mins = Math.floor(diff / 60000)
-  if (mins < 1) return 'nu'
-  if (mins < 60) return `${mins}m`
-  if (mins < 1440) return `${Math.floor(mins / 60)}u`
-  return `${Math.floor(mins / 1440)}d`
+  if (mins < 1) return t('messages2.now')
+  if (mins < 60) return `${mins}${t('messages2.minutesShort')}`
+  if (mins < 1440) return `${Math.floor(mins / 60)}${t('messages2.hoursShort')}`
+  return `${Math.floor(mins / 1440)}${t('messages2.daysShort')}`
 }
 
 export default function ConversationList({ conversations, activeId, activeUsername }: ConversationListProps) {
+  const { t } = useLang()
+
   if (conversations.length === 0) {
     return (
       <div className="p-6 text-center">
         <p className="font-mono text-[10px] tracking-[0.2em] text-text-dim/60 uppercase mb-2">
-          Leeg
+          {t('messages2.empty')}
         </p>
-        <p className="text-text-dim text-xs">Nog geen gesprekken.</p>
+        <p className="text-text-dim text-xs">{t('messages2.noConversations')}</p>
       </div>
     )
   }
@@ -94,18 +97,18 @@ export default function ConversationList({ conversations, activeId, activeUserna
                     {conv.other_user.display_name ?? conv.other_user.username}
                   </span>
                   <span className="font-mono text-[10px] text-text-dim/60 flex-shrink-0 ml-2">
-                    {timeAgo(conv.last_message_at)}
+                    {timeAgo(conv.last_message_at, t)}
                   </span>
                 </div>
                 <div className="flex items-center justify-between mt-0.5">
                   <p className={`text-xs truncate ${
                     conv.unread_count > 0 ? 'text-text' : 'text-text-dim/60'
                   }`}>
-                    {conv.last_message_preview ?? 'Nog geen berichten'}
+                    {conv.last_message_preview ?? t('messages2.noMessagesYet')}
                   </p>
                   {conv.is_pending_outgoing ? (
                     <span className="font-mono text-[9px] uppercase tracking-widest px-1.5 py-0.5 rounded-full bg-warning/10 border border-warning/20 text-warning flex-shrink-0 ml-2 whitespace-nowrap">
-                      Wachtend
+                      {t('messages2.pending')}
                     </span>
                   ) : conv.unread_count > 0 ? (
                     <div className="w-5 h-5 rounded-full bg-purple flex items-center justify-center flex-shrink-0 ml-2">

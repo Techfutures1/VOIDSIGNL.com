@@ -1,5 +1,8 @@
+'use client'
+
 import Image from 'next/image'
 import Link from 'next/link'
+import { useLang } from '@/lib/lang-context'
 
 export interface CategoryCardData {
   id: string
@@ -25,6 +28,7 @@ function timeAgo(date: string) {
 }
 
 export default function CategoryCard({ category }: { category: CategoryCardData }) {
+  const { t } = useLang()
   return (
     <Link href={`/forums/${category.slug}`}>
       <div className="bg-surface border border-border rounded-xl p-5 hover:border-purple transition-colors duration-200 group">
@@ -43,7 +47,7 @@ export default function CategoryCard({ category }: { category: CategoryCardData 
               </p>
             )}
             <p className="font-mono text-[10px] text-text-dim/60">
-              {category.thread_count.toLocaleString()} threads
+              {category.thread_count.toLocaleString()} {t('forums2.threads')}
             </p>
           </div>
 

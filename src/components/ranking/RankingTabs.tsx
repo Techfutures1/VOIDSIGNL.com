@@ -1,16 +1,18 @@
 'use client'
 
+import { useLang } from '@/lib/lang-context'
+
 interface Tab {
   key: string
-  label: string
+  labelKey: string
   comingSoon?: boolean
 }
 
 const TABS: Tab[] = [
-  { key: 'global', label: 'Global' },
-  { key: 'clips', label: 'Clips' },
-  { key: 'coaching', label: 'Coaching' },
-  { key: 'clans', label: 'Clans' },
+  { key: 'global', labelKey: 'rankingUi.tabGlobal' },
+  { key: 'clips', labelKey: 'rankingUi.tabClips' },
+  { key: 'coaching', labelKey: 'rankingUi.tabCoaching' },
+  { key: 'clans', labelKey: 'rankingUi.tabClans' },
 ]
 
 interface RankingTabsProps {
@@ -19,6 +21,8 @@ interface RankingTabsProps {
 }
 
 export default function RankingTabs({ active, onChange }: RankingTabsProps) {
+  const { t } = useLang()
+
   return (
     <div className="flex gap-1 bg-surface border border-border rounded-xl p-1">
       {TABS.map(tab => (
@@ -34,9 +38,11 @@ export default function RankingTabs({ active, onChange }: RankingTabsProps) {
                 : 'text-text-dim hover:text-text'
           }`}
         >
-          {tab.label}
+          {t(tab.labelKey)}
           {tab.comingSoon && (
-            <span className="text-[8px] tracking-widest text-text-dim/60">SOON</span>
+            <span className="text-[8px] tracking-widest text-text-dim/60">
+              {t('rankingUi.soon')}
+            </span>
           )}
         </button>
       ))}

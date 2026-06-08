@@ -1,5 +1,8 @@
+'use client'
+
 import Link from 'next/link'
 import Image from 'next/image'
+import { useLang } from '@/lib/lang-context'
 
 export interface ThreadRowData {
   id: string
@@ -24,16 +27,17 @@ export interface ThreadRowData {
   } | null
 }
 
-function timeAgo(date: string) {
+function timeAgo(date: string, t: (key: string) => string) {
   const diff = Date.now() - new Date(date).getTime()
   const mins = Math.floor(diff / 60000)
-  if (mins < 1) return 'nu'
+  if (mins < 1) return t('forums2.time_now')
   if (mins < 60) return `${mins}m`
   if (mins < 1440) return `${Math.floor(mins / 60)}u`
   return `${Math.floor(mins / 1440)}d`
 }
 
 export default function ThreadRow({ thread, categorySlug }: { thread: ThreadRowData; categorySlug: string }) {
+  const { t } = useLang()
   const accentColor = thread.author?.accent_color ?? '#6B3FE0'
 
   return (
@@ -59,12 +63,12 @@ export default function ThreadRow({ thread, categorySlug }: { thread: ThreadRowD
           <div className="flex items-center gap-2 mb-0.5 flex-wrap">
             {thread.is_pinned && (
               <span className="font-mono text-[8px] uppercase tracking-widest px-1.5 py-0.5 rounded-full bg-purple/15 text-purple">
-                Gepind
+                {t('forums2.badge_pinned')}
               </span>
             )}
             {thread.is_locked && (
               <span className="font-mono text-[8px] uppercase tracking-widest px-1.5 py-0.5 rounded-full bg-text-dim/10 text-text-dim">
-                Gesloten
+                {t('forums2.badge_locked')}
               </span>
             )}
             <p className="font-mono text-sm font-bold text-text group-hover:text-purple transition-colors truncate">
@@ -76,23 +80,23 @@ export default function ThreadRow({ thread, categorySlug }: { thread: ThreadRowD
               {thread.author?.display_name ?? thread.author?.username}
             </span>
             <span className="font-mono text-[10px] text-text-dim/60">
-              {timeAgo(thread.created_at)}
+              {timeAgo(thread.created_at, t)}
             </span>
           </div>
         </div>
 
         <div className="text-right flex-shrink-0 hidden sm:block">
           <p className="font-mono text-xs text-text mb-0.5">
-            {thread.reply_count.toLocaleString()} replies
+            {thread.reply_count.toLocaleString()} {t('forums2.replies')}
           </p>
           <p className="font-mono text-[10px] text-text-dim/60">
-            {thread.view_count.toLocaleString()} views
+            {thread.view_count.toLocaleString()} {t('forums2.views')}
           </p>
         </div>
 
         <div className="text-right flex-shrink-0 min-w-[60px]">
           <p className="font-mono text-[10px] text-text-dim">
-            {timeAgo(thread.last_reply_at)}
+            {timeAgo(thread.last_reply_at, t)}
           </p>
           {thread.last_replier && (
             <p className="font-mono text-[9px] text-text-dim/60 truncate max-w-[60px]">

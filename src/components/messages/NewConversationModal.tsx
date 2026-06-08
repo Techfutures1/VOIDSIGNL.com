@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
+import { useLang } from '@/lib/lang-context'
 
 interface ProfileResult {
   id: string
@@ -21,6 +22,7 @@ interface NewConversationModalProps {
 
 export default function NewConversationModal({ open, onClose }: NewConversationModalProps) {
   const router = useRouter()
+  const { t } = useLang()
   const supabase = createClient()
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<ProfileResult[]>([])
@@ -87,13 +89,13 @@ export default function NewConversationModal({ open, onClose }: NewConversationM
         <div className="flex items-center justify-between px-5 py-4 border-b border-border">
           <div>
             <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-purple mb-0.5">
-              Berichten
+              {t('messages2.eyebrow')}
             </p>
-            <h2 className="font-mono text-base font-bold text-text">Nieuw gesprek</h2>
+            <h2 className="font-mono text-base font-bold text-text">{t('messages2.newConversation')}</h2>
           </div>
           <button
             onClick={onClose}
-            aria-label="Sluiten"
+            aria-label={t('messages2.close')}
             className="text-text-muted hover:text-text transition-colors duration-200 font-mono text-lg leading-none"
           >
             ✕
@@ -107,23 +109,23 @@ export default function NewConversationModal({ open, onClose }: NewConversationM
             value={query}
             onChange={(e) => handleChange(e.target.value)}
             onKeyDown={handleKey}
-            placeholder="Zoek op gebruikersnaam..."
+            placeholder={t('messages2.searchUsername')}
             className="w-full bg-void border border-border rounded-lg px-4 py-3 text-text text-sm font-mono placeholder-text-dim focus:outline-none focus:border-purple transition-[border-color] duration-200"
           />
         </div>
 
         <div className="max-h-80 overflow-y-auto">
           {searching && query && (
-            <p className="px-5 py-6 text-center font-mono text-xs text-text-dim">Zoeken...</p>
+            <p className="px-5 py-6 text-center font-mono text-xs text-text-dim">{t('messages2.searching')}</p>
           )}
           {!searching && query && results.length === 0 && (
             <p className="px-5 py-6 text-center font-mono text-xs text-text-dim">
-              Geen gebruikers gevonden.
+              {t('messages2.noUsersFound')}
             </p>
           )}
           {!query && (
             <p className="px-5 py-6 text-center font-mono text-xs text-text-dim">
-              Type een gebruikersnaam om te beginnen.
+              {t('messages2.typeUsername')}
             </p>
           )}
           {results.map((u) => (

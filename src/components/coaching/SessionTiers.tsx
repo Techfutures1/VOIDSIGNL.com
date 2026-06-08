@@ -1,5 +1,7 @@
 'use client'
 
+import { useLang } from '@/lib/lang-context'
+
 interface SessionTiersProps {
   onBook?: (tier: string) => void
   comingSoon?: boolean
@@ -11,14 +13,14 @@ const TIERS = [
     label: 'Basic',
     price: '€10',
     duration: '60 min',
-    features: ['1 game focus', 'Live coaching', 'Discord sessie'],
+    features: ['feature_one_game', 'feature_live_coaching', 'feature_discord'],
   },
   {
     key: 'standard',
     label: 'Standard',
     price: '€25',
     duration: '90 min',
-    features: ['1 game focus', 'Live coaching', 'VOD review', 'Discord sessie'],
+    features: ['feature_one_game', 'feature_live_coaching', 'feature_vod_review', 'feature_discord'],
     featured: true,
   },
   {
@@ -26,15 +28,16 @@ const TIERS = [
     label: 'Premium',
     price: '€50',
     duration: '120 min',
-    features: ['Meerdere games', 'Live coaching', 'VOD review', 'Persoonlijk plan', 'Discord sessie'],
+    features: ['feature_multiple_games', 'feature_live_coaching', 'feature_vod_review', 'feature_personal_plan', 'feature_discord'],
   },
 ]
 
 export default function SessionTiers({ onBook, comingSoon = true }: SessionTiersProps) {
+  const { t } = useLang()
   return (
     <div className="space-y-4">
       <p className="font-mono text-[10px] tracking-[0.2em] text-purple uppercase mb-4">
-        Sessie pakketten
+        {t('coachingUi.session_packages')}
       </p>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -48,7 +51,7 @@ export default function SessionTiers({ onBook, comingSoon = true }: SessionTiers
             {tier.featured && (
               <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                 <span className="font-mono text-[9px] uppercase tracking-widest px-3 py-1 rounded-full bg-purple text-white">
-                  Populair
+                  {t('coachingUi.popular')}
                 </span>
               </div>
             )}
@@ -63,7 +66,7 @@ export default function SessionTiers({ onBook, comingSoon = true }: SessionTiers
               {tier.features.map(f => (
                 <li key={f} className="flex items-center gap-2">
                   <span className="text-purple text-xs">→</span>
-                  <span className="text-text-dim text-xs">{f}</span>
+                  <span className="text-text-dim text-xs">{t(`coachingUi.${f}`)}</span>
                 </li>
               ))}
             </ul>
@@ -71,7 +74,7 @@ export default function SessionTiers({ onBook, comingSoon = true }: SessionTiers
             {comingSoon ? (
               <div className="w-full py-2.5 rounded-lg border border-border text-center">
                 <span className="font-mono text-[10px] text-text-dim/60 uppercase tracking-widest">
-                  Binnenkort
+                  {t('coachingUi.coming_soon')}
                 </span>
               </div>
             ) : (
@@ -83,7 +86,7 @@ export default function SessionTiers({ onBook, comingSoon = true }: SessionTiers
                     : 'border border-border text-text-dim hover:border-purple hover:text-text'
                 }`}
               >
-                Boeken
+                {t('coachingUi.book')}
               </button>
             )}
           </div>
@@ -92,7 +95,7 @@ export default function SessionTiers({ onBook, comingSoon = true }: SessionTiers
 
       {comingSoon && (
         <p className="text-center font-mono text-[10px] text-text-dim/60 mt-2">
-          Betaling via Stripe — binnenkort beschikbaar
+          {t('coachingUi.stripe_note')}
         </p>
       )}
     </div>

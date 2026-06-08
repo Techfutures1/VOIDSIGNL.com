@@ -7,6 +7,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase-browser'
+import { useLang } from '@/lib/lang-context'
 import { Users, UserPlus, Check } from 'lucide-react'
 import { Avatar } from '@/components/ui/avatar'
 
@@ -26,6 +27,7 @@ interface FriendRecsProps {
 }
 
 export function FriendRecs({ userId }: FriendRecsProps) {
+  const { t } = useLang()
   const supabase = createClient()
   const [recs, setRecs] = useState<Rec[]>([])
   const [loading, setLoading] = useState(true)
@@ -69,7 +71,7 @@ export function FriendRecs({ userId }: FriendRecsProps) {
   return (
     <div className="vs-card vs-lit">
       <p className="vs-label mb-3 flex items-center gap-1.5">
-        <Users size={11} className="text-cyan" /> WHO TO FOLLOW
+        <Users size={11} className="text-cyan" /> {t('widgets.whoToFollow')}
       </p>
       <ul className="space-y-3">
         {recs.map(r => {
@@ -103,7 +105,7 @@ export function FriendRecs({ userId }: FriendRecsProps) {
                   'bg-purple/15 text-purple-light hover:bg-purple/25 active:scale-90'
                 }`}
               >
-                {isFollowed ? <><Check size={10} /> Followed</> : <><UserPlus size={10} /> Follow</>}
+                {isFollowed ? <><Check size={10} /> {t('widgets.followed')}</> : <><UserPlus size={10} /> {t('widgets.follow')}</>}
               </button>
             </li>
           )

@@ -8,6 +8,7 @@ import MessageComposer from '@/components/messages/MessageComposer'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
+import { useLang } from '@/lib/lang-context'
 
 interface OtherUser {
   id: string
@@ -22,6 +23,7 @@ interface OtherUser {
 export default function ChatPage() {
   const params = useParams()
   const router = useRouter()
+  const { t } = useLang()
   const supabase = createClient()
   const username = (params?.username as string) ?? ''
 
@@ -59,7 +61,7 @@ export default function ChatPage() {
       })
       const json = await res.json().catch(() => ({}))
       if (!res.ok || !json.conversation_id) {
-        setStartError(json.error ?? `Gesprek niet beschikbaar (status ${res.status})`)
+        setStartError(json.error ?? t('messages2.unavailable').replace('{status}', String(res.status)))
         return
       }
 
@@ -165,8 +167,8 @@ export default function ChatPage() {
         new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime()) /
         86_400_000,
     )
-    if (diffDays === 0) return 'Vandaag'
-    if (diffDays === 1) return 'Gisteren'
+    if (diffDays === 0) return t('messages2.today')
+    if (diffDays === 1) return t('messages2.yesterday')
     if (diffDays < 7) {
       return d.toLocaleDateString('nl-NL', { weekday: 'long' })
     }
@@ -197,7 +199,7 @@ export default function ChatPage() {
         <Link
           href="/messages"
           className="text-text-dim hover:text-text transition-colors duration-200 md:hidden"
-          aria-label="Terug"
+          aria-label={t('messages2.back')}
         >
           <ArrowLeft size={18} />
         </Link>
@@ -230,7 +232,7 @@ export default function ChatPage() {
                 </p>
               </Link>
               <p className="font-mono text-[10px] text-text-dim">
-                {isOnline ? 'Online' : 'Offline'}
+                {isOnline ? t('messages2.online') : t('messages2.offline')}
               </p>
             </div>
           </>
@@ -252,17 +254,17 @@ export default function ChatPage() {
         ) : messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center">
             <p className="font-mono text-[10px] tracking-[0.2em] text-text-dim/60 uppercase mb-2">
-              {startError ? 'Fout' : 'Begin'}
+              {startError ? t('messages2.errorLabel') : t('messages2.startLabel')}
             </p>
             <p className="text-text-dim text-sm">
-              {startError ?? `Stuur een bericht naar ${otherUser?.display_name ?? otherUser?.username}.`}
+              {startError ?? t('messages2.sendFirstMessage').replace('{name}', otherUser?.display_name ?? otherUser?.username ?? '')}
             </p>
             {startError && (
               <button
                 onClick={initChat}
                 className="mt-4 px-4 py-2 bg-purple text-white font-mono text-xs uppercase tracking-wider rounded-lg hover:bg-purple/85 transition-colors duration-200"
               >
-                Opnieuw proberen
+                {t('messages2.retry')}
               </button>
             )}
           </div>
@@ -293,10 +295,10 @@ export default function ChatPage() {
       {convStatus === 'pending' && otherUser && requestFrom === currentUserId && (
         <div className="px-4 py-3 bg-warning/8 border-t border-warning/25">
           <p className="text-warning text-xs text-center font-mono">
-            ⏳ Wachtend op acceptatie van {otherUser.display_name ?? otherUser.username}
+            ⏳ {t('messages2.waitingFor').replace('{name}', otherUser.display_name ?? otherUser.username)}
           </p>
           <p className="text-text-dim text-[10px] text-center font-mono mt-1">
-            Je kunt blijven typen — zodra ze accepteren komt het gesprek bij hen aan.
+            {t('messages2.waitingHint')}
           </p>
         </div>
       )}
@@ -304,20 +306,20 @@ export default function ChatPage() {
       {convStatus === 'pending' && otherUser && requestFrom !== currentUserId && (
         <div className="px-4 py-3 bg-purple/10 border-t border-purple/30">
           <p className="text-text-dim text-xs text-center font-mono mb-2">
-            Berichtverzoek van {otherUser.display_name ?? otherUser.username}
+            {t('messages2.requestFrom').replace('{name}', otherUser.display_name ?? otherUser.username)}
           </p>
           <div className="flex gap-2">
             <button
               onClick={() => handleRequestAction('accept')}
               className="flex-1 py-2 bg-purple text-white font-mono text-xs uppercase tracking-wider rounded-lg hover:bg-purple/85 transition-colors duration-200"
             >
-              Accepteren
+              {t('messages2.accept')}
             </button>
             <button
               onClick={() => handleRequestAction('block')}
               className="flex-1 py-2 border border-border text-text-dim font-mono text-xs uppercase tracking-wider rounded-lg hover:border-danger hover:text-danger transition-colors duration-200"
             >
-              Weigeren
+              {t('messages2.reject')}
             </button>
           </div>
         </div>

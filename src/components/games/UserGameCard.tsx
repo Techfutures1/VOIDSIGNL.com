@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { X } from 'lucide-react'
 import { BrandSelect } from '@/components/ui/BrandSelect'
+import { useLang } from '@/lib/lang-context'
 
 const RANK_SETS: Record<string, string[]> = {
   valorant: ['Iron 1','Iron 2','Iron 3','Bronze 1','Bronze 2','Bronze 3','Silver 1','Silver 2','Silver 3','Gold 1','Gold 2','Gold 3','Platinum 1','Platinum 2','Platinum 3','Diamond 1','Diamond 2','Diamond 3','Ascendant 1','Ascendant 2','Ascendant 3','Immortal 1','Immortal 2','Immortal 3','Radiant'],
@@ -38,6 +39,7 @@ interface UserGameCardProps {
 }
 
 export default function UserGameCard({ userGame, onRemove, onUpdateRank, isOwnProfile }: UserGameCardProps) {
+  const { t } = useLang()
   const [editing, setEditing] = useState(false)
   const [rank, setRank] = useState(userGame.rank ?? '')
   const { game } = userGame
@@ -60,7 +62,7 @@ export default function UserGameCard({ userGame, onRemove, onUpdateRank, isOwnPr
       {userGame.is_main && (
         <div className="absolute top-2 left-2 z-10">
           <span className="font-mono text-[8px] uppercase tracking-widest px-2 py-0.5 rounded-full bg-purple text-white">
-            Main
+            {t('games2.main_badge')}
           </span>
         </div>
       )}
@@ -89,9 +91,9 @@ export default function UserGameCard({ userGame, onRemove, onUpdateRank, isOwnPr
               value={rank}
               onChange={setRank}
               size="sm"
-              placeholder="Rank selecteren"
+              placeholder={t('games2.rank_select')}
               options={[
-                { value: '', label: 'Rank selecteren' },
+                { value: '', label: t('games2.rank_select') },
                 ...rankOptions.map(r => ({ value: r, label: r })),
               ]}
             />
@@ -116,7 +118,7 @@ export default function UserGameCard({ userGame, onRemove, onUpdateRank, isOwnPr
                   : 'text-text-dim/60 hover:text-text-dim'
               } ${isOwnProfile ? 'cursor-pointer' : 'cursor-default'}`}
             >
-              {userGame.rank ?? (isOwnProfile ? '+ Rank' : '—')}
+              {userGame.rank ?? (isOwnProfile ? t('games2.add_rank') : '—')}
             </button>
             {isOwnProfile && (
               <button

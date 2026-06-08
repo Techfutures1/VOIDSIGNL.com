@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase-browser'
+import { useLang } from '@/lib/lang-context'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Circle, Users, Wifi } from 'lucide-react'
@@ -19,6 +20,7 @@ interface OnlineFriend {
 const ONLINE_THRESHOLD_MS = 5 * 60 * 1000
 
 export function OnlineFriends({ userId }: { userId: string }) {
+  const { t } = useLang()
   const supabase = createClient()
   const [friends, setFriends] = useState<OnlineFriend[]>([])
   const [loading, setLoading] = useState(true)
@@ -59,8 +61,8 @@ export function OnlineFriends({ userId }: { userId: string }) {
 
   function getStatusText(lastSeen: string) {
     const diff = Date.now() - new Date(lastSeen).getTime()
-    if (diff < 60_000) return 'just now'
-    return `${Math.floor(diff / 60_000)}m ago`
+    if (diff < 60_000) return t('widgets.justNow')
+    return `${Math.floor(diff / 60_000)}${t('widgets.minutesAgo')}`
   }
 
   if (loading) return null
@@ -70,13 +72,13 @@ export function OnlineFriends({ userId }: { userId: string }) {
       <div className="flex items-center justify-between mb-3">
         <p className="vs-label flex items-center gap-1.5">
           <Wifi size={10} className="text-success" />
-          ONLINE FRIENDS
+          {t('widgets.onlineFriends')}
         </p>
         <span className="text-[10px] text-text-dim">{friends.length}</span>
       </div>
 
       {friends.length === 0 ? (
-        <p className="text-xs text-text-dim py-2">No friends online right now</p>
+        <p className="text-xs text-text-dim py-2">{t('widgets.noFriendsOnline')}</p>
       ) : (
         <div className="space-y-2">
           {friends.slice(0, 10).map(friend => (
@@ -105,7 +107,7 @@ export function OnlineFriends({ userId }: { userId: string }) {
             </Link>
           ))}
           {friends.length > 10 && (
-            <p className="text-[10px] text-text-dim text-center pt-1">+{friends.length - 10} more online</p>
+            <p className="text-[10px] text-text-dim text-center pt-1">+{friends.length - 10} {t('widgets.moreOnline')}</p>
           )}
         </div>
       )}

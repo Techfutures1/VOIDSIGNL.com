@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase-browser'
+import { useLang } from '@/lib/lang-context'
 import type { Profile, Game } from '@/types'
 import Link from 'next/link'
 import {
@@ -66,6 +67,7 @@ interface BuddyMatch {
 }
 
 export default function BuddyCoachPage() {
+  const { t } = useLang()
   const supabase = createClient()
   const [tab, setTab] = useState<PageTab>('buddy')
   const [userId, setUserId] = useState<string | null>(null)
@@ -263,7 +265,7 @@ export default function BuddyCoachPage() {
       completed: 'bg-success/15 text-success',
       cancelled: 'bg-danger/15 text-danger',
     }
-    return <span className={`text-[9px] px-2 py-0.5 rounded ${styles[status] || 'bg-text-dim/15 text-text-dim'}`}>{status}</span>
+    return <span className={`text-[9px] px-2 py-0.5 rounded ${styles[status] || 'bg-text-dim/15 text-text-dim'}`}>{t(`buddyCoach.status_${status}`)}</span>
   }
 
   if (loading) return <div className="flex items-center justify-center h-64"><ScopeSpinner size={28} /></div>
@@ -273,26 +275,26 @@ export default function BuddyCoachPage() {
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-xl font-semibold tracking-wide flex items-center gap-2">
-          <Users size={20} className="text-purple" /> Buddy & Coach
+          <Users size={20} className="text-purple" /> {t('buddyCoach.title')}
         </h1>
-        <p className="text-sm text-text-dim mt-0.5">Find a gaming buddy or level up with a coach</p>
+        <p className="text-sm text-text-dim mt-0.5">{t('buddyCoach.subtitle')}</p>
       </div>
 
       {/* Tabs */}
       <div className="flex items-center gap-1.5 mb-6 overflow-x-auto pb-1">
         {[
-          { id: 'buddy' as PageTab, label: 'Find Buddy', icon: UserPlus, count: buddyMatches.length },
-          { id: 'coaches' as PageTab, label: 'Coaches', icon: GraduationCap, count: coaches.length },
-          { id: 'my-sessions' as PageTab, label: 'My Sessions', icon: Calendar, count: sessions.length },
-        ].map(t => (
+          { id: 'buddy' as PageTab, label: t('buddyCoach.tab_buddy'), icon: UserPlus, count: buddyMatches.length },
+          { id: 'coaches' as PageTab, label: t('buddyCoach.tab_coaches'), icon: GraduationCap, count: coaches.length },
+          { id: 'my-sessions' as PageTab, label: t('buddyCoach.tab_my_sessions'), icon: Calendar, count: sessions.length },
+        ].map(tabItem => (
           <button
-            key={t.id}
-            onClick={() => setTab(t.id)}
-            data-active={tab === t.id}
+            key={tabItem.id}
+            onClick={() => setTab(tabItem.id)}
+            data-active={tab === tabItem.id}
             className="vs-tab shrink-0"
           >
-            <t.icon size={13} /> {t.label}
-            {t.count > 0 && <span className="text-[10px] opacity-60 tabular-nums">({t.count})</span>}
+            <tabItem.icon size={13} /> {tabItem.label}
+            {tabItem.count > 0 && <span className="text-[10px] opacity-60 tabular-nums">({tabItem.count})</span>}
           </button>
         ))}
       </div>
@@ -303,8 +305,8 @@ export default function BuddyCoachPage() {
           {/* Toggle */}
           <div className="vs-card mb-5 flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium">Looking for a buddy?</p>
-              <p className="text-xs text-text-dim mt-0.5">Toggle this on so others can find you</p>
+              <p className="text-sm font-medium">{t('buddyCoach.looking_title')}</p>
+              <p className="text-xs text-text-dim mt-0.5">{t('buddyCoach.looking_desc')}</p>
             </div>
             <button onClick={toggleBuddyLooking}
               className={`w-12 h-6 rounded-full transition-colors relative ${isLookingForBuddy ? 'bg-cyan' : 'bg-surface-2'}`}>
@@ -316,8 +318,8 @@ export default function BuddyCoachPage() {
           {buddyMatches.length === 0 ? (
             <EmptyState
               icon={UserPlus}
-              title="No buddies looking right now"
-              description={'Turn on "Looking for buddy" and check back later.'}
+              title={t('buddyCoach.buddy_empty_title')}
+              description={t('buddyCoach.buddy_empty_desc')}
             />
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -351,10 +353,10 @@ export default function BuddyCoachPage() {
                   </div>
                   <div className="flex gap-2 mt-3">
                     <Link href={`/messages`} className="vs-btn vs-btn-cyan text-[10px] px-3 py-1.5 flex-1 text-center">
-                      <MessageCircle size={11} /> Message
+                      <MessageCircle size={11} /> {t('buddyCoach.message')}
                     </Link>
                     <Link href={`/profile/${match.username}`} className="vs-btn vs-btn-ghost text-[10px] px-3 py-1.5 flex-1 text-center">
-                      Profile
+                      {t('buddyCoach.profile')}
                     </Link>
                   </div>
                 </div>
@@ -374,7 +376,7 @@ export default function BuddyCoachPage() {
               data-active={!coachGameFilter}
               className="vs-tab shrink-0"
             >
-              All Games
+              {t('buddyCoach.all_games')}
             </button>
             {games.slice(0, 6).map(g => (
               <button
@@ -391,8 +393,8 @@ export default function BuddyCoachPage() {
           {coaches.length === 0 ? (
             <EmptyState
               icon={GraduationCap}
-              title="No coaches available yet"
-              description="Coaches need admin approval before they appear here."
+              title={t('buddyCoach.coaches_empty_title')}
+              description={t('buddyCoach.coaches_empty_desc')}
             />
           ) : (
             <div className="space-y-3">
@@ -414,7 +416,7 @@ export default function BuddyCoachPage() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
                           <Link href={`/profile/${p?.username}`} className="text-sm font-semibold hover:text-purple transition-colors">{p?.display_name || p?.username}</Link>
-                          <span className="vs-badge vs-badge-purple text-[8px]"><GraduationCap size={8} /> Coach</span>
+                          <span className="vs-badge vs-badge-purple text-[8px]"><GraduationCap size={8} /> {t('buddyCoach.coach_badge')}</span>
                           {coach.avg_rating > 0 && (
                             <span className="flex items-center gap-0.5 text-[10px] text-yellow-400 tabular-nums">
                               <Star size={10} fill="currentColor" /> {coach.avg_rating.toFixed(1)}
@@ -431,16 +433,16 @@ export default function BuddyCoachPage() {
                           ))}
                         </div>
                         <div className="flex items-center gap-3 text-[10px] text-text-dim">
-                          <span className="tabular-nums">{coach.total_sessions} sessions</span>
+                          <span className="tabular-nums">{coach.total_sessions} {t('buddyCoach.sessions_suffix')}</span>
                           {coach.languages.length > 0 && <span><Globe size={9} className="inline" /> {coach.languages.join(', ')}</span>}
                         </div>
                       </div>
                       <div className="text-right shrink-0">
                         <p className="text-lg font-bold text-cyan tabular-nums">{tier.price}</p>
-                        <p className="vs-counter text-[9px] text-text-dim">PER SESSION</p>
+                        <p className="vs-counter text-[9px] text-text-dim">{t('buddyCoach.per_session')}</p>
                         <button onClick={() => setBookingCoach(coach)}
                           className="vs-btn vs-btn-primary text-[10px] px-4 py-1.5 mt-2">
-                          Book
+                          {t('buddyCoach.book')}
                         </button>
                       </div>
                     </div>
@@ -458,9 +460,9 @@ export default function BuddyCoachPage() {
           {sessions.length === 0 ? (
             <EmptyState
               icon={Calendar}
-              title="No sessions yet"
-              description="Book a coach to get started."
-              cta={{ label: 'Browse coaches', onClick: () => setTab('coaches') }}
+              title={t('buddyCoach.sessions_empty_title')}
+              description={t('buddyCoach.sessions_empty_desc')}
+              cta={{ label: t('buddyCoach.browse_coaches'), onClick: () => setTab('coaches') }}
             />
           ) : (
             <div className="space-y-3">
@@ -474,7 +476,7 @@ export default function BuddyCoachPage() {
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-medium">
-                          {isCoach ? `Coach: ${coachProfile?.display_name || coachProfile?.username}` : 'Your session'}
+                          {isCoach ? `${t('buddyCoach.coach_label')}: ${coachProfile?.display_name || coachProfile?.username}` : t('buddyCoach.your_session')}
                         </span>
                         {getStatusBadge(session.status)}
                         {session.game && <span className="vs-badge vs-badge-purple text-[8px]">{(session.game as any)?.name}</span>}
@@ -483,7 +485,7 @@ export default function BuddyCoachPage() {
                     </div>
                     {session.notes && <p className="text-xs text-text-muted mb-2">{session.notes}</p>}
                     <div className="flex items-center gap-3 text-[10px] text-text-dim">
-                      <span>{tier.label} tier</span>
+                      <span>{t(`buddyCoach.tier_${session.tier}`)} {t('buddyCoach.tier_suffix')}</span>
                       {session.scheduled_at && (
                         <span><Calendar size={9} className="inline" /> {new Date(session.scheduled_at).toLocaleString('en', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
                       )}
@@ -493,15 +495,15 @@ export default function BuddyCoachPage() {
                     <div className="flex gap-2 mt-3">
                       {session.status === 'pending' && (
                         <>
-                          <button onClick={() => updateSessionStatus(session.id, 'confirmed')} className="vs-btn vs-btn-cyan text-[10px] px-3 py-1.5"><Check size={11} /> Confirm</button>
-                          <button onClick={() => updateSessionStatus(session.id, 'cancelled')} className="vs-btn vs-btn-ghost text-[10px] px-3 py-1.5"><X size={11} /> Cancel</button>
+                          <button onClick={() => updateSessionStatus(session.id, 'confirmed')} className="vs-btn vs-btn-cyan text-[10px] px-3 py-1.5"><Check size={11} /> {t('buddyCoach.confirm')}</button>
+                          <button onClick={() => updateSessionStatus(session.id, 'cancelled')} className="vs-btn vs-btn-ghost text-[10px] px-3 py-1.5"><X size={11} /> {t('buddyCoach.cancel')}</button>
                         </>
                       )}
                       {session.status === 'confirmed' && (
-                        <button onClick={() => updateSessionStatus(session.id, 'completed')} className="vs-btn vs-btn-primary text-[10px] px-3 py-1.5"><Check size={11} /> Mark Complete</button>
+                        <button onClick={() => updateSessionStatus(session.id, 'completed')} className="vs-btn vs-btn-primary text-[10px] px-3 py-1.5"><Check size={11} /> {t('buddyCoach.mark_complete')}</button>
                       )}
                       {session.status === 'completed' && session.student_id === userId && (
-                        <button onClick={() => setReviewSession(session)} className="vs-btn vs-btn-ghost text-[10px] px-3 py-1.5"><Star size={11} /> Leave Review</button>
+                        <button onClick={() => setReviewSession(session)} className="vs-btn vs-btn-ghost text-[10px] px-3 py-1.5"><Star size={11} /> {t('buddyCoach.leave_review')}</button>
                       )}
                     </div>
                   </div>
@@ -517,7 +519,7 @@ export default function BuddyCoachPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setBookingCoach(null)}>
           <div className="bg-surface border border-border rounded-xl w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto animate-slide-up vs-lit" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between p-4 border-b border-border sticky top-0 bg-surface z-10">
-              <h3 className="text-sm font-medium flex items-center gap-2"><GraduationCap size={16} className="text-purple" /> Book Session</h3>
+              <h3 className="text-sm font-medium flex items-center gap-2"><GraduationCap size={16} className="text-purple" /> {t('buddyCoach.book_session')}</h3>
               <button onClick={() => setBookingCoach(null)} className="text-text-dim hover:text-text"><X size={16} /></button>
             </div>
             <div className="p-4 space-y-4">
@@ -534,33 +536,33 @@ export default function BuddyCoachPage() {
                   <p className="text-sm font-medium">{(bookingCoach.profile as any)?.display_name || (bookingCoach.profile as any)?.username}</p>
                   {bookingCoach.avg_rating > 0 && (
                     <p className="text-[10px] text-yellow-400 tabular-nums">
-                      <Star size={9} fill="currentColor" className="inline" /> {bookingCoach.avg_rating.toFixed(1)} ({bookingCoach.review_count} reviews)
+                      <Star size={9} fill="currentColor" className="inline" /> {bookingCoach.avg_rating.toFixed(1)} ({bookingCoach.review_count} {t('buddyCoach.reviews_suffix')})
                     </p>
                   )}
                 </div>
               </div>
 
               <div>
-                <label className="vs-label block mb-2">SESSION TIER</label>
+                <label className="vs-label block mb-2">{t('buddyCoach.session_tier_label')}</label>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   {Object.entries(TIERS).map(([key, val]) => (
                     <button key={key} onClick={() => setBookingTier(key)}
                       className={`py-3 rounded-lg text-center border transition-colors duration-200 ${bookingTier === key ? 'border-purple bg-purple/10 text-purple' : 'border-border bg-surface text-text-dim hover:border-border-hover'}`}>
                       <p className="text-lg font-bold">{val.price}</p>
-                      <p className="text-[10px]">{val.label}</p>
+                      <p className="text-[10px]">{t(`buddyCoach.tier_${key}`)}</p>
                     </button>
                   ))}
                 </div>
               </div>
 
               <div>
-                <label className="vs-label block mb-1">GAME</label>
+                <label className="vs-label block mb-1">{t('buddyCoach.game_label')}</label>
                 <BrandSelect
                   value={bookingGame}
                   onChange={setBookingGame}
-                  placeholder="Select game..."
+                  placeholder={t('buddyCoach.select_game')}
                   options={[
-                    { value: '', label: 'Select game...' },
+                    { value: '', label: t('buddyCoach.select_game') },
                     ...games.map(g => ({ value: g.id, label: g.name })),
                   ]}
                 />
@@ -568,24 +570,24 @@ export default function BuddyCoachPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="vs-label block mb-1">DATE</label>
+                  <label className="vs-label block mb-1">{t('buddyCoach.date_label')}</label>
                   <input type="date" value={bookingDate} onChange={e => setBookingDate(e.target.value)} className="vs-input text-sm" />
                 </div>
                 <div>
-                  <label className="vs-label block mb-1">TIME</label>
+                  <label className="vs-label block mb-1">{t('buddyCoach.time_label')}</label>
                   <input type="time" value={bookingTime} onChange={e => setBookingTime(e.target.value)} className="vs-input text-sm" />
                 </div>
               </div>
 
               <div>
-                <label className="vs-label block mb-1">NOTES (OPTIONAL)</label>
-                <textarea value={bookingNotes} onChange={e => setBookingNotes(e.target.value)} className="vs-input text-sm resize-none min-h-[60px]" placeholder="What do you want to work on?" maxLength={500} />
+                <label className="vs-label block mb-1">{t('buddyCoach.notes_label')}</label>
+                <textarea value={bookingNotes} onChange={e => setBookingNotes(e.target.value)} className="vs-input text-sm resize-none min-h-[60px]" placeholder={t('buddyCoach.notes_placeholder')} maxLength={500} />
               </div>
 
               <button onClick={bookSession} disabled={booking} className="vs-btn vs-btn-primary w-full disabled:opacity-40">
-                {booking ? <div className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" /> : `Book for ${TIERS[bookingTier as keyof typeof TIERS].price}`}
+                {booking ? <div className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" /> : `${t('buddyCoach.book_for')} ${TIERS[bookingTier as keyof typeof TIERS].price}`}
               </button>
-              <p className="text-[10px] text-text-dim text-center">Payment integration coming soon — sessions are free during beta</p>
+              <p className="text-[10px] text-text-dim text-center">{t('buddyCoach.beta_note')}</p>
             </div>
           </div>
         </div>
@@ -596,12 +598,12 @@ export default function BuddyCoachPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setReviewSession(null)}>
           <div className="bg-surface border border-border rounded-xl w-full max-w-sm mx-4 max-h-[85vh] overflow-y-auto animate-slide-up vs-lit" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between p-4 border-b border-border sticky top-0 bg-surface z-10">
-              <h3 className="text-sm font-medium flex items-center gap-2"><Star size={16} className="text-yellow-400" /> Leave Review</h3>
+              <h3 className="text-sm font-medium flex items-center gap-2"><Star size={16} className="text-yellow-400" /> {t('buddyCoach.leave_review')}</h3>
               <button onClick={() => setReviewSession(null)} className="text-text-dim hover:text-text"><X size={16} /></button>
             </div>
             <div className="p-4 space-y-4">
               <div>
-                <label className="vs-label block mb-2">RATING</label>
+                <label className="vs-label block mb-2">{t('buddyCoach.rating_label')}</label>
                 <div className="flex gap-2">
                   {[1, 2, 3, 4, 5].map(n => (
                     <button key={n} onClick={() => setReviewRating(n)}
@@ -613,11 +615,11 @@ export default function BuddyCoachPage() {
                 </div>
               </div>
               <div>
-                <label className="vs-label block mb-1">REVIEW (OPTIONAL)</label>
+                <label className="vs-label block mb-1">{t('buddyCoach.review_label')}</label>
                 <textarea value={reviewText} onChange={e => setReviewText(e.target.value)}
-                  className="vs-input text-sm resize-none min-h-[80px]" placeholder="How was your session?" maxLength={500} />
+                  className="vs-input text-sm resize-none min-h-[80px]" placeholder={t('buddyCoach.review_placeholder')} maxLength={500} />
               </div>
-              <button onClick={submitReview} className="vs-btn vs-btn-primary w-full">Submit Review</button>
+              <button onClick={submitReview} className="vs-btn vs-btn-primary w-full">{t('buddyCoach.submit_review')}</button>
             </div>
           </div>
         </div>

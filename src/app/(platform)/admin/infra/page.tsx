@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase-browser'
 import { Shield, RefreshCw, ArrowLeft, Check, X } from 'lucide-react'
+import { useLang } from '@/lib/lang-context'
 
 interface InfraCheck {
   id: string
@@ -21,32 +22,24 @@ interface InfraCheck {
 
 interface AutoCheck {
   key: string
-  label: string
   category: string
-  description: string
   check: () => Promise<boolean>
 }
 
 const AUTO_CHECKS: AutoCheck[] = [
   {
     key: 'env_supabase_url',
-    label: 'NEXT_PUBLIC_SUPABASE_URL aanwezig',
     category: 'security',
-    description: 'Supabase URL is geconfigureerd als environment variable.',
     check: async () => !!process.env.NEXT_PUBLIC_SUPABASE_URL,
   },
   {
     key: 'env_supabase_anon',
-    label: 'NEXT_PUBLIC_SUPABASE_ANON_KEY aanwezig',
     category: 'security',
-    description: 'Supabase anon key is geconfigureerd.',
     check: async () => !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   },
   {
     key: 'security_headers',
-    label: 'Security headers actief',
     category: 'security',
-    description: 'X-Frame-Options, CSP en andere security headers zijn ingesteld in next.config.',
     check: async () => {
       try {
         const res = await fetch('/api/health', { cache: 'no-store' })
@@ -58,19 +51,12 @@ const AUTO_CHECKS: AutoCheck[] = [
   },
   {
     key: 'rls_active',
-    label: 'RLS actief op alle tabellen',
     category: 'security',
-    description: 'Row Level Security beschermt alle database tabellen (bevestigd in MD1 audit).',
     check: async () => true,
   },
 ]
 
-const CATEGORY_LABELS: Record<string, string> = {
-  security: 'Beveiliging',
-  auth: 'Authenticatie',
-  infrastructure: 'Infrastructure',
-  monitoring: 'Monitoring',
-}
+const CATEGORY_KEYS = ['security', 'auth', 'infrastructure', 'monitoring']
 
 const CATEGORY_COLORS: Record<string, string> = {
   security: '#6B3FE0',
@@ -80,6 +66,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 }
 
 export default function InfraPage() {
+  const { t } = useLang()
   const supabase = createClient()
   const router = useRouter()
   const [authorized, setAuthorized] = useState(false)
@@ -155,8 +142,8 @@ export default function InfraPage() {
     ...AUTO_CHECKS.map<InfraCheck>(ac => ({
       id: ac.key,
       key: ac.key,
-      label: ac.label,
-      description: ac.description,
+      label: t(`adminManage.autoCheck_${ac.key}_label`),
+      description: t(`adminManage.autoCheck_${ac.key}_desc`),
       category: ac.category,
       type: 'auto',
       is_done: autoResults[ac.key] ?? false,
@@ -167,7 +154,7 @@ export default function InfraPage() {
     ...checks,
   ]
 
-  const grouped = Object.keys(CATEGORY_LABELS).reduce((acc, cat) => {
+  const grouped = CATEGORY_KEYS.reduce((acc, cat) => {
     acc[cat] = allChecks.filter(c => c.category === cat)
     return acc
   }, {} as Record<string, InfraCheck[]>)
@@ -182,23 +169,23 @@ export default function InfraPage() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <Link href="/admin" className="inline-flex items-center gap-1.5 text-xs text-text-dim hover:text-text mb-3">
-            <ArrowLeft size={12} /> Terug naar Admin
+            <ArrowLeft size={12} /> {t('adminManage.backToAdmin')}
           </Link>
           <p className="font-mono text-[10px] tracking-[0.2em] text-purple uppercase mb-1">
-            Infrastructure
+            {t('adminManage.infraEyebrow')}
           </p>
           <h1 className="text-xl font-semibold tracking-wide flex items-center gap-2">
-            <Shield size={20} className="text-purple" /> Security Status
+            <Shield size={20} className="text-purple" /> {t('adminManage.securityStatusTitle')}
           </h1>
           <p className="text-sm text-text-dim mt-1">
-            Platform gereedheid voor productie op schaal
+            {t('adminManage.infraSubtitle')}
           </p>
         </div>
         <button
           onClick={runAutoChecks}
           className="px-4 py-2 bg-surface border border-border rounded-lg font-mono text-xs text-text-dim hover:border-purple hover:text-text transition-colors duration-200 flex items-center gap-2"
         >
-          <RefreshCw size={12} /> Hercheck
+          <RefreshCw size={12} /> {t('adminManage.recheck')}
         </button>
       </div>
 
@@ -206,10 +193,10 @@ export default function InfraPage() {
       <div className="bg-surface border border-border rounded-xl p-5">
         <div className="flex items-center justify-between mb-3">
           <span className="font-mono text-xs text-text-dim uppercase tracking-widest">
-            Gereedheid
+            {t('adminManage.readiness')}
           </span>
           <span className="font-mono text-sm text-text">
-            {totalDone}/{totalCount} voltooid
+            {totalDone}/{totalCount} {t('adminManage.completed')}
           </span>
         </div>
         <div className="w-full h-2 bg-void rounded-full overflow-hidden">
@@ -225,7 +212,7 @@ export default function InfraPage() {
           <span className="font-mono text-xs text-text-dim">{pct}%</span>
           {lastChecked && (
             <span className="text-[10px] text-text-dim/60">
-              Laatste check: {lastChecked}
+              {t('adminManage.lastCheck')}: {lastChecked}
             </span>
           )}
         </div>
@@ -243,7 +230,7 @@ export default function InfraPage() {
                 className="font-mono text-xs uppercase tracking-[0.15em]"
                 style={{ color: CATEGORY_COLORS[cat] }}
               >
-                {CATEGORY_LABELS[cat]}
+                {t(`adminManage.category_${cat}`)}
               </span>
               <span className="text-text-dim/60 font-mono text-xs">
                 {doneCat}/{items.length}
@@ -298,7 +285,7 @@ export default function InfraPage() {
                             : 'border-border text-text-dim/70'
                         }`}
                       >
-                        {check.type === 'auto' ? 'Auto' : 'Handmatig'}
+                        {check.type === 'auto' ? t('adminManage.typeAuto') : t('adminManage.typeManual')}
                       </span>
                     </div>
                     <p className="text-text-dim text-xs mt-1 leading-relaxed">
@@ -306,12 +293,12 @@ export default function InfraPage() {
                     </p>
                     {check.is_done && check.done_at && check.type === 'manual' && (
                       <p className="text-text-dim/60 text-[10px] mt-1 font-mono">
-                        Afgevinkt op {new Date(check.done_at).toLocaleString('nl-NL')}
+                        {t('adminManage.checkedOff')} {new Date(check.done_at).toLocaleString('nl-NL')}
                       </p>
                     )}
                     {check.type === 'auto' && lastChecked && (
                       <p className="text-text-dim/60 text-[10px] mt-1 font-mono">
-                        Gecheckt: {lastChecked}
+                        {t('adminManage.checkedAt')}: {lastChecked}
                       </p>
                     )}
                   </div>
@@ -326,14 +313,13 @@ export default function InfraPage() {
       {pct < 100 && (
         <div className="bg-purple/8 border border-purple/20 rounded-xl p-5">
           <p className="font-mono text-xs text-purple uppercase tracking-widest mb-2">
-            Prioriteit
+            {t('adminManage.priority')}
           </p>
           <p className="text-text-dim text-sm leading-relaxed">
-            Voor je live gaat met echte gebruikers: zorg minimaal dat{' '}
-            <span className="text-text">Cloudflare</span>,{' '}
-            <span className="text-text">rate limiting</span> en{' '}
-            <span className="text-text">Supabase betaald plan</span> groen zijn.
-            Die drie beschermen je platform op het moment dat er verkeer op komt.
+            {t('adminManage.priorityIntro')}{' '}
+            <span className="text-text">{t('adminManage.priorityItem1')}</span>,{' '}
+            <span className="text-text">{t('adminManage.priorityItem2')}</span> {t('adminManage.priorityAnd')}{' '}
+            <span className="text-text">{t('adminManage.priorityItem3')}</span> {t('adminManage.priorityOutro')}
           </p>
         </div>
       )}

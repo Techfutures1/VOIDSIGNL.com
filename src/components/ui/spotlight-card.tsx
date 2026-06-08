@@ -7,6 +7,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase-browser'
+import { useLang } from '@/lib/lang-context'
 import { Sparkles, Star } from 'lucide-react'
 import { Avatar } from '@/components/ui/avatar'
 
@@ -21,6 +22,7 @@ interface FeaturedProfile {
 }
 
 export function SpotlightCard() {
+  const { t } = useLang()
   const supabase = createClient()
   const [profile, setProfile] = useState<FeaturedProfile | null>(null)
   const [loading, setLoading] = useState(true)
@@ -79,7 +81,7 @@ export function SpotlightCard() {
         />
         <div className="flex-1 min-w-0">
           <p className="vs-counter text-[10px] tabular-nums text-purple-light flex items-center gap-1">
-            <Sparkles size={10} /> SPOTLIGHT · THIS WEEK
+            <Sparkles size={10} /> {t('widgets.spotlightThisWeek')}
           </p>
           <h3 className="text-lg font-semibold tracking-wide mt-1 truncate flex items-center gap-2">
             {profile.display_name || profile.username}

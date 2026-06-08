@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Repeat2 } from 'lucide-react'
+import { useLang } from '@/lib/lang-context'
 
 interface RepostModalProps {
   postId: string
@@ -10,6 +11,7 @@ interface RepostModalProps {
 }
 
 export default function RepostModal({ postId, onClose, onSuccess }: RepostModalProps) {
+  const { t } = useLang()
   const [comment, setComment] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -36,13 +38,13 @@ export default function RepostModal({ postId, onClose, onSuccess }: RepostModalP
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-void/90" onClick={onClose} />
       <div className="relative z-10 w-full max-w-sm bg-surface border border-border rounded-xl p-5">
-        <p className="font-mono text-[10px] tracking-[0.2em] text-purple uppercase mb-1">Delen</p>
-        <h3 className="font-mono text-base font-bold text-text mb-4">Post delen</h3>
+        <p className="font-mono text-[10px] tracking-[0.2em] text-purple uppercase mb-1">{t('feed2.share_eyebrow')}</p>
+        <h3 className="font-mono text-base font-bold text-text mb-4">{t('feed2.share_title')}</h3>
 
         <textarea
           value={comment}
           onChange={e => setComment(e.target.value)}
-          placeholder="Voeg een reactie toe... (optioneel)"
+          placeholder={t('feed2.share_placeholder')}
           rows={3}
           maxLength={500}
           className="w-full bg-void border border-border rounded-lg px-4 py-3 text-text text-sm font-mono placeholder-text-dim/60 focus:outline-none focus:border-purple transition-colors resize-none mb-4"
@@ -53,14 +55,14 @@ export default function RepostModal({ postId, onClose, onSuccess }: RepostModalP
             onClick={onClose}
             className="flex-1 py-2.5 border border-border text-text-dim font-mono text-xs uppercase tracking-wider rounded-lg hover:border-purple hover:text-text transition-colors duration-200"
           >
-            Annuleer
+            {t('feed2.cancel')}
           </button>
           <button
             onClick={handleRepost}
             disabled={loading}
             className="flex-1 py-2.5 bg-purple text-white font-mono text-xs uppercase tracking-wider rounded-lg hover:bg-purple/85 transition-colors duration-200 disabled:opacity-40 flex items-center justify-center gap-1.5"
           >
-            {loading ? '...' : <><Repeat2 size={12} /> Delen</>}
+            {loading ? '...' : <><Repeat2 size={12} /> {t('feed2.share_action')}</>}
           </button>
         </div>
       </div>

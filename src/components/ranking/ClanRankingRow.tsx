@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
+import { useLang } from '@/lib/lang-context'
 
 export interface ClanRankingRowData {
   id: string
@@ -26,6 +27,7 @@ function rankColor(rank: number) {
 }
 
 export default function ClanRankingRow({ rank, clan, maxXp = 1 }: ClanRankingRowProps) {
+  const { t } = useLang()
   const accent = '#6B3FE0'
   const value = clan.xp_total ?? 0
   const barPct = Math.max(2, Math.round((value / (maxXp || 1)) * 100))
@@ -73,7 +75,10 @@ export default function ClanRankingRow({ rank, clan, maxXp = 1 }: ClanRankingRow
           </div>
           <div className="flex items-center gap-2.5 flex-wrap">
             <span className="font-mono text-[10px] text-text-muted">
-              {members} {members === 1 ? 'lid' : 'leden'}
+              {members}{' '}
+              {members === 1
+                ? t('rankingUi.memberSingular')
+                : t('rankingUi.memberPlural')}
             </span>
             <div className="w-20 h-0.5 bg-void rounded-full overflow-hidden shrink-0 ml-auto">
               <div

@@ -1,4 +1,5 @@
 import { getNextLevel } from '@/lib/levels'
+import { useLang } from '@/lib/lang-context'
 
 interface MyPositionBarProps {
   rank: number
@@ -18,6 +19,7 @@ export default function MyPositionBar({
   user,
   nextRankXp,
 }: MyPositionBarProps) {
+  const { t } = useLang()
   const nextLevel = getNextLevel(user.level_name)
   const xpToNextRank =
     nextRankXp != null ? Math.max(0, nextRankXp - user.xp + 1) : null
@@ -27,7 +29,7 @@ export default function MyPositionBar({
       {/* Positie */}
       <div className="flex items-center gap-3">
         <span className="font-mono text-[10px] text-text-muted uppercase tracking-widest">
-          Jouw positie
+          {t('rankingUi.yourPosition')}
         </span>
         <span className="font-mono text-xl font-bold text-text">#{rank}</span>
       </div>
@@ -36,7 +38,7 @@ export default function MyPositionBar({
       <div className="flex items-center gap-5 flex-wrap">
         <div>
           <p className="font-mono text-[9px] text-text-dim uppercase tracking-widest mb-0.5">
-            Level
+            {t('rankingUi.level')}
           </p>
           <p className="font-mono text-xs text-text-muted">{user.level_name}</p>
         </div>
@@ -49,7 +51,7 @@ export default function MyPositionBar({
             {user.xp.toLocaleString()}
             {nextLevel && (
               <span className="font-normal text-[10px] text-text-dim ml-1">
-                / {nextLevel.minXp.toLocaleString()} next
+                / {nextLevel.minXp.toLocaleString()} {t('rankingUi.next')}
               </span>
             )}
           </p>
@@ -58,10 +60,10 @@ export default function MyPositionBar({
         {(user.achievement_count ?? 0) > 0 && (
           <div>
             <p className="font-mono text-[9px] text-text-dim uppercase tracking-widest mb-0.5">
-              Badges
+              {t('rankingUi.badgesLabel')}
             </p>
             <p className="font-mono text-xs text-purple">
-              {user.achievement_count} unlocked
+              {user.achievement_count} {t('rankingUi.unlocked')}
             </p>
           </div>
         )}
@@ -69,7 +71,7 @@ export default function MyPositionBar({
         {xpToNextRank !== null && rank > 1 && (
           <div>
             <p className="font-mono text-[9px] text-text-dim uppercase tracking-widest mb-0.5">
-              Naar #{rank - 1}
+              {t('rankingUi.toRank')} #{rank - 1}
             </p>
             <p className="font-mono text-xs text-text-muted">
               {xpToNextRank.toLocaleString()} XP

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useLang } from '@/lib/lang-context'
 
 const MOD_LEVEL_LABELS = [
   '',
@@ -113,6 +114,7 @@ function isOnline(last?: string | null): boolean {
 
 export default function InnerCirclePage() {
   const router = useRouter()
+  const { t } = useLang()
   const [data, setData] = useState<IcData | null>(null)
   const [loading, setLoading] = useState(true)
   const [tab, setTab] = useState<Tab>('overview')
@@ -169,24 +171,24 @@ export default function InnerCirclePage() {
           <div className="flex items-start justify-between mb-4 flex-wrap gap-3">
             <div>
               <p className="font-mono text-[10px] tracking-[0.3em] uppercase text-cyan mb-2">
-                Inner Circle
+                {t('innerCircle.eyebrow')}
               </p>
               <h1 className="font-mono text-3xl font-bold text-text mb-1">
-                The Inner Circle
+                {t('innerCircle.heroTitle')}
               </h1>
               <p className="text-text-muted text-sm">
-                {stats.total} leden · Governance & Moderatie
+                {stats.total} {t('innerCircle.heroSubtitle')}
               </p>
             </div>
             <div className="text-right">
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border bg-cyan/8 border-cyan/20">
                 <span className="text-cyan text-sm">★</span>
                 <span className="font-mono text-[10px] uppercase tracking-widest text-cyan">
-                  Inner Circle
+                  {t('innerCircle.badge')}
                 </span>
               </div>
               <p className="font-mono text-xs text-text-muted mt-2">
-                Jouw niveau:{' '}
+                {t('innerCircle.yourLevel')}{' '}
                 <span style={{ color: MOD_LEVEL_COLORS[profile.mod_level] }}>
                   {MOD_LEVEL_LABELS[profile.mod_level]}
                 </span>
@@ -196,13 +198,13 @@ export default function InnerCirclePage() {
 
           <div className="grid grid-cols-4 gap-3">
             {[
-              { num: stats.total, label: 'Leden', color: '#fff' },
-              { num: stats.level1, label: 'Level 1', color: '#9998aa' },
-              { num: stats.level2, label: 'Level 2', color: '#6B3FE0' },
-              { num: stats.level3p, label: 'Level 3+', color: '#00C8F0' },
+              { num: stats.total, key: 'total', tKey: 'innerCircle.statMembers', color: '#fff' },
+              { num: stats.level1, key: 'level1', tKey: 'innerCircle.statLevel1', color: '#9998aa' },
+              { num: stats.level2, key: 'level2', tKey: 'innerCircle.statLevel2', color: '#6B3FE0' },
+              { num: stats.level3p, key: 'level3p', tKey: 'innerCircle.statLevel3p', color: '#00C8F0' },
             ].map((s) => (
               <div
-                key={s.label}
+                key={s.key}
                 className="bg-black/30 rounded-xl p-3 text-center"
               >
                 <p
@@ -212,7 +214,7 @@ export default function InnerCirclePage() {
                   {s.num}
                 </p>
                 <p className="font-mono text-[9px] text-text-muted uppercase tracking-wider">
-                  {s.label}
+                  {t(s.tKey)}
                 </p>
               </div>
             ))}
@@ -223,24 +225,24 @@ export default function InnerCirclePage() {
       {/* Tabs */}
       <div className="flex gap-0.5 bg-surface border border-border rounded-xl p-1 mb-6">
         {[
-          { key: 'overview' as Tab, label: 'Overview' },
-          { key: 'members' as Tab, label: 'Leden' },
+          { key: 'overview' as Tab, label: t('innerCircle.tabOverview') },
+          { key: 'members' as Tab, label: t('innerCircle.tabMembers') },
           {
             key: 'votes' as Tab,
-            label: `Votes${activeVotes.length > 0 ? ` (${activeVotes.length})` : ''}`,
+            label: `${t('innerCircle.tabVotes')}${activeVotes.length > 0 ? ` (${activeVotes.length})` : ''}`,
           },
-          { key: 'modlog' as Tab, label: 'Mod Log' },
-        ].map((t) => (
+          { key: 'modlog' as Tab, label: t('innerCircle.tabModLog') },
+        ].map((tab_) => (
           <button
-            key={t.key}
-            onClick={() => setTab(t.key)}
+            key={tab_.key}
+            onClick={() => setTab(tab_.key)}
             className={`flex-1 py-2.5 rounded-lg font-mono text-[10px] uppercase tracking-wider transition-colors duration-200 ${
-              tab === t.key
+              tab === tab_.key
                 ? 'bg-purple text-white'
                 : 'text-text-muted hover:text-text'
             }`}
           >
-            {t.label}
+            {tab_.label}
           </button>
         ))}
       </div>
@@ -253,7 +255,7 @@ export default function InnerCirclePage() {
               <div className="bg-surface border border-border rounded-xl overflow-hidden">
                 <div className="flex items-center justify-between px-5 py-4 border-b border-border">
                   <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-purple">
-                    Actieve votes
+                    {t('innerCircle.activeVotes')}
                   </p>
                   <Link
                     href="#"
@@ -263,7 +265,7 @@ export default function InnerCirclePage() {
                     }}
                     className="font-mono text-[9px] text-text-muted hover:text-text transition-colors"
                   >
-                    Alle →
+                    {t('innerCircle.all')}
                   </Link>
                 </div>
                 {activeVotes.slice(0, 3).map((vote) => (
@@ -281,7 +283,7 @@ export default function InnerCirclePage() {
                           {vote.creator?.username}
                         </span>
                         <span className="font-mono text-[10px] text-text-dim">
-                          {vote.vote_count} stemmen
+                          {vote.vote_count} {t('innerCircle.votesCount')}
                         </span>
                       </div>
                     </div>
@@ -297,14 +299,14 @@ export default function InnerCirclePage() {
                           }`}
                         >
                           {vote.my_vote === 'for'
-                            ? 'Voor'
+                            ? t('innerCircle.voteFor')
                             : vote.my_vote === 'against'
-                              ? 'Tegen'
-                              : 'Onthouding'}
+                              ? t('innerCircle.voteAgainst')
+                              : t('innerCircle.voteAbstain')}
                         </span>
                       ) : (
                         <span className="font-mono text-[9px] uppercase tracking-widest px-2 py-1 rounded-full border bg-purple/10 border-purple/25 text-purple">
-                          Stem nu
+                          {t('innerCircle.voteNow')}
                         </span>
                       )}
                       <p className="font-mono text-[10px] text-text-dim mt-1">
@@ -319,7 +321,7 @@ export default function InnerCirclePage() {
             {icClan && (
               <div className="bg-surface border border-cyan/20 rounded-xl p-5">
                 <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-cyan mb-3">
-                  The Inner Circle Clan
+                  {t('innerCircle.clanTitle')}
                 </p>
                 <div className="flex items-center justify-between flex-wrap gap-3">
                   <div className="flex items-center gap-3">
@@ -331,7 +333,7 @@ export default function InnerCirclePage() {
                         {icClan.name}
                       </p>
                       <p className="font-mono text-[10px] text-text-muted">
-                        {icClan.member_count} leden · Exclusief
+                        {icClan.member_count} {t('innerCircle.clanMembers')}
                       </p>
                     </div>
                   </div>
@@ -339,7 +341,7 @@ export default function InnerCirclePage() {
                     href={`/clans/${icClan.slug}`}
                     className="px-4 py-2 bg-cyan/10 border border-cyan/20 text-cyan font-mono text-xs uppercase tracking-widest rounded-lg hover:bg-cyan/15 transition-colors duration-200"
                   >
-                    Bekijk →
+                    {t('innerCircle.view')}
                   </Link>
                 </div>
               </div>
@@ -349,7 +351,7 @@ export default function InnerCirclePage() {
           <div className="space-y-4">
             <div className="bg-surface border border-border rounded-xl p-4">
               <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-purple mb-3">
-                Jouw status
+                {t('innerCircle.yourStatus')}
               </p>
               <div className="space-y-2">
                 {[1, 2, 3, 4].map((level) => {
@@ -378,15 +380,15 @@ export default function InnerCirclePage() {
                         </p>
                         <p className="font-mono text-[9px] text-text-dim">
                           {level === 1
-                            ? 'Automatisch bij IC'
+                            ? t('innerCircle.levelHintAuto')
                             : level === 2
-                              ? '30d + 50 acties'
-                              : 'Via IC vote'}
+                              ? t('innerCircle.levelHint30d')
+                              : t('innerCircle.levelHintVote')}
                         </p>
                       </div>
                       {isCurrent && (
                         <span className="font-mono text-[8px] text-purple uppercase tracking-widest">
-                          Actief
+                          {t('innerCircle.levelActive')}
                         </span>
                       )}
                     </div>
@@ -399,7 +401,7 @@ export default function InnerCirclePage() {
               href="/inner-circle/votes/new"
               className="flex items-center justify-center gap-2 w-full py-3 bg-purple text-white font-mono text-xs uppercase tracking-wider rounded-xl hover:bg-purple/85 transition-colors duration-200"
             >
-              + Nieuw voorstel
+              {t('innerCircle.newProposal')}
             </Link>
           </div>
         </div>
@@ -451,7 +453,7 @@ export default function InnerCirclePage() {
                     {member.display_name ?? member.username}
                   </Link>
                   <span className="font-mono text-[8px] uppercase tracking-widest px-1.5 py-0.5 rounded-full border bg-cyan/8 border-cyan/20 text-cyan">
-                    Inner Circle
+                    {t('innerCircle.memberBadge')}
                   </span>
                 </div>
                 <div className="flex items-center gap-3 flex-wrap">
@@ -465,7 +467,7 @@ export default function InnerCirclePage() {
                     {MOD_LEVEL_LABELS[member.mod_level]}
                   </span>
                   <span className="font-mono text-[10px] text-text-dim">
-                    {member.mod_actions_count} acties
+                    {member.mod_actions_count} {t('innerCircle.memberActions')}
                   </span>
                 </div>
               </div>
@@ -474,7 +476,7 @@ export default function InnerCirclePage() {
                   {(member.xp ?? 0).toLocaleString()}
                 </p>
                 <p className="font-mono text-[9px] text-text-dim uppercase">
-                  XP
+                  {t('innerCircle.xp')}
                 </p>
               </div>
             </div>
@@ -487,23 +489,23 @@ export default function InnerCirclePage() {
         <div className="space-y-4">
           <div className="flex items-center justify-between mb-2 flex-wrap gap-3">
             <p className="text-text-muted text-sm">
-              {activeVotes.length} actief · {closedVotes.length} gesloten
+              {activeVotes.length} {t('innerCircle.votesActive')} · {closedVotes.length} {t('innerCircle.votesClosed')}
             </p>
             <Link
               href="/inner-circle/votes/new"
               className="px-5 py-2.5 bg-purple text-white font-mono text-xs uppercase tracking-wider rounded-lg hover:bg-purple/85 transition-colors duration-200"
             >
-              + Nieuw voorstel
+              {t('innerCircle.newProposal')}
             </Link>
           </div>
 
           {activeVotes.length === 0 && closedVotes.length === 0 ? (
             <div className="text-center py-16">
               <p className="font-mono text-[10px] uppercase text-text-dim mb-2">
-                Geen votes
+                {t('innerCircle.noVotes')}
               </p>
               <p className="text-text-muted text-sm mb-6">
-                Dien een voorstel in.
+                {t('innerCircle.submitProposalPrompt')}
               </p>
             </div>
           ) : (
@@ -530,10 +532,10 @@ export default function InnerCirclePage() {
                           }`}
                         >
                           {vote.vote_type === 'upgrade_request'
-                            ? 'Upgrade'
+                            ? t('innerCircle.typeUpgrade')
                             : vote.vote_type === 'platform_decision'
-                              ? 'Platform'
-                              : 'Voorstel'}
+                              ? t('innerCircle.typePlatform')
+                              : t('innerCircle.typeProposal')}
                         </span>
                       </div>
                       <p className="text-text-muted text-xs line-clamp-2">
@@ -551,11 +553,11 @@ export default function InnerCirclePage() {
                                 : 'bg-surface-2 border-border text-text-muted'
                           }`}
                         >
-                          Gestemd
+                          {t('innerCircle.voted')}
                         </span>
                       ) : (
                         <span className="font-mono text-[9px] uppercase tracking-widest px-2 py-1 rounded-full border bg-purple/15 border-purple text-purple block mb-1">
-                          Stem nu
+                          {t('innerCircle.voteNow')}
                         </span>
                       )}
                       <p className="font-mono text-[10px] text-text-dim">
@@ -568,7 +570,7 @@ export default function InnerCirclePage() {
                       {vote.creator?.username}
                     </span>
                     <span className="font-mono text-[10px] text-text-dim">
-                      {vote.vote_count} / {stats.total} stemmen
+                      {vote.vote_count} / {stats.total} {t('innerCircle.votesOfTotal')}
                     </span>
                   </div>
                 </Link>
@@ -577,7 +579,7 @@ export default function InnerCirclePage() {
               {closedVotes.length > 0 && (
                 <div className="pt-2">
                   <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-text-dim mb-3">
-                    Gesloten
+                    {t('innerCircle.closed')}
                   </p>
                   {closedVotes.map((vote) => (
                     <Link
@@ -598,8 +600,8 @@ export default function InnerCirclePage() {
                         }`}
                       >
                         {vote.result === 'approved'
-                          ? 'Goedgekeurd'
-                          : 'Afgewezen'}
+                          ? t('innerCircle.resultApproved')
+                          : t('innerCircle.resultRejected')}
                       </span>
                     </Link>
                   ))}
@@ -616,7 +618,7 @@ export default function InnerCirclePage() {
           {recentModActions.length === 0 ? (
             <div className="py-12 text-center">
               <p className="text-text-muted text-sm">
-                Nog geen moderatie acties.
+                {t('innerCircle.noModActions')}
               </p>
             </div>
           ) : (
@@ -651,17 +653,17 @@ export default function InnerCirclePage() {
                     </span>{' '}
                     <span className="text-text-muted">
                       {action.action === 'delete'
-                        ? 'verwijderde'
+                        ? t('innerCircle.actionDelete')
                         : action.action === 'pin'
-                          ? 'pinned'
+                          ? t('innerCircle.actionPin')
                           : action.action === 'lock'
-                            ? 'sloot'
+                            ? t('innerCircle.actionLock')
                             : action.action === 'warn'
-                              ? 'waarschuwde'
+                              ? t('innerCircle.actionWarn')
                               : action.action === 'mute'
-                                ? 'mutete'
-                                : 'actie op'}{' '}
-                      een {action.target_type.replace('_', ' ')}
+                                ? t('innerCircle.actionMute')
+                                : t('innerCircle.actionOther')}{' '}
+                      {t('innerCircle.actionA')} {action.target_type.replace('_', ' ')}
                     </span>
                   </p>
                   {action.reason && (

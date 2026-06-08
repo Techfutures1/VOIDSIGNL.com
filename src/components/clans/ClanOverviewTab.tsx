@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
+import { useLang } from '@/lib/lang-context'
 
 interface MemberLite {
   id: string
@@ -62,16 +63,16 @@ interface Props {
   joining: boolean
 }
 
-const ACTION_LABELS: Record<string, string> = {
-  clip_upload: 'Clip uploaden',
-  achievement_unlock: 'Achievement behalen',
-  cotw_win: 'CotW winnen',
-  forum_post: 'Forum post',
-  forum_reply: 'Forum reply',
-  buddy_accepted: 'Buddy accepteren',
-  war_won: 'War winnen',
-  quest_completed: 'Quest voltooien',
-  daily_login: 'Dagelijks inloggen',
+const ACTION_LABEL_KEYS: Record<string, string> = {
+  clip_upload: 'clans2.actionClipUpload',
+  achievement_unlock: 'clans2.actionAchievementUnlock',
+  cotw_win: 'clans2.actionCotwWinShort',
+  forum_post: 'clans2.actionForumPostShort',
+  forum_reply: 'clans2.actionForumReplyShort',
+  buddy_accepted: 'clans2.actionBuddyAcceptedShort',
+  war_won: 'clans2.actionWarWon',
+  quest_completed: 'clans2.actionQuestCompleted',
+  daily_login: 'clans2.actionDailyLogin',
 }
 
 function isOnline(lastSeen?: string | null): boolean {
@@ -90,6 +91,11 @@ export default function ClanOverviewTab({
   onJoin,
   joining,
 }: Props) {
+  const { t } = useLang()
+  const ACTION_LABELS: Record<string, string> = Object.fromEntries(
+    Object.entries(ACTION_LABEL_KEYS).map(([action, key]) => [action, t(key)]),
+  )
+
   const topMembers = [...members]
     .sort((a, b) => (b.user?.xp ?? 0) - (a.user?.xp ?? 0))
     .slice(0, 5)
@@ -107,11 +113,11 @@ export default function ClanOverviewTab({
           <div className="bg-surface border border-border rounded-xl overflow-hidden">
             <div className="flex items-center justify-between px-5 py-4 border-b border-border">
               <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-purple">
-                Wekelijkse quests
+                {t('clans2.weeklyQuests')}
               </p>
               <span className="font-mono text-[10px] text-text-muted">
                 {quests.filter((q) => q.is_completed).length}/{quests.length}{' '}
-                voltooid
+                {t('clans2.completed')}
               </span>
             </div>
             <div className="p-4 space-y-3">
@@ -170,7 +176,7 @@ export default function ClanOverviewTab({
         {/* Top leden */}
         <div className="bg-surface border border-border rounded-xl overflow-hidden">
           <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-purple px-5 py-4 border-b border-border">
-            Top leden
+            {t('clans2.topMembers')}
           </p>
           {topMembers.map((member) => {
             const u = member.user
@@ -223,17 +229,17 @@ export default function ClanOverviewTab({
                     </span>
                     {isOwner && (
                       <span className="font-mono text-[8px] uppercase tracking-widest px-1.5 py-0.5 rounded-full border bg-purple/10 border-purple/25 text-purple">
-                        Owner
+                        {t('clans2.owner')}
                       </span>
                     )}
                     {isOff && (
                       <span className="font-mono text-[8px] uppercase tracking-widest px-1.5 py-0.5 rounded-full border bg-cyan/10 border-cyan/25 text-cyan">
-                        Officer
+                        {t('clans2.officer')}
                       </span>
                     )}
                     {u.is_inner_circle && (
                       <span className="font-mono text-[8px] uppercase tracking-widest px-1.5 py-0.5 rounded-full border bg-cyan/10 border-cyan/25 text-cyan">
-                        Inner Circle
+                        {t('clans2.innerCircle')}
                       </span>
                     )}
                   </div>
@@ -273,7 +279,7 @@ export default function ClanOverviewTab({
         {xpHistory.length > 0 && (
           <div className="bg-surface border border-border rounded-xl overflow-hidden">
             <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-purple px-5 py-4 border-b border-border">
-              Recente XP
+              {t('clans2.recentXp')}
             </p>
             {xpHistory.map((event) => (
               <div
@@ -308,7 +314,7 @@ export default function ClanOverviewTab({
         {/* XP Voortgang */}
         <div className="bg-surface border border-border rounded-xl p-4">
           <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-purple mb-3">
-            Clan voortgang
+            {t('clans2.clanProgress')}
           </p>
           <div className="grid grid-cols-2 gap-2 mb-4">
             <div className="bg-void border border-border rounded-lg p-3">
@@ -316,7 +322,7 @@ export default function ClanOverviewTab({
                 {clan.xp_total.toLocaleString()}
               </p>
               <p className="font-mono text-[9px] text-text-muted uppercase mt-1">
-                Clan XP
+                {t('clans2.statClanXp')}
               </p>
             </div>
             <div className="bg-void border border-border rounded-lg p-3">
@@ -324,7 +330,7 @@ export default function ClanOverviewTab({
                 {clan.member_count}/{clan.max_members}
               </p>
               <p className="font-mono text-[9px] text-text-muted uppercase mt-1">
-                Leden
+                {t('clans2.statMembers')}
               </p>
             </div>
           </div>
@@ -342,7 +348,7 @@ export default function ClanOverviewTab({
               <>
                 <div className="flex items-center justify-between mb-1">
                   <p className="font-mono text-[9px] text-text-dim uppercase tracking-wider">
-                    Naar {next.toLocaleString()} XP
+                    {t('clans2.toward')} {next.toLocaleString()} XP
                   </p>
                   <p className="font-mono text-[9px] text-text-muted">{pct}%</p>
                 </div>
@@ -353,7 +359,7 @@ export default function ClanOverviewTab({
                   />
                 </div>
                 <p className="font-mono text-[10px] text-text-dim mt-1">
-                  nog {(next - clan.xp_total).toLocaleString()} XP
+                  {t('clans2.stillNeeded')} {(next - clan.xp_total).toLocaleString()} XP
                 </p>
               </>
             )
@@ -364,7 +370,7 @@ export default function ClanOverviewTab({
         {activeRules.length > 0 && (
           <div className="bg-surface border border-border rounded-xl p-4">
             <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-purple mb-3">
-              XP verdienen
+              {t('clans2.earnXp')}
             </p>
             <div className="space-y-1.5">
               {activeRules.map((rule) => (
@@ -388,19 +394,19 @@ export default function ClanOverviewTab({
         {canJoin && (
           <div className="bg-purple/8 border border-purple/20 rounded-xl p-4">
             <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-purple mb-2">
-              Word lid
+              {t('clans2.becomeMember')}
             </p>
             <p className="text-xs text-text-muted mb-3 leading-relaxed">
               {clan.is_open
-                ? 'Open clan — je kunt direct joinen.'
-                : 'Gesloten clan — stuur een aanvraag.'}
+                ? t('clans2.openClanCta')
+                : t('clans2.closedClanCta')}
             </p>
             <button
               onClick={onJoin}
               disabled={joining}
               className="w-full py-2.5 bg-purple text-white font-mono text-xs uppercase tracking-wider rounded-lg hover:bg-purple/85 transition-colors disabled:opacity-40"
             >
-              {joining ? '...' : clan.is_open ? '+ Joinen' : '+ Aanvragen'}
+              {joining ? '...' : clan.is_open ? t('clans2.join') : t('clans2.request')}
             </button>
           </div>
         )}

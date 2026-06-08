@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Heart, MoreHorizontal } from 'lucide-react'
+import { useLang } from '@/lib/lang-context'
 
 export interface ReplyCardData {
   id: string
@@ -34,18 +35,19 @@ interface ReplyCardProps {
   onMarkSolution?: (replyId: string) => void
 }
 
-function timeAgo(date: string) {
+function timeAgo(date: string, t: (key: string) => string) {
   const diff = Date.now() - new Date(date).getTime()
   const mins = Math.floor(diff / 60000)
-  if (mins < 1) return 'nu'
-  if (mins < 60) return `${mins}m geleden`
-  if (mins < 1440) return `${Math.floor(mins / 60)}u geleden`
+  if (mins < 1) return t('forums2.time_now')
+  if (mins < 60) return `${mins}m ${t('forums2.time_ago')}`
+  if (mins < 1440) return `${Math.floor(mins / 60)}u ${t('forums2.time_ago')}`
   return new Date(date).toLocaleDateString('nl-NL')
 }
 
 export default function ReplyCard({
   reply, threadAuthorId, currentUserId, isMod, onDelete, onMarkSolution,
 }: ReplyCardProps) {
+  const { t } = useLang()
   const [liked, setLiked] = useState(reply.is_liked)
   const [likeCount, setLikeCount] = useState(reply.like_count)
   const [showMenu, setShowMenu] = useState(false)
@@ -65,7 +67,7 @@ export default function ReplyCard({
   }
 
   async function handleDelete() {
-    if (!confirm('Reply verwijderen?')) return
+    if (!confirm(t('forums2.confirm_delete_reply'))) return
     await fetch('/api/forums/mod', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -111,11 +113,11 @@ export default function ReplyCard({
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <span className="font-mono text-[10px] text-text-dim/60">
-              {timeAgo(reply.created_at)}
+              {timeAgo(reply.created_at, t)}
             </span>
             {reply.is_solution && (
               <span className="font-mono text-[9px] uppercase tracking-widest px-2 py-0.5 rounded-full bg-success/15 text-success">
-                ✓ Oplossing
+                ✓ {t('forums2.solution')}
               </span>
             )}
           </div>
@@ -135,7 +137,7 @@ export default function ReplyCard({
                       onClick={() => { onMarkSolution?.(reply.id); setShowMenu(false) }}
                       className="w-full text-left px-4 py-2.5 font-mono text-xs text-success hover:bg-surface transition-colors"
                     >
-                      ✓ Oplossing
+                      ✓ {t('forums2.solution')}
                     </button>
                   )}
                   {(isOwn || isMod) && (
@@ -143,7 +145,7 @@ export default function ReplyCard({
                       onClick={() => { handleDelete(); setShowMenu(false) }}
                       className="w-full text-left px-4 py-2.5 font-mono text-xs text-danger hover:bg-surface transition-colors"
                     >
-                      Verwijderen
+                      {t('forums2.mod_delete')}
                     </button>
                   )}
                 </div>

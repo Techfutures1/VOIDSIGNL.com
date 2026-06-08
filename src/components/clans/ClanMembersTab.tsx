@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
+import { useLang } from '@/lib/lang-context'
 
 interface MemberLite {
   id: string
@@ -42,6 +43,8 @@ export default function ClanMembersTab({
   clanSlug,
   onRefresh,
 }: Props) {
+  const { t } = useLang()
+
   async function handlePromote(userId: string, newRole: 'officer' | 'member') {
     await fetch(`/api/clans/${clanSlug}/members`, {
       method: 'PATCH',
@@ -52,7 +55,7 @@ export default function ClanMembersTab({
   }
 
   async function handleKick(userId: string) {
-    if (!confirm('Lid verwijderen?')) return
+    if (!confirm(t('clans2.confirmKick'))) return
     await fetch(`/api/clans/${clanSlug}/members`, {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
@@ -119,22 +122,22 @@ export default function ClanMembersTab({
                 </Link>
                 {isMe && (
                   <span className="font-mono text-[9px] text-purple/50">
-                    ← jij
+                    ← {t('clans2.you')}
                   </span>
                 )}
                 {member.role === 'owner' && (
                   <span className="font-mono text-[8px] uppercase tracking-widest px-1.5 py-0.5 rounded-full border bg-purple/10 border-purple/25 text-purple">
-                    Owner
+                    {t('clans2.owner')}
                   </span>
                 )}
                 {member.role === 'officer' && (
                   <span className="font-mono text-[8px] uppercase tracking-widest px-1.5 py-0.5 rounded-full border bg-cyan/10 border-cyan/25 text-cyan">
-                    Officer
+                    {t('clans2.officer')}
                   </span>
                 )}
                 {u.is_inner_circle && (
                   <span className="font-mono text-[8px] uppercase tracking-widest px-1.5 py-0.5 rounded-full border bg-cyan/10 border-cyan/25 text-cyan">
-                    Inner Circle
+                    {t('clans2.innerCircle')}
                   </span>
                 )}
               </div>
@@ -146,7 +149,7 @@ export default function ClanMembersTab({
                   {(u.xp ?? 0).toLocaleString()} XP
                 </span>
                 <span className="font-mono text-[10px] text-text-dim">
-                  Lid sinds{' '}
+                  {t('clans2.memberSince')}{' '}
                   {new Date(member.joined_at).toLocaleDateString('nl-NL', {
                     month: 'short',
                     year: 'numeric',
@@ -163,7 +166,7 @@ export default function ClanMembersTab({
                     onClick={() => handlePromote(u.id, 'officer')}
                     className="px-3 py-1.5 border border-border text-text-muted font-mono text-[10px] uppercase tracking-widest rounded-lg hover:border-purple/40 hover:text-text transition-colors duration-200"
                   >
-                    Officer
+                    {t('clans2.officer')}
                   </button>
                 )}
                 {isOwner && member.role === 'officer' && (
@@ -171,7 +174,7 @@ export default function ClanMembersTab({
                     onClick={() => handlePromote(u.id, 'member')}
                     className="px-3 py-1.5 border border-border text-text-muted font-mono text-[10px] uppercase tracking-widest rounded-lg hover:text-text transition-colors duration-200"
                   >
-                    Degraderen
+                    {t('clans2.demote')}
                   </button>
                 )}
                 {(isOwner || member.role === 'member') && (
@@ -179,7 +182,7 @@ export default function ClanMembersTab({
                     onClick={() => handleKick(u.id)}
                     className="px-3 py-1.5 border border-border text-text-muted font-mono text-[10px] uppercase tracking-widest rounded-lg hover:border-danger/40 hover:text-danger transition-colors duration-200"
                   >
-                    Verwijderen
+                    {t('clans2.remove')}
                   </button>
                 )}
               </div>

@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
+import { useLang } from '@/lib/lang-context'
 
 export interface BuddyCardUser {
   id: string
@@ -33,10 +34,10 @@ interface BuddyCardProps {
 }
 
 const COMPATIBILITY_LABEL = (score: number) =>
-  score >= 7 ? { label: 'Perfect match', color: '#22c55e' } :
-  score >= 4 ? { label: 'Goede match',   color: '#00C8F0' } :
-  score >= 2 ? { label: 'Match',         color: '#6B3FE0' } :
-               { label: 'Weinig overlap', color: '#9998aa' }
+  score >= 7 ? { labelKey: 'buddyUi.matchPerfect', color: '#22c55e' } :
+  score >= 4 ? { labelKey: 'buddyUi.matchGood',    color: '#00C8F0' } :
+  score >= 2 ? { labelKey: 'buddyUi.matchOk',      color: '#6B3FE0' } :
+               { labelKey: 'buddyUi.matchLow',     color: '#9998aa' }
 
 const isOnline = (lastSeen?: string | null) => {
   if (!lastSeen) return false
@@ -44,6 +45,7 @@ const isOnline = (lastSeen?: string | null) => {
 }
 
 export default function BuddyCard({ user, onRequest, onAccept, onDecline }: BuddyCardProps) {
+  const { t } = useLang()
   const [showMessageInput, setShowMessageInput] = useState(false)
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
@@ -132,7 +134,7 @@ export default function BuddyCard({ user, onRequest, onAccept, onDecline }: Budd
               {user.compatibility}/9
             </p>
             <p className="font-mono text-[8px]" style={{ color: compat.color }}>
-              {compat.label}
+              {t(compat.labelKey)}
             </p>
           </div>
         )}
@@ -161,7 +163,7 @@ export default function BuddyCard({ user, onRequest, onAccept, onDecline }: Budd
       {user.is_buddy ? (
         <div className="flex items-center gap-2">
           <div className="flex-1 py-2 rounded-lg border border-success/30 bg-success/5 text-center">
-            <span className="font-mono text-xs text-success">✓ Buddy</span>
+            <span className="font-mono text-xs text-success">✓ {t('buddyUi.buddy')}</span>
           </div>
           <Link
             href={`/messages?to=${user.username}`}
@@ -173,7 +175,7 @@ export default function BuddyCard({ user, onRequest, onAccept, onDecline }: Budd
       ) : pendingForMe ? (
         <div className="space-y-2">
           <p className="font-mono text-[10px] text-text-dim text-center">
-            Buddy request van {user.display_name ?? user.username}
+            {t('buddyUi.requestFrom')} {user.display_name ?? user.username}
           </p>
           <div className="flex gap-2">
             <button
@@ -181,24 +183,24 @@ export default function BuddyCard({ user, onRequest, onAccept, onDecline }: Budd
               disabled={respondLoading !== null}
               className="flex-1 py-2 bg-purple text-white font-mono text-xs uppercase tracking-wider rounded-lg hover:bg-purple/85 transition-colors duration-200 disabled:opacity-40"
             >
-              {respondLoading === 'accept' ? '...' : 'Accepteren'}
+              {respondLoading === 'accept' ? '...' : t('buddyUi.accept')}
             </button>
             <button
               onClick={handleDecline}
               disabled={respondLoading !== null}
               className="px-3 py-2 border border-border text-text-dim font-mono text-xs uppercase tracking-wider rounded-lg hover:border-danger hover:text-danger transition-colors duration-200 disabled:opacity-40"
             >
-              {respondLoading === 'decline' ? '...' : 'Weigeren'}
+              {respondLoading === 'decline' ? '...' : t('buddyUi.decline')}
             </button>
           </div>
         </div>
       ) : pendingFromMe ? (
         <div className="py-2 rounded-lg border border-border text-center">
-          <span className="font-mono text-xs text-text-dim">Request verstuurd</span>
+          <span className="font-mono text-xs text-text-dim">{t('buddyUi.requestSent')}</span>
         </div>
       ) : sent ? (
         <div className="py-2 rounded-lg border border-purple/30 bg-purple/5 text-center">
-          <span className="font-mono text-xs text-purple">✓ Request verstuurd</span>
+          <span className="font-mono text-xs text-purple">✓ {t('buddyUi.requestSent')}</span>
         </div>
       ) : showMessageInput ? (
         <div className="space-y-2">
@@ -206,7 +208,7 @@ export default function BuddyCard({ user, onRequest, onAccept, onDecline }: Budd
             type="text"
             value={message}
             onChange={e => setMessage(e.target.value)}
-            placeholder="Kort berichtje (optioneel)..."
+            placeholder={t('buddyUi.messagePlaceholder')}
             maxLength={200}
             className="w-full bg-void border border-border rounded-lg px-3 py-2 text-text text-xs font-mono placeholder-text-dim/60 focus:outline-none focus:border-purple transition-colors"
           />
@@ -216,13 +218,13 @@ export default function BuddyCard({ user, onRequest, onAccept, onDecline }: Budd
               disabled={loading}
               className="flex-1 py-2 bg-purple text-white font-mono text-xs uppercase tracking-wider rounded-lg hover:bg-purple/85 transition-colors duration-200 disabled:opacity-40"
             >
-              {loading ? '...' : 'Verstuur'}
+              {loading ? '...' : t('buddyUi.send')}
             </button>
             <button
               onClick={() => setShowMessageInput(false)}
               className="px-3 py-2 border border-border text-text-dim font-mono text-xs uppercase tracking-wider rounded-lg hover:border-purple hover:text-text transition-colors duration-200"
             >
-              Annuleer
+              {t('buddyUi.cancel')}
             </button>
           </div>
         </div>
@@ -231,7 +233,7 @@ export default function BuddyCard({ user, onRequest, onAccept, onDecline }: Budd
           onClick={() => setShowMessageInput(true)}
           className="w-full py-2.5 border border-border text-text-dim font-mono text-xs uppercase tracking-wider rounded-lg hover:border-purple hover:text-text transition-colors duration-200"
         >
-          + Buddy request
+          {t('buddyUi.addBuddyRequest')}
         </button>
       )}
     </div>

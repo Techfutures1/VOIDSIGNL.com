@@ -1,4 +1,9 @@
+'use client'
+
+import { useLang } from '@/lib/lang-context'
+
 export default function MessagesPage() {
+  const { t } = useLang()
   // Op desktop wordt deze page in de rechterkolom van /messages/layout.tsx
   // gerenderd als 'lege staat'. Op mobiel verbergt de layout deze
   // panel-kolom — dan zie je alleen de conversation list uit de sidebar.
@@ -26,14 +31,13 @@ export default function MessagesPage() {
           </svg>
         </div>
         <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-purple mb-2">
-          Berichten
+          {t('messages2.eyebrow')}
         </p>
         <h2 className="font-mono text-lg font-bold text-text mb-2">
-          Begin een gesprek
+          {t('messages2.emptyTitle')}
         </h2>
         <p className="text-text-muted text-sm leading-relaxed">
-          Kies een conversatie uit de lijst, of klik op de + knop om iemand
-          een nieuw bericht te sturen.
+          {t('messages2.emptyDescription')}
         </p>
       </div>
     </div>

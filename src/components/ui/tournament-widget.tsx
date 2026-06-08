@@ -7,6 +7,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase-browser'
+import { useLang } from '@/lib/lang-context'
 import { Trophy, Calendar, Users } from 'lucide-react'
 
 interface Tournament {
@@ -17,20 +18,25 @@ interface Tournament {
   registration_open: boolean
 }
 
-function timeUntil(iso: string): { text: string; live: boolean; soon: boolean } {
+function timeUntil(
+  iso: string,
+  t: (key: string) => string,
+): { text: string; live: boolean; soon: boolean } {
   const ms = new Date(iso).getTime() - Date.now()
-  if (ms <= 0) return { text: 'Live now', live: true, soon: false }
+  if (ms <= 0) return { text: t('widgets.liveNow'), live: true, soon: false }
   const min = Math.floor(ms / 60_000)
   const hours = Math.floor(min / 60)
   const days = Math.floor(hours / 24)
+  const inPrefix = t('widgets.inPrefix')
   let text = ''
-  if (days > 0) text = `in ${days}d ${hours % 24}h`
-  else if (hours > 0) text = `in ${hours}h ${min % 60}m`
-  else text = `in ${min}m`
+  if (days > 0) text = `${inPrefix} ${days}d ${hours % 24}h`
+  else if (hours > 0) text = `${inPrefix} ${hours}h ${min % 60}m`
+  else text = `${inPrefix} ${min}m`
   return { text, live: false, soon: hours < 1 }
 }
 
 export function TournamentWidget() {
+  const { t } = useLang()
   const supabase = createClient()
   const [tournament, setTournament] = useState<Tournament | null>(null)
   const [loading, setLoading] = useState(true)
@@ -69,7 +75,7 @@ export function TournamentWidget() {
 
   if (!tournament) return null
 
-  const { text, live, soon } = timeUntil(tournament.starts_at)
+  const { text, live, soon } = timeUntil(tournament.starts_at, t)
   // tick state used to force re-render; reference it to satisfy lint
   void tick
 
@@ -77,12 +83,12 @@ export function TournamentWidget() {
     <Link href="/tournaments" className="block vs-card vs-lit hover:border-purple/30 transition-colors group">
       <div className="flex items-center justify-between mb-2">
         <p className="vs-label flex items-center gap-1.5">
-          <Trophy size={11} className="text-warning" /> NEXT TOURNAMENT
+          <Trophy size={11} className="text-warning" /> {t('widgets.nextTournament')}
         </p>
         {live && (
           <span className="flex items-center gap-1 text-[9px] text-danger">
             <span className="w-1.5 h-1.5 rounded-full bg-danger animate-pulse" />
-            LIVE
+            {t('widgets.live')}
           </span>
         )}
       </div>
@@ -99,7 +105,7 @@ export function TournamentWidget() {
         <span className="tabular-nums">{text}</span>
         {tournament.registration_open && !live && (
           <span className="ml-auto vs-badge vs-badge-success text-[8px]">
-            <Users size={8} /> OPEN
+            <Users size={8} /> {t('widgets.open')}
           </span>
         )}
       </div>

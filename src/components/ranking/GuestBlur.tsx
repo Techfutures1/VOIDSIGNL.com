@@ -1,6 +1,9 @@
 import Link from 'next/link'
+import { useLang } from '@/lib/lang-context'
 
 export default function GuestBlur() {
+  const { t } = useLang()
+
   return (
     <div className="relative">
       {[...Array(8)].map((_, i) => (
@@ -22,19 +25,19 @@ export default function GuestBlur() {
       <div className="absolute inset-0 flex items-center justify-center">
         <div className="text-center bg-void/90 backdrop-blur-sm border border-purple/30 rounded-xl px-8 py-6 max-w-xs mx-4">
           <p className="font-mono text-[10px] tracking-[0.2em] text-purple uppercase mb-2">
-            Toegang vereist
+            {t('rankingUi.accessRequired')}
           </p>
           <p className="text-text font-mono text-sm font-bold mb-1">
-            Zie de volledige ranking
+            {t('rankingUi.seeFullRanking')}
           </p>
           <p className="text-text-dim text-xs mb-4">
-            Join VOIDSIGNL om je positie te zien.
+            {t('rankingUi.joinToSeePosition')}
           </p>
           <Link
             href="/register"
             className="block w-full py-2.5 bg-purple text-white font-mono text-xs uppercase tracking-wider rounded-lg hover:bg-purple/85 transition-colors text-center"
           >
-            Join the void
+            {t('rankingUi.joinTheVoid')}
           </Link>
         </div>
       </div>

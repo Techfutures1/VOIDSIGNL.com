@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import ConversationList, { type ConversationItem } from './ConversationList'
 import NewConversationModal from './NewConversationModal'
+import { useLang } from '@/lib/lang-context'
 
 type Tab = 'inbox' | 'requests'
 
@@ -15,6 +16,7 @@ export default function MessagesSidebar({
   activeUsername,
   defaultTab = 'inbox',
 }: MessagesSidebarProps) {
+  const { t } = useLang()
   const [conversations, setConversations] = useState<ConversationItem[]>([])
   const [requests, setRequests] = useState<ConversationItem[]>([])
   const [loading, setLoading] = useState(true)
@@ -49,8 +51,8 @@ export default function MessagesSidebar({
   }
 
   const TABS: { key: Tab; label: string; count?: number }[] = [
-    { key: 'inbox', label: 'Inbox' },
-    { key: 'requests', label: 'Verzoeken', count: requests.length },
+    { key: 'inbox', label: t('messages2.inbox') },
+    { key: 'requests', label: t('messages2.requests'), count: requests.length },
   ]
 
   return (
@@ -58,13 +60,13 @@ export default function MessagesSidebar({
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-border flex-shrink-0">
         <div>
-          <p className="font-mono text-[10px] tracking-[0.2em] text-purple uppercase">Community</p>
-          <h1 className="font-mono text-base font-bold text-text">Berichten</h1>
+          <p className="font-mono text-[10px] tracking-[0.2em] text-purple uppercase">{t('messages2.community')}</p>
+          <h1 className="font-mono text-base font-bold text-text">{t('messages2.title')}</h1>
         </div>
         <button
           onClick={() => setNewOpen(true)}
           className="w-9 h-9 bg-purple text-white rounded-full flex items-center justify-center hover:bg-purple/85 transition-colors duration-200 shadow-[0_2px_8px_rgba(107,63,224,0.35)]"
-          aria-label="Nieuw gesprek"
+          aria-label={t('messages2.newConversation')}
         >
           <svg
             width="16"
@@ -86,20 +88,20 @@ export default function MessagesSidebar({
       {/* Tabs */}
       <div className="px-3 pt-3 flex-shrink-0">
         <div className="flex gap-1 bg-surface border border-border rounded-xl p-1">
-          {TABS.map((t) => (
+          {TABS.map((tabItem) => (
             <button
-              key={t.key}
-              onClick={() => setTab(t.key)}
+              key={tabItem.key}
+              onClick={() => setTab(tabItem.key)}
               className={`flex-1 py-2 rounded-lg font-mono text-[10px] uppercase tracking-wider transition-colors duration-200 ${
-                tab === t.key
+                tab === tabItem.key
                   ? 'bg-purple text-white'
                   : 'text-text-dim hover:text-text'
               }`}
             >
-              {t.label}
-              {t.count !== undefined && t.count > 0 && (
-                <span className={`ml-1.5 ${tab === t.key ? 'text-white/70' : 'text-text-dim/60'}`}>
-                  {t.count}
+              {tabItem.label}
+              {tabItem.count !== undefined && tabItem.count > 0 && (
+                <span className={`ml-1.5 ${tab === tabItem.key ? 'text-white/70' : 'text-text-dim/60'}`}>
+                  {tabItem.count}
                 </span>
               )}
             </button>
@@ -120,9 +122,9 @@ export default function MessagesSidebar({
         ) : requests.length === 0 ? (
           <div className="text-center py-12 px-4">
             <p className="font-mono text-[10px] tracking-[0.2em] text-text-dim/60 uppercase mb-2">
-              Leeg
+              {t('messages2.empty')}
             </p>
-            <p className="text-text-dim text-xs">Geen berichtverzoeken.</p>
+            <p className="text-text-dim text-xs">{t('messages2.noRequests')}</p>
           </div>
         ) : (
           <div className="space-y-2 px-3">
@@ -135,20 +137,20 @@ export default function MessagesSidebar({
                   {req.other_user?.display_name ?? req.other_user?.username}
                 </p>
                 <p className="text-text-dim text-[11px] mb-2 line-clamp-2">
-                  {req.last_message_preview ?? 'Geen preview'}
+                  {req.last_message_preview ?? t('messages2.noPreview')}
                 </p>
                 <div className="flex gap-1.5">
                   <button
                     onClick={() => handleRequest(req.id, 'accept')}
                     className="flex-1 py-1.5 bg-purple text-white font-mono text-[10px] uppercase tracking-wider rounded-lg hover:bg-purple/85 transition-colors duration-200"
                   >
-                    Accepteren
+                    {t('messages2.accept')}
                   </button>
                   <button
                     onClick={() => handleRequest(req.id, 'block')}
                     className="flex-1 py-1.5 border border-border text-text-dim font-mono text-[10px] uppercase tracking-wider rounded-lg hover:border-danger hover:text-danger transition-colors duration-200"
                   >
-                    Weigeren
+                    {t('messages2.reject')}
                   </button>
                 </div>
               </div>

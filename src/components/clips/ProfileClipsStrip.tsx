@@ -6,12 +6,14 @@ import Image from 'next/image'
 import type { ClipData } from './ClipModal'
 import ClipModal from './ClipModal'
 import { Play } from 'lucide-react'
+import { useLang } from '@/lib/lang-context'
 
 /**
  * Compacte clips-strip op de profielpagina.
  * Toont max 6 clips + "Bekijk alle" link naar /clips.
  */
 export function ProfileClipsStrip({ userId }: { userId: string }) {
+  const { t } = useLang()
   const [clips, setClips] = useState<ClipData[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
@@ -43,10 +45,10 @@ export function ProfileClipsStrip({ userId }: { userId: string }) {
     <div className="vs-card mb-5">
       <div className="flex items-center justify-between mb-3">
         <p className="vs-counter text-[10px] text-text-dim tabular-nums">
-          CLIPS · {total}
+          {t('clipsUi.clipsLabel')} · {total}
         </p>
         <Link href="/clips" className="font-mono text-[10px] text-purple hover:text-purple/85 transition-colors">
-          Bekijk alle →
+          {t('clipsUi.viewAll')} →
         </Link>
       </div>
       <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">

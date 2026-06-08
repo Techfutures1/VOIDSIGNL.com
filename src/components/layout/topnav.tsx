@@ -174,7 +174,7 @@ export function Topnav({ profile, notificationCount = 0 }: TopnavProps) {
 
   function notifTimeAgo(date: string): string {
     const s = Math.floor((Date.now() - new Date(date).getTime()) / 1000)
-    if (s < 60) return 'now'
+    if (s < 60) return t('topnav.timeNow')
     if (s < 3600) return `${Math.floor(s / 60)}m`
     if (s < 86400) return `${Math.floor(s / 3600)}h`
     if (s < 604800) return `${Math.floor(s / 86400)}d`
@@ -235,7 +235,7 @@ export function Topnav({ profile, notificationCount = 0 }: TopnavProps) {
         type: 'game' as const,
         id: g.id,
         title: g.name,
-        subtitle: 'Game',
+        subtitle: t('topnav.gameLabel'),
         link: `/feed?game=${g.id}`,
       })))
     }
@@ -272,7 +272,7 @@ export function Topnav({ profile, notificationCount = 0 }: TopnavProps) {
     setLang(lang === 'en' ? 'nl' : 'en')
   }
 
-  const typeLabel = { member: 'MEMBER', game: 'GAME', page: 'PAGE' }
+  const typeLabel = { member: t('topnav.typeMember'), game: t('topnav.typeGame'), page: t('topnav.typePage') }
   const typeColor = { member: 'text-purple', game: 'text-cyan', page: 'text-text-dim' }
 
   return (
@@ -297,7 +297,7 @@ export function Topnav({ profile, notificationCount = 0 }: TopnavProps) {
             onChange={(e) => handleChange(e.target.value)}
             onFocus={() => { if (results.length > 0 || recentQueries.length > 0) setOpen(true) }}
             onKeyDown={handleKeyDown}
-            placeholder={profile ? t('nav.search') : 'Search...'}
+            placeholder={profile ? t('nav.search') : t('topnav.searchPlaceholder')}
             className="bg-transparent text-sm text-text placeholder-text-dim outline-none w-full"
           />
           {query && (
@@ -314,12 +314,12 @@ export function Topnav({ profile, notificationCount = 0 }: TopnavProps) {
             {!query.trim() && recentQueries.length > 0 && (
               <div>
                 <div className="flex items-center justify-between px-4 py-2 border-b border-border">
-                  <span className="vs-counter text-[9px] text-text-dim tabular-nums">RECENT</span>
+                  <span className="vs-counter text-[9px] text-text-dim tabular-nums">{t('topnav.recent')}</span>
                   <button
                     onClick={clearRecent}
                     className="text-[10px] text-text-dim hover:text-danger transition-colors"
                   >
-                    Clear
+                    {t('topnav.clear')}
                   </button>
                 </div>
                 {recentQueries.map(q => (
@@ -356,7 +356,7 @@ export function Topnav({ profile, notificationCount = 0 }: TopnavProps) {
               )
             })}
             {searching && (
-              <div className="px-4 py-3 text-xs text-text-dim text-center">Searching...</div>
+              <div className="px-4 py-3 text-xs text-text-dim text-center">{t('topnav.searching')}</div>
             )}
           </div>
         )}
@@ -405,10 +405,10 @@ export function Topnav({ profile, notificationCount = 0 }: TopnavProps) {
               )
             })}
             {query && results.length === 0 && !searching && (
-              <div className="text-center py-12 text-sm text-text-dim">No results for "{query}"</div>
+              <div className="text-center py-12 text-sm text-text-dim">{t('topnav.noResults')} &quot;{query}&quot;</div>
             )}
             {searching && (
-              <div className="text-center py-8 text-xs text-text-dim">Searching...</div>
+              <div className="text-center py-8 text-xs text-text-dim">{t('topnav.searching')}</div>
             )}
           </div>
         </div>
@@ -434,7 +434,7 @@ export function Topnav({ profile, notificationCount = 0 }: TopnavProps) {
               <button
                 onClick={openNotifs}
                 className="relative p-1.5 -m-1.5 active:scale-90 transition-transform"
-                aria-label="Notifications"
+                aria-label={t('topnav.notifications')}
               >
                 <Bell
                   size={17}
@@ -451,7 +451,7 @@ export function Topnav({ profile, notificationCount = 0 }: TopnavProps) {
                 <div className="fixed top-[58px] right-3 md:right-5 w-[340px] max-w-[calc(100vw-1.5rem)] bg-surface border border-border rounded-xl shadow-xl shadow-black/40 overflow-hidden z-[60] animate-slide-up vs-lit">
                   <div className="flex items-center justify-between px-4 py-3 border-b border-border">
                     <p className="vs-counter text-[10px] tabular-nums">
-                      NOTIFICATIONS{notificationCount > 0 ? ` · ${String(notificationCount).padStart(2, '0')}` : ''}
+                      {t('topnav.notifications')}{notificationCount > 0 ? ` · ${String(notificationCount).padStart(2, '0')}` : ''}
                     </p>
                     <div className="flex items-center gap-3">
                       {notificationCount > 0 && (
@@ -459,7 +459,7 @@ export function Topnav({ profile, notificationCount = 0 }: TopnavProps) {
                           onClick={markAllRead}
                           className="text-[10px] text-cyan hover:text-cyan/80 transition-colors flex items-center gap-1"
                         >
-                          <CheckCheck size={10} /> Mark all
+                          <CheckCheck size={10} /> {t('topnav.markAll')}
                         </button>
                       )}
                     </div>
@@ -467,11 +467,11 @@ export function Topnav({ profile, notificationCount = 0 }: TopnavProps) {
 
                   <div className="max-h-[400px] overflow-y-auto">
                     {loadingNotifs ? (
-                      <div className="py-8 text-center text-xs text-text-dim">Loading...</div>
+                      <div className="py-8 text-center text-xs text-text-dim">{t('topnav.loading')}</div>
                     ) : notifs.length === 0 ? (
                       <div className="py-12 text-center">
                         <Bell size={24} className="mx-auto text-text-dim opacity-40 mb-2" />
-                        <p className="text-xs text-text-dim">No notifications yet</p>
+                        <p className="text-xs text-text-dim">{t('topnav.noNotifications')}</p>
                       </div>
                     ) : (
                       notifs.map(n => (
@@ -509,7 +509,7 @@ export function Topnav({ profile, notificationCount = 0 }: TopnavProps) {
                     onClick={() => setNotifOpen(false)}
                     className="flex items-center justify-center gap-1.5 px-4 py-2.5 text-[11px] text-text-muted hover:text-text bg-surface-2 transition-colors"
                   >
-                    See all <ArrowRight size={11} />
+                    {t('topnav.seeAll')} <ArrowRight size={11} />
                   </Link>
                 </div>
               )}
@@ -524,7 +524,7 @@ export function Topnav({ profile, notificationCount = 0 }: TopnavProps) {
           </>
         ) : (
           <Link href="/login" className="text-sm text-cyan hover:text-cyan/80 transition-colors">
-            Enter
+            {t('topnav.enter')}
           </Link>
         )}
       </div>

@@ -5,6 +5,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Plus, Check, Loader2 } from 'lucide-react'
+import { useLang } from '@/lib/lang-context'
 
 export interface GameCardData {
   id: string
@@ -25,6 +26,7 @@ interface GameCardProps {
 
 export default function GameCard({ game, userRank, isInLibrary }: GameCardProps) {
   const router = useRouter()
+  const { t } = useLang()
   const [inLibrary, setInLibrary] = useState(!!isInLibrary)
   const [loading, setLoading] = useState(false)
 
@@ -70,7 +72,7 @@ export default function GameCard({ game, userRank, isInLibrary }: GameCardProps)
           <button
             onClick={handleAdd}
             disabled={loading || inLibrary}
-            aria-label={inLibrary ? 'In bibliotheek' : 'Voeg toe aan bibliotheek'}
+            aria-label={inLibrary ? t('games2.in_library') : t('games2.add_to_library')}
             className={`absolute top-2 right-2 z-10 w-7 h-7 rounded-full flex items-center justify-center transition-all duration-200 ${
               inLibrary
                 ? 'bg-success/90 cursor-default'
@@ -94,7 +96,7 @@ export default function GameCard({ game, userRank, isInLibrary }: GameCardProps)
             </p>
             <div className="flex items-center justify-between">
               <span className="font-mono text-[9px] text-text-dim">
-                {game.player_count.toLocaleString()} spelers
+                {game.player_count.toLocaleString()} {t('games2.players_suffix')}
               </span>
               {userRank && (
                 <span className="font-mono text-[9px] text-purple">{userRank}</span>

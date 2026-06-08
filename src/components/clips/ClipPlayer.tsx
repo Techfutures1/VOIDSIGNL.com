@@ -1,5 +1,7 @@
 'use client'
 
+import { useLang } from '@/lib/lang-context'
+
 interface ClipPlayerProps {
   videoUrl: string
   sourceType: 'upload' | 'youtube' | 'twitch' | string
@@ -17,12 +19,13 @@ function getTwitchClipId(url: string) {
 }
 
 export default function ClipPlayer({ videoUrl, sourceType, title }: ClipPlayerProps) {
+  const { t } = useLang()
   if (sourceType === 'youtube') {
     const videoId = getYouTubeId(videoUrl)
     if (!videoId) {
       return (
         <div className="aspect-video bg-void rounded-xl flex items-center justify-center">
-          <p className="text-text-dim font-mono text-xs">Ongeldige YouTube URL</p>
+          <p className="text-text-dim font-mono text-xs">{t('clipsUi.invalidYoutubeUrl')}</p>
         </div>
       )
     }
@@ -44,7 +47,7 @@ export default function ClipPlayer({ videoUrl, sourceType, title }: ClipPlayerPr
     if (!clipId) {
       return (
         <div className="aspect-video bg-void rounded-xl flex items-center justify-center">
-          <p className="text-text-dim font-mono text-xs">Ongeldige Twitch URL</p>
+          <p className="text-text-dim font-mono text-xs">{t('clipsUi.invalidTwitchUrl')}</p>
         </div>
       )
     }

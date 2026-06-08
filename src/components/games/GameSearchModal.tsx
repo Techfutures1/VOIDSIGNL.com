@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { X } from 'lucide-react'
+import { useLang } from '@/lib/lang-context'
 
 interface IGDBResult {
   igdb_id: number
@@ -20,6 +21,7 @@ interface GameSearchModalProps {
 }
 
 export default function GameSearchModal({ onSelect, onClose }: GameSearchModalProps) {
+  const { t } = useLang()
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<IGDBResult[]>([])
   const [loading, setLoading] = useState(false)
@@ -59,10 +61,10 @@ export default function GameSearchModal({ onSelect, onClose }: GameSearchModalPr
         onSelect({ id: json.game_id, ...game })
         onClose()
       } else if (res.ok) {
-        alert(`${game.name} aangevraagd. Een admin keurt dit goed.`)
+        alert(`${game.name} ${t('games2.requested_admin_approval')}`)
         onClose()
       } else {
-        alert(json.error ?? 'Aanvraag mislukt')
+        alert(json.error ?? t('games2.request_failed'))
       }
     } finally {
       setRequesting(null)
@@ -72,7 +74,7 @@ export default function GameSearchModal({ onSelect, onClose }: GameSearchModalPr
   async function handleManualRequest() {
     setManualError('')
     if (manualName.trim().length < 2) {
-      setManualError('Naam moet minstens 2 tekens zijn.')
+      setManualError(t('games2.name_min_length'))
       return
     }
     setRequesting('manual')
@@ -94,10 +96,10 @@ export default function GameSearchModal({ onSelect, onClose }: GameSearchModalPr
       const json = await res.json()
 
       if (res.ok) {
-        alert(`${payload.name} aangevraagd. Een admin keurt dit goed.`)
+        alert(`${payload.name} ${t('games2.requested_admin_approval')}`)
         onClose()
       } else {
-        setManualError(json.error ?? 'Aanvraag mislukt')
+        setManualError(json.error ?? t('games2.request_failed'))
       }
     } finally {
       setRequesting(null)
@@ -110,8 +112,8 @@ export default function GameSearchModal({ onSelect, onClose }: GameSearchModalPr
       <div className="relative z-10 w-full max-w-lg bg-surface border border-border rounded-2xl overflow-hidden">
         <div className="flex items-center justify-between px-5 py-4 border-b border-border">
           <div>
-            <p className="font-mono text-[10px] tracking-[0.2em] text-purple uppercase mb-0.5">Games</p>
-            <h2 className="font-mono text-lg font-bold text-text">Game toevoegen</h2>
+            <p className="font-mono text-[10px] tracking-[0.2em] text-purple uppercase mb-0.5">{t('games2.modal_eyebrow')}</p>
+            <h2 className="font-mono text-lg font-bold text-text">{t('games2.modal_title')}</h2>
           </div>
           <button onClick={onClose} className="text-text-dim hover:text-text transition-colors">
             <X size={18} />
@@ -123,7 +125,7 @@ export default function GameSearchModal({ onSelect, onClose }: GameSearchModalPr
             type="text"
             value={query}
             onChange={e => { setQuery(e.target.value); setManualOpen(false) }}
-            placeholder="Zoek een game... (bijv. Valorant, CS2)"
+            placeholder={t('games2.search_placeholder')}
             autoFocus
             className="w-full bg-void border border-border rounded-lg px-4 py-3 text-text text-sm font-mono placeholder-text-dim/60 focus:outline-none focus:border-purple transition-colors"
           />
@@ -177,7 +179,7 @@ export default function GameSearchModal({ onSelect, onClose }: GameSearchModalPr
                     disabled={requesting === game.igdb_id}
                     className="px-3 py-1.5 bg-purple text-white font-mono text-xs uppercase tracking-wider rounded-lg hover:bg-purple/85 transition-colors duration-200 disabled:opacity-40 flex-shrink-0"
                   >
-                    {requesting === game.igdb_id ? '...' : '+ Aanvragen'}
+                    {requesting === game.igdb_id ? '...' : t('games2.request_button')}
                   </button>
                 </div>
               ))}
@@ -185,7 +187,7 @@ export default function GameSearchModal({ onSelect, onClose }: GameSearchModalPr
               {results.length === 0 && query.length >= 2 && !loading && (
                 <div className="p-6 text-center">
                   <p className="text-text-dim font-mono text-xs mb-3">
-                    Geen IGDB-resultaten voor &ldquo;{query}&rdquo;
+                    {t('games2.no_igdb_results')} &ldquo;{query}&rdquo;
                   </p>
                 </div>
               )}
@@ -193,7 +195,7 @@ export default function GameSearchModal({ onSelect, onClose }: GameSearchModalPr
               {query.length === 0 && !manualOpen && (
                 <div className="p-6 text-center">
                   <p className="text-text-dim/60 font-mono text-xs">
-                    Typ een game naam om te zoeken via IGDB
+                    {t('games2.search_hint')}
                   </p>
                 </div>
               )}
@@ -211,20 +213,20 @@ export default function GameSearchModal({ onSelect, onClose }: GameSearchModalPr
               }}
               className="w-full px-5 py-3 text-left font-mono text-xs text-text-dim hover:text-text hover:bg-surface-2 transition-colors duration-200 flex items-center justify-between"
             >
-              <span>Game niet gevonden? Vraag handmatig aan.</span>
+              <span>{t('games2.not_found_manual')}</span>
               <span className="text-purple">→</span>
             </button>
           ) : (
             <div className="p-5 space-y-3 bg-surface-2/50">
               <div className="flex items-center justify-between">
                 <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-purple">
-                  Handmatige aanvraag
+                  {t('games2.manual_request_title')}
                 </p>
                 <button
                   onClick={() => setManualOpen(false)}
                   className="text-text-dim hover:text-text transition-colors font-mono text-xs"
                 >
-                  Annuleer
+                  {t('games2.cancel')}
                 </button>
               </div>
 
@@ -232,7 +234,7 @@ export default function GameSearchModal({ onSelect, onClose }: GameSearchModalPr
                 type="text"
                 value={manualName}
                 onChange={e => setManualName(e.target.value)}
-                placeholder="Game naam *"
+                placeholder={t('games2.manual_name_placeholder')}
                 maxLength={100}
                 required
                 className="w-full bg-void border border-border rounded-lg px-3 py-2.5 text-text text-sm font-mono placeholder-text-dim/60 focus:outline-none focus:border-purple transition-colors"
@@ -241,7 +243,7 @@ export default function GameSearchModal({ onSelect, onClose }: GameSearchModalPr
               <textarea
                 value={manualDesc}
                 onChange={e => setManualDesc(e.target.value)}
-                placeholder="Korte beschrijving (optioneel)"
+                placeholder={t('games2.manual_desc_placeholder')}
                 rows={2}
                 maxLength={2000}
                 className="w-full bg-void border border-border rounded-lg px-3 py-2.5 text-text text-sm font-mono placeholder-text-dim/60 focus:outline-none focus:border-purple transition-colors resize-none"
@@ -251,7 +253,7 @@ export default function GameSearchModal({ onSelect, onClose }: GameSearchModalPr
                 type="number"
                 value={manualYear}
                 onChange={e => setManualYear(e.target.value)}
-                placeholder="Releasejaar (optioneel)"
+                placeholder={t('games2.manual_year_placeholder')}
                 min={1970}
                 max={2030}
                 className="w-full bg-void border border-border rounded-lg px-3 py-2.5 text-text text-sm font-mono placeholder-text-dim/60 focus:outline-none focus:border-purple transition-colors"
@@ -266,7 +268,7 @@ export default function GameSearchModal({ onSelect, onClose }: GameSearchModalPr
                 disabled={requesting === 'manual'}
                 className="w-full py-2.5 bg-purple text-white font-mono text-xs uppercase tracking-wider rounded-lg hover:bg-purple/85 transition-colors duration-200 disabled:opacity-40"
               >
-                {requesting === 'manual' ? 'Bezig...' : '+ Aanvraag indienen'}
+                {requesting === 'manual' ? t('games2.submitting') : t('games2.submit_request')}
               </button>
             </div>
           )}

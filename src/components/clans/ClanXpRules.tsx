@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useLang } from '@/lib/lang-context'
 
 interface XpRule {
   action: string
@@ -37,6 +38,7 @@ export default function ClanXpRules({
   actionLabels,
   onSaved,
 }: Props) {
+  const { t } = useLang()
   const [localRules, setLocalRules] = useState<LocalRules>(() =>
     Object.fromEntries(
       rules.map((r) => [
@@ -93,12 +95,12 @@ export default function ClanXpRules({
         <div className="flex items-center justify-between px-5 py-4 border-b border-border">
           <div>
             <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-purple mb-0.5">
-              Clan XP regels
+              {t('clans2.xpRulesTitle')}
             </p>
             <p className="text-text-muted text-xs">
               {canEdit
-                ? 'Stel in hoeveel XP leden verdienen per actie.'
-                : 'Hoeveel XP leden verdienen per actie.'}
+                ? t('clans2.xpRulesDescEdit')
+                : t('clans2.xpRulesDescView')}
             </p>
           </div>
           {canEdit && (
@@ -107,7 +109,7 @@ export default function ClanXpRules({
               disabled={saving}
               className="px-5 py-2.5 bg-purple text-white font-mono text-xs uppercase tracking-wider rounded-lg hover:bg-purple/85 transition-colors disabled:opacity-40"
             >
-              {saving ? '...' : saved ? '✓ Opgeslagen' : 'Opslaan'}
+              {saving ? '...' : saved ? `✓ ${t('clans2.saved')}` : t('clans2.save')}
             </button>
           )}
         </div>
@@ -137,7 +139,7 @@ export default function ClanXpRules({
                       background: rule.is_enabled ? '#6B3FE0' : '#3a3a48',
                     }}
                     aria-label={
-                      rule.is_enabled ? 'Schakel uit' : 'Schakel aan'
+                      rule.is_enabled ? t('clans2.toggleOff') : t('clans2.toggleOn')
                     }
                   >
                     <span
@@ -164,7 +166,7 @@ export default function ClanXpRules({
                     {actionLabels[action] ?? action}
                   </p>
                   <p className="font-mono text-[10px] text-text-dim mt-0.5">
-                    Max: {meta.max} XP · Standaard: {meta.default} XP
+                    {t('clans2.max')}: {meta.max} XP · {t('clans2.default')}: {meta.default} XP
                   </p>
                 </div>
 
@@ -207,7 +209,7 @@ export default function ClanXpRules({
       {!canEdit && (
         <div className="bg-purple/5 border border-purple/20 rounded-xl p-4">
           <p className="text-text-muted text-xs leading-relaxed">
-            XP regels worden ingesteld door de clan owner en officers.
+            {t('clans2.xpRulesFooter')}
           </p>
         </div>
       )}

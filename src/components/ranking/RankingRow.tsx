@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
+import { useLang } from '@/lib/lang-context'
 
 export interface RankingRowUser {
   id: string
@@ -52,6 +53,7 @@ export default function RankingRow({
   metricLabel,
   metaItems,
 }: RankingRowProps) {
+  const { t } = useLang()
   const accent = user.accent_color ?? '#6B3FE0'
   const value = metricValue ?? user.xp ?? 0
   const barPct = Math.max(2, Math.round((value / (maxXp || 1)) * 100))
@@ -116,7 +118,7 @@ export default function RankingRow({
 
             {isOwn && (
               <span className="font-mono text-[9px] opacity-50" style={{ color: accent }}>
-                ← jij
+                ← {t('rankingUi.you')}
               </span>
             )}
 
@@ -124,12 +126,13 @@ export default function RankingRow({
 
             {user.is_inner_circle && (
               <span className="font-mono text-[8px] uppercase tracking-widest px-1.5 py-0.5 rounded-full border bg-cyan/10 border-cyan/25 text-cyan">
-                Inner Circle              </span>
+                {t('rankingUi.innerCircle')}
+              </span>
             )}
 
             {(user.cotw_count ?? 0) > 0 && (
               <span className="font-mono text-[8px] uppercase tracking-widest px-1.5 py-0.5 rounded-full border bg-cyan/10 border-cyan/25 text-cyan">
-                ★ CotW
+                ★ {t('rankingUi.cotw')}
               </span>
             )}
 
@@ -154,19 +157,22 @@ export default function RankingRow({
 
             {(user.clip_count ?? 0) > 0 && (
               <span className="text-[10px] text-text-dim">
-                {user.clip_count} {user.clip_count === 1 ? 'clip' : 'clips'}
+                {user.clip_count}{' '}
+                {user.clip_count === 1
+                  ? t('rankingUi.clipSingular')
+                  : t('rankingUi.clipPlural')}
               </span>
             )}
 
             {(user.follower_count ?? 0) > 0 && (
               <span className="text-[10px] text-text-dim">
-                {user.follower_count} volgers
+                {user.follower_count} {t('rankingUi.followers')}
               </span>
             )}
 
             {(user.achievement_count ?? 0) > 0 && (
               <span className="text-[10px] text-purple">
-                {user.achievement_count} badges
+                {user.achievement_count} {t('rankingUi.badges')}
               </span>
             )}
 

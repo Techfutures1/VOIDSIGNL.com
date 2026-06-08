@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import Image from 'next/image'
 import { Heart, Send, X } from 'lucide-react'
+import { useLang } from '@/lib/lang-context'
 
 export interface FeedComment {
   id: string
@@ -21,6 +22,7 @@ export interface FeedComment {
 }
 
 export default function PostComments({ postId }: { postId: string }) {
+  const { t } = useLang()
   const [comments, setComments] = useState<FeedComment[]>([])
   const [newComment, setNewComment] = useState('')
   const [replyTo, setReplyTo] = useState<{ id: string; username: string } | null>(null)
@@ -131,7 +133,7 @@ export default function PostComments({ postId }: { postId: string }) {
                 onClick={() => startReply(comment.id, comment.user?.username ?? '')}
                 className="font-mono text-[10px] text-text-dim hover:text-purple transition-colors duration-200"
               >
-                Reageer
+                {t('feed2.reply')}
               </button>
             )}
           </div>
@@ -152,7 +154,7 @@ export default function PostComments({ postId }: { postId: string }) {
 
       {comments.length === 0 && (
         <p className="text-center text-text-dim/60 font-mono text-xs py-2">
-          Nog geen reacties.
+          {t('feed2.no_comments')}
         </p>
       )}
 
@@ -160,7 +162,7 @@ export default function PostComments({ postId }: { postId: string }) {
         {replyTo && (
           <div className="flex items-center gap-2 mb-1.5">
             <span className="font-mono text-[10px] text-purple">
-              ↳ Reageer op @{replyTo.username}
+              ↳ {t('feed2.replying_to')} @{replyTo.username}
             </span>
             <button
               type="button"
@@ -177,7 +179,7 @@ export default function PostComments({ postId }: { postId: string }) {
             type="text"
             value={newComment}
             onChange={e => setNewComment(e.target.value)}
-            placeholder={replyTo ? `Antwoord aan @${replyTo.username}…` : 'Schrijf een reactie…'}
+            placeholder={replyTo ? `${t('feed2.reply_placeholder_prefix')} @${replyTo.username}…` : t('feed2.comment_placeholder')}
             maxLength={1000}
             className="flex-1 bg-void border border-border rounded-full px-4 py-2 text-text text-sm placeholder-text-dim/60 focus:outline-none focus:border-purple transition-[border-color] duration-200"
           />
@@ -185,7 +187,7 @@ export default function PostComments({ postId }: { postId: string }) {
             type="submit"
             disabled={loading || !newComment.trim()}
             className="w-9 h-9 bg-purple text-white rounded-full flex items-center justify-center hover:bg-purple/85 transition-colors duration-200 disabled:opacity-40 disabled:cursor-not-allowed flex-shrink-0"
-            aria-label="Verstuur"
+            aria-label={t('feed2.send')}
           >
             {loading ? '...' : <Send size={14} />}
           </button>

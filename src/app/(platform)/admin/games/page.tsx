@@ -7,17 +7,18 @@ import Image from 'next/image'
 import { createClient } from '@/lib/supabase-browser'
 import { ArrowLeft, Shield, Check, X } from 'lucide-react'
 import { BrandSelect } from '@/components/ui/BrandSelect'
+import { useLang } from '@/lib/lang-context'
 
-const RANK_SET_OPTIONS = [
-  { value: 'none', label: 'Geen ranks' },
-  { value: 'valorant', label: 'Valorant' },
-  { value: 'cs2', label: 'CS2' },
-  { value: 'fortnite', label: 'Fortnite' },
-  { value: 'apex', label: 'Apex Legends' },
-  { value: 'lol', label: 'League of Legends' },
-  { value: 'overwatch2', label: 'Overwatch 2' },
-  { value: 'rocket_league', label: 'Rocket League' },
-  { value: 'custom', label: 'Aangepast' },
+const RANK_SET_VALUES = [
+  'none',
+  'valorant',
+  'cs2',
+  'fortnite',
+  'apex',
+  'lol',
+  'overwatch2',
+  'rocket_league',
+  'custom',
 ]
 
 interface GameRequest {
@@ -36,8 +37,13 @@ interface GameRequest {
 }
 
 export default function AdminGamesPage() {
+  const { t } = useLang()
   const supabase = createClient()
   const router = useRouter()
+  const rankSetOptions = RANK_SET_VALUES.map((value) => ({
+    value,
+    label: t(`adminManage.rankSet_${value}`),
+  }))
   const [authorized, setAuthorized] = useState(false)
   const [requests, setRequests] = useState<GameRequest[]>([])
   const [loading, setLoading] = useState(true)
@@ -99,7 +105,7 @@ export default function AdminGamesPage() {
   }
 
   async function handleReject(requestId: string) {
-    const note = prompt('Reden voor afwijzing:')
+    const note = prompt(t('adminManage.rejectReason'))
     if (!note) return
     await supabase
       .from('game_requests')
@@ -115,7 +121,7 @@ export default function AdminGamesPage() {
   if (!authorized) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-text-dim text-sm animate-pulse">Checking access...</div>
+        <div className="text-text-dim text-sm animate-pulse">{t('adminManage.checkingAccess')}</div>
       </div>
     )
   }
@@ -127,14 +133,14 @@ export default function AdminGamesPage() {
     <div className="max-w-5xl mx-auto animate-fade-in space-y-6">
       <div>
         <Link href="/admin" className="inline-flex items-center gap-1.5 text-xs text-text-dim hover:text-text mb-3">
-          <ArrowLeft size={12} /> Terug naar Admin
+          <ArrowLeft size={12} /> {t('adminManage.backToAdmin')}
         </Link>
-        <p className="font-mono text-[10px] tracking-[0.2em] text-purple uppercase mb-1">Admin</p>
+        <p className="font-mono text-[10px] tracking-[0.2em] text-purple uppercase mb-1">{t('adminManage.adminLabel')}</p>
         <h1 className="text-xl font-semibold tracking-wide flex items-center gap-2">
-          <Shield size={20} className="text-purple" /> Game aanvragen
+          <Shield size={20} className="text-purple" /> {t('adminManage.gamesTitle')}
         </h1>
         <p className="text-text-dim text-sm mt-1">
-          {pending.length} wachtend · {reviewed.length} afgehandeld
+          {pending.length} {t('adminManage.pendingCount')} · {reviewed.length} {t('adminManage.reviewedCount')}
         </p>
       </div>
 
@@ -146,7 +152,7 @@ export default function AdminGamesPage() {
         </div>
       ) : pending.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-text-dim font-mono text-sm">Geen openstaande aanvragen.</p>
+          <p className="text-text-dim font-mono text-sm">{t('adminManage.noPendingRequests')}</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -166,7 +172,7 @@ export default function AdminGamesPage() {
                 <div className="flex-1 min-w-0">
                   <p className="font-mono text-sm font-bold text-text mb-0.5">{req.name}</p>
                   <p className="font-mono text-[10px] text-text-dim">
-                    Aangevraagd door {req.requester?.username ?? 'onbekend'} · {req.release_year ?? '—'}
+                    {t('adminManage.requestedBy')} {req.requester?.username ?? t('adminManage.unknownRequester')} · {req.release_year ?? '—'}
                   </p>
                   {req.genre && req.genre.length > 0 && (
                     <div className="flex gap-1 mt-1.5 flex-wrap">
@@ -181,19 +187,19 @@ export default function AdminGamesPage() {
 
                   <div className="mt-3 space-y-2">
                     <label className="font-mono text-[10px] text-text-dim uppercase tracking-wider">
-                      Rank systeem
+                      {t('adminManage.rankSystem')}
                     </label>
                     <BrandSelect
                       value={rankSets[req.id] ?? 'none'}
                       onChange={(v) => setRankSets(prev => ({ ...prev, [req.id]: v }))}
-                      options={RANK_SET_OPTIONS.map(opt => ({ value: opt.value, label: opt.label }))}
+                      options={rankSetOptions}
                     />
 
                     {rankSets[req.id] === 'custom' && (
                       <textarea
                         value={customRanks[req.id] ?? ''}
                         onChange={e => setCustomRanks(prev => ({ ...prev, [req.id]: e.target.value }))}
-                        placeholder="Één rank per regel..."
+                        placeholder={t('adminManage.customRanksPlaceholder')}
                         rows={4}
                         className="w-full bg-void border border-border rounded-lg px-3 py-2 text-text text-xs font-mono placeholder-text-dim/60 focus:outline-none focus:border-purple transition-colors resize-none"
                       />
@@ -206,13 +212,13 @@ export default function AdminGamesPage() {
                       disabled={approving === req.id}
                       className="px-4 py-2 bg-success text-white font-mono text-xs uppercase tracking-wider rounded-lg hover:bg-success/85 transition-colors duration-200 disabled:opacity-40 flex items-center gap-1.5"
                     >
-                      <Check size={12} /> Goedkeuren
+                      <Check size={12} /> {t('adminManage.approve')}
                     </button>
                     <button
                       onClick={() => handleReject(req.id)}
                       className="px-4 py-2 border border-danger text-danger font-mono text-xs uppercase tracking-wider rounded-lg hover:bg-danger/10 transition-colors duration-200 flex items-center gap-1.5"
                     >
-                      <X size={12} /> Afwijzen
+                      <X size={12} /> {t('adminManage.reject')}
                     </button>
                   </div>
                 </div>

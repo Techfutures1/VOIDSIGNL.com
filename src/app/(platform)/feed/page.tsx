@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, Suspense } from 'react'
 import { createClient } from '@/lib/supabase-browser'
+import { useLang } from '@/lib/lang-context'
 import PostCard, { type FeedPost } from '@/components/feed/PostCard'
 import CreatePostBox from '@/components/feed/CreatePostBox'
 import RepostModal from '@/components/feed/RepostModal'
@@ -20,6 +21,7 @@ const PAGE_SIZE = 20
 
 function FeedContent() {
   const supabase = createClient()
+  const { t } = useLang()
   const [tab, setTab] = useState<FeedTab>('global')
   const [posts, setPosts] = useState<FeedPost[]>([])
   const [loading, setLoading] = useState(true)
@@ -75,24 +77,24 @@ function FeedContent() {
     <div className="max-w-2xl mx-auto px-4 py-8">
       <div className="mb-6">
         <p className="font-mono text-[10px] tracking-[0.2em] text-purple uppercase mb-1">
-          Community
+          {t('feed2.eyebrow_community')}
         </p>
-        <h1 className="font-mono text-3xl font-bold text-text">Feed</h1>
+        <h1 className="font-mono text-3xl font-bold text-text">{t('feed2.title')}</h1>
       </div>
 
       <div className="flex gap-1 bg-surface border border-border rounded-xl p-1 mb-5">
         {[
-          { key: 'global', label: 'Globaal' },
-          { key: 'following', label: 'Volgend' },
-        ].map(t => (
+          { key: 'global', label: t('feed2.tab_global') },
+          { key: 'following', label: t('feed2.tab_following') },
+        ].map(item => (
           <button
-            key={t.key}
-            onClick={() => setTab(t.key as FeedTab)}
+            key={item.key}
+            onClick={() => setTab(item.key as FeedTab)}
             className={`flex-1 py-2.5 rounded-lg font-mono text-xs uppercase tracking-wider transition-colors duration-200 ${
-              tab === t.key ? 'bg-purple text-white' : 'text-text-dim hover:text-text'
+              tab === item.key ? 'bg-purple text-white' : 'text-text-dim hover:text-text'
             }`}
           >
-            {t.label}
+            {item.label}
           </button>
         ))}
       </div>
@@ -112,12 +114,12 @@ function FeedContent() {
       ) : posts.length === 0 ? (
         <div className="text-center py-16">
           <p className="font-mono text-[10px] tracking-[0.2em] text-text-dim/60 uppercase mb-3">
-            Leeg
+            {t('feed2.empty_eyebrow')}
           </p>
           <p className="text-text-dim text-sm">
             {tab === 'following'
-              ? 'Volg mensen om hun posts hier te zien.'
-              : 'Nog geen posts. Wees de eerste.'}
+              ? t('feed2.empty_following')
+              : t('feed2.empty_global')}
           </p>
         </div>
       ) : (
@@ -144,7 +146,7 @@ function FeedContent() {
             }}
             className="px-6 py-2.5 border border-border text-text-dim font-mono text-xs rounded-lg hover:border-purple hover:text-text transition-colors duration-200"
           >
-            Meer laden
+            {t('feed2.load_more')}
           </button>
         </div>
       )}

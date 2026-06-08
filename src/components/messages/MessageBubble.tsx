@@ -1,4 +1,7 @@
+'use client'
+
 import Image from 'next/image'
+import { useLang } from '@/lib/lang-context'
 
 export interface ChatMessage {
   id: string
@@ -38,6 +41,7 @@ function formatTime(date: string) {
  * (kleurt cyan zodra read=true). Alleen tonen op eigen messages.
  */
 function ReadReceiptIcon({ read }: { read: boolean }) {
+  const { t } = useLang()
   const color = read ? '#00C8F0' : 'currentColor'
   return (
     <svg
@@ -49,7 +53,7 @@ function ReadReceiptIcon({ read }: { read: boolean }) {
       strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
-      aria-label={read ? 'Gelezen' : 'Verzonden'}
+      aria-label={read ? t('messages2.read') : t('messages2.sent')}
     >
       {/* Eerste vinkje */}
       <polyline points="1,6 4.5,9 11,2.5" />
@@ -65,6 +69,7 @@ export default function MessageBubble({
   isFirstInGroup = true,
   isLastInGroup = true,
 }: MessageBubbleProps) {
+  const { t } = useLang()
   const accentColor = message.sender?.accent_color ?? '#6B3FE0'
   const isText = message.message_type === 'text'
 
@@ -145,7 +150,7 @@ export default function MessageBubble({
             >
               <Image
                 src={message.media_url}
-                alt="Afbeelding"
+                alt={t('messages2.imageAlt')}
                 width={240}
                 height={180}
                 className="object-cover"
@@ -162,7 +167,7 @@ export default function MessageBubble({
               style={{ borderRadius: radius }}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={message.gif_url} alt="GIF" className="w-full" />
+              <img src={message.gif_url} alt={t('messages2.gifAlt')} className="w-full" />
             </div>
             <span className="absolute bottom-1.5 right-1.5 font-mono text-[10px] text-white bg-black/55 backdrop-blur-sm rounded-full px-1.5 py-0.5 leading-none">
               {formatTime(message.created_at)}
@@ -173,7 +178,7 @@ export default function MessageBubble({
             <div className="w-28 h-28 relative">
               <Image
                 src={`/stickers/${message.sticker_id.replace('void_', 'void-')}.svg`}
-                alt="Sticker"
+                alt={t('messages2.stickerAlt')}
                 fill
                 sizes="112px"
                 className="object-contain drop-shadow-md"

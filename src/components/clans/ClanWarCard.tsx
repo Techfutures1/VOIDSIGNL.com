@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { useLang } from '@/lib/lang-context'
 
 interface ClanWarCardProps {
   war: {
@@ -15,6 +16,7 @@ interface ClanWarCardProps {
 }
 
 export default function ClanWarCard({ war, myClanId }: ClanWarCardProps) {
+  const { t } = useLang()
   const isChallenger = war.challenger.id === myClanId
   const myClan = isChallenger ? war.challenger : war.challenged
   const enemyClan = isChallenger ? war.challenged : war.challenger
@@ -37,10 +39,10 @@ export default function ClanWarCard({ war, myClanId }: ClanWarCardProps) {
       }`}
     >
       <div className="flex items-center justify-between mb-4">
-        <p className="font-mono text-[10px] tracking-[0.2em] text-purple uppercase">Clan War</p>
+        <p className="font-mono text-[10px] tracking-[0.2em] text-purple uppercase">{t('clans2.clanWar')}</p>
         {daysLeft !== null && (
           <span className="font-mono text-[10px] text-text-dim">
-            {daysLeft > 0 ? `${daysLeft} dagen resterend` : 'Afgelopen'}
+            {daysLeft > 0 ? `${daysLeft} ${t('clans2.daysRemaining')}` : t('clans2.ended')}
           </span>
         )}
       </div>
@@ -76,7 +78,7 @@ export default function ClanWarCard({ war, myClanId }: ClanWarCardProps) {
 
         {/* VS */}
         <div className="text-center flex-shrink-0">
-          <p className="font-mono text-sm text-text-dim/60 font-bold">VS</p>
+          <p className="font-mono text-sm text-text-dim/60 font-bold">{t('clans2.vs')}</p>
         </div>
 
         {/* Tegenstander */}
@@ -111,7 +113,7 @@ export default function ClanWarCard({ war, myClanId }: ClanWarCardProps) {
             isWinning ? 'text-success' : isTied ? 'text-text-dim' : 'text-danger'
           }`}
         >
-          {isWinning ? '↑ Jullie leiden' : isTied ? 'Gelijkspel' : '↓ Achterstand'}
+          {isWinning ? `↑ ${t('clans2.leading')}` : isTied ? t('clans2.tied') : `↓ ${t('clans2.behind')}`}
         </p>
       </div>
     </div>

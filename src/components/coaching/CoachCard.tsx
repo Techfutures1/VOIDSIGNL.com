@@ -1,5 +1,8 @@
+'use client'
+
 import Image from 'next/image'
 import Link from 'next/link'
+import { useLang } from '@/lib/lang-context'
 
 const TIER_LABELS: Record<string, { label: string; price: string }> = {
   basic: { label: 'Basic', price: '€10' },
@@ -29,6 +32,7 @@ export interface CoachCardData {
 }
 
 export default function CoachCard({ coach }: { coach: CoachCardData }) {
+  const { t } = useLang()
   if (!coach.user) return null
 
   const accentColor = coach.user.accent_color ?? '#6B3FE0'
@@ -73,7 +77,7 @@ export default function CoachCard({ coach }: { coach: CoachCardData }) {
                   ))}
                 </div>
                 <span className="font-mono text-[10px] text-text-dim">
-                  {coach.avg_rating > 0 ? coach.avg_rating.toFixed(1) : 'Nieuw'}
+                  {coach.avg_rating > 0 ? coach.avg_rating.toFixed(1) : t('coachingUi.new')}
                   {coach.review_count > 0 && ` (${coach.review_count})`}
                 </span>
               </div>
@@ -110,7 +114,7 @@ export default function CoachCard({ coach }: { coach: CoachCardData }) {
               ))}
             </div>
             <span className="font-mono text-[10px] text-text-dim">
-              {coach.total_sessions} sessies
+              {coach.total_sessions} {t('coachingUi.sessions')}
             </span>
           </div>
         </div>

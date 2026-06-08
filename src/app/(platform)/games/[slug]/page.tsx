@@ -16,6 +16,7 @@ import {
   Loader2,
 } from 'lucide-react'
 import { BrandSelect } from '@/components/ui/BrandSelect'
+import { useLang } from '@/lib/lang-context'
 import GameOverviewTab from '@/components/games/tabs/GameOverviewTab'
 import GamePlayersTab from '@/components/games/tabs/GamePlayersTab'
 import GameClipsTab from '@/components/games/tabs/GameClipsTab'
@@ -79,17 +80,18 @@ const RANK_SETS: Record<string, string[]> = {
   fortnite: ['Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond', 'Elite', 'Champion', 'Unreal'],
 }
 
-const TABS: { id: Tab; label: string; icon: React.ComponentType<{ size?: number; className?: string }> }[] = [
-  { id: 'overview', label: 'Overzicht', icon: Trophy },
-  { id: 'players', label: 'Spelers', icon: Users },
-  { id: 'clips', label: 'Clips', icon: Video },
-  { id: 'forum', label: 'Forum', icon: MessageSquare },
-  { id: 'coaches', label: 'Coaches', icon: GraduationCap },
+const TABS: { id: Tab; labelKey: string; icon: React.ComponentType<{ size?: number; className?: string }> }[] = [
+  { id: 'overview', labelKey: 'games2.tab_overview', icon: Trophy },
+  { id: 'players', labelKey: 'games2.tab_players', icon: Users },
+  { id: 'clips', labelKey: 'games2.tab_clips', icon: Video },
+  { id: 'forum', labelKey: 'games2.tab_forum', icon: MessageSquare },
+  { id: 'coaches', labelKey: 'games2.tab_coaches', icon: GraduationCap },
 ]
 
 export default function GamePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params)
   const router = useRouter()
+  const { t } = useLang()
 
   const [activeTab, setActiveTab] = useState<Tab>('overview')
   const [page, setPage] = useState(1)
@@ -105,21 +107,21 @@ export default function GamePage({ params }: { params: Promise<{ slug: string }>
     try {
       const res = await fetch(`/api/games/${slug}?tab=${activeTab}&page=${page}`)
       if (res.status === 404) {
-        setError('Game niet gevonden')
+        setError(t('games2.error_not_found'))
         return
       }
       if (!res.ok) {
-        setError('Kon game niet laden')
+        setError(t('games2.error_load_failed'))
         return
       }
       const json = (await res.json()) as ApiResponse
       setData(json)
     } catch {
-      setError('Netwerkfout')
+      setError(t('games2.error_network'))
     } finally {
       setLoading(false)
     }
-  }, [slug, activeTab, page])
+  }, [slug, activeTab, page, t])
 
   useEffect(() => {
     void fetchData()
@@ -186,12 +188,12 @@ export default function GamePage({ params }: { params: Promise<{ slug: string }>
   if (error || !data) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-12 text-center">
-        <p className="font-mono text-sm text-danger">{error ?? 'Onbekende fout'}</p>
+        <p className="font-mono text-sm text-danger">{error ?? t('games2.error_unknown')}</p>
         <Link
           href="/games"
           className="inline-block mt-4 font-mono text-[10px] uppercase tracking-widest text-purple hover:underline"
         >
-          ← Terug naar games
+          ← {t('games2.back_to_games')}
         </Link>
       </div>
     )
@@ -202,10 +204,10 @@ export default function GamePage({ params }: { params: Promise<{ slug: string }>
   const rankOptions = game.rank_set && RANK_SETS[game.rank_set] ? RANK_SETS[game.rank_set] : null
 
   const statBlocks = [
-    { value: stats.players, label: 'Spelers', icon: Users },
-    { value: stats.clips, label: 'Clips', icon: Video },
-    { value: stats.threads, label: 'Threads', icon: MessageSquare },
-    { value: stats.coaches, label: 'Coaches', icon: GraduationCap },
+    { value: stats.players, label: t('games2.stat_players'), icon: Users },
+    { value: stats.clips, label: t('games2.stat_clips'), icon: Video },
+    { value: stats.threads, label: t('games2.stat_threads'), icon: MessageSquare },
+    { value: stats.coaches, label: t('games2.stat_coaches'), icon: GraduationCap },
   ]
 
   return (
@@ -216,7 +218,7 @@ export default function GamePage({ params }: { params: Promise<{ slug: string }>
         className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-text-muted hover:text-text transition-colors duration-200 mb-4"
       >
         <ArrowLeft size={12} />
-        Alle games
+        {t('games2.all_games')}
       </button>
 
       {/* Hero met blurred cover */}
@@ -269,7 +271,7 @@ export default function GamePage({ params }: { params: Promise<{ slug: string }>
 
             <div className="flex items-center gap-4 flex-wrap justify-center md:justify-start mb-3">
               <span className="font-mono text-xs text-text-muted">
-                {game.player_count?.toLocaleString() ?? 0} spelers
+                {game.player_count?.toLocaleString() ?? 0} {t('games2.players_suffix')}
               </span>
               {game.release_year && (
                 <span className="font-mono text-xs text-text-dim">{game.release_year}</span>
@@ -309,7 +311,7 @@ export default function GamePage({ params }: { params: Promise<{ slug: string }>
                     ) : (
                       <Check size={12} />
                     )}
-                    In bibliotheek
+                    {t('games2.in_library')}
                   </button>
 
                   {rankOptions && (
@@ -319,9 +321,9 @@ export default function GamePage({ params }: { params: Promise<{ slug: string }>
                         onChange={handleRankChange}
                         disabled={rankUpdating}
                         size="sm"
-                        placeholder="Kies je rank"
+                        placeholder={t('games2.choose_rank')}
                         options={[
-                          { value: '', label: 'Geen rank' },
+                          { value: '', label: t('games2.no_rank') },
                           ...rankOptions.map((r) => ({ value: r, label: r })),
                         ]}
                       />
@@ -339,7 +341,7 @@ export default function GamePage({ params }: { params: Promise<{ slug: string }>
                   ) : (
                     <Plus size={12} />
                   )}
-                  Voeg toe aan bibliotheek
+                  {t('games2.add_to_library')}
                 </button>
               )}
             </div>
@@ -373,13 +375,13 @@ export default function GamePage({ params }: { params: Promise<{ slug: string }>
       {/* Tab nav */}
       <div className="border-b border-border mb-6 -mx-4 px-4 overflow-x-auto">
         <div className="flex gap-1 min-w-max">
-          {TABS.map((t) => {
-            const Icon = t.icon
-            const isActive = activeTab === t.id
+          {TABS.map((tab) => {
+            const Icon = tab.icon
+            const isActive = activeTab === tab.id
             return (
               <button
-                key={t.id}
-                onClick={() => handleTabChange(t.id)}
+                key={tab.id}
+                onClick={() => handleTabChange(tab.id)}
                 className={`flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest px-4 py-3 border-b-2 transition-colors duration-200 ${
                   isActive
                     ? 'border-purple text-purple'
@@ -387,7 +389,7 @@ export default function GamePage({ params }: { params: Promise<{ slug: string }>
                 }`}
               >
                 <Icon size={12} />
-                {t.label}
+                {t(tab.labelKey)}
               </button>
             )
           })}

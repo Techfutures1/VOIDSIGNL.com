@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import PostComments from './PostComments'
+import { useLang } from '@/lib/lang-context'
 import { Heart, MessageCircle, Repeat2, MoreHorizontal, Link2 } from 'lucide-react'
 
 export interface FeedPost {
@@ -39,24 +40,25 @@ interface PostCardProps {
   onDelete?: (postId: string) => void
 }
 
-const POST_TYPE_LABELS: Record<string, { label: string; color: string }> = {
-  achievement: { label: '🏆 Achievement', color: '#f59e0b' },
-  clip: { label: '🎬 Clip', color: '#00C8F0' },
-  buddy: { label: '🤝 Buddy', color: '#22c55e' },
-  repost: { label: '↩ Gedeeld', color: '#9998aa' },
+const POST_TYPE_META: Record<string, { labelKey: string; color: string }> = {
+  achievement: { labelKey: 'feed2.type_achievement', color: '#f59e0b' },
+  clip: { labelKey: 'feed2.type_clip', color: '#00C8F0' },
+  buddy: { labelKey: 'feed2.type_buddy', color: '#22c55e' },
+  repost: { labelKey: 'feed2.type_repost', color: '#9998aa' },
 }
 
-function timeAgo(date: string) {
+function timeAgo(date: string, t: (key: string) => string) {
   const diff = Date.now() - new Date(date).getTime()
   const mins = Math.floor(diff / 60000)
-  if (mins < 1) return 'nu'
-  if (mins < 60) return `${mins}m`
+  if (mins < 1) return t('feed2.time_now')
+  if (mins < 60) return `${mins}${t('feed2.time_minute_short')}`
   const hrs = Math.floor(mins / 60)
-  if (hrs < 24) return `${hrs}u`
-  return `${Math.floor(hrs / 24)}d`
+  if (hrs < 24) return `${hrs}${t('feed2.time_hour_short')}`
+  return `${Math.floor(hrs / 24)}${t('feed2.time_day_short')}`
 }
 
 export default function PostCard({ post, currentUserId, onRepost, onDelete }: PostCardProps) {
+  const { t } = useLang()
   const [liked, setLiked] = useState(post.is_liked)
   const [likeCount, setLikeCount] = useState(post.like_count)
   const [showComments, setShowComments] = useState(false)
@@ -64,7 +66,7 @@ export default function PostCard({ post, currentUserId, onRepost, onDelete }: Po
 
   if (!post.user) return null
   const accentColor = post.user.accent_color ?? '#6B3FE0'
-  const typeLabel = POST_TYPE_LABELS[post.post_type]
+  const typeMeta = POST_TYPE_META[post.post_type]
 
   const allImages = [
     ...(post.images ?? []),
@@ -82,7 +84,7 @@ export default function PostCard({ post, currentUserId, onRepost, onDelete }: Po
   }
 
   async function handleDelete() {
-    if (!confirm('Post verwijderen?')) return
+    if (!confirm(t('feed2.delete_confirm'))) return
     await fetch(`/api/feed/${post.id}`, { method: 'DELETE' })
     onDelete?.(post.id)
   }
@@ -122,7 +124,8 @@ export default function PostCard({ post, currentUserId, onRepost, onDelete }: Po
               {post.user.is_verified && <span className="text-cyan text-xs">✓</span>}
               {post.user.is_inner_circle && (
                 <span className="font-mono text-[8px] uppercase tracking-widest px-1.5 py-0.5 rounded-full bg-cyan/10 border border-cyan/20 text-cyan">
-                  Inner Circle                </span>
+                  {t('feed2.inner_circle')}
+                </span>
               )}
             </div>
             <div className="flex items-center gap-2">
@@ -130,16 +133,16 @@ export default function PostCard({ post, currentUserId, onRepost, onDelete }: Po
               {post.game && (
                 <span className="font-mono text-[10px] text-text-dim/60">· {post.game.name}</span>
               )}
-              <span className="font-mono text-[10px] text-text-dim/60">· {timeAgo(post.created_at)}</span>
+              <span className="font-mono text-[10px] text-text-dim/60">· {timeAgo(post.created_at, t)}</span>
             </div>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          {typeLabel && (
+          {typeMeta && (
             <span className="font-mono text-[9px] px-2 py-0.5 rounded-full bg-surface-2"
-              style={{ color: typeLabel.color }}>
-              {typeLabel.label}
+              style={{ color: typeMeta.color }}>
+              {t(typeMeta.labelKey)}
             </span>
           )}
 
@@ -157,14 +160,14 @@ export default function PostCard({ post, currentUserId, onRepost, onDelete }: Po
                     onClick={() => { handleDelete(); setShowMenu(false) }}
                     className="w-full text-left px-4 py-2.5 font-mono text-xs text-danger hover:bg-surface transition-colors"
                   >
-                    Verwijderen
+                    {t('feed2.delete')}
                   </button>
                 )}
                 <button
                   onClick={handleCopyLink}
                   className="w-full text-left px-4 py-2.5 font-mono text-xs text-text-dim hover:bg-surface transition-colors flex items-center gap-2"
                 >
-                  <Link2 size={11} /> Link kopiëren
+                  <Link2 size={11} /> {t('feed2.copy_link')}
                 </button>
               </div>
             )}
@@ -197,7 +200,7 @@ export default function PostCard({ post, currentUserId, onRepost, onDelete }: Po
             <div key={i} className={`relative overflow-hidden rounded-lg bg-void ${
               allImages.length === 1 ? 'aspect-video' : 'aspect-square'
             } ${i === 2 && allImages.length === 3 ? 'col-span-2' : ''}`}>
-              <Image src={img} alt={`Post afbeelding ${i + 1}`} fill sizes="(max-width: 768px) 100vw, 600px" className="object-cover" />
+              <Image src={img} alt={`${t('feed2.image_alt')} ${i + 1}`} fill sizes="(max-width: 768px) 100vw, 600px" className="object-cover" />
               {i === 3 && allImages.length > 4 && (
                 <div className="absolute inset-0 bg-void/70 flex items-center justify-center">
                   <span className="font-mono text-text text-lg font-bold">+{allImages.length - 4}</span>

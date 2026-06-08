@@ -7,6 +7,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase-browser'
+import { useLang } from '@/lib/lang-context'
 import {
   Bell, Heart, MessageCircle, UserPlus, Trophy, Film, Star, Award,
   Users, Swords, type LucideIcon,
@@ -57,6 +58,7 @@ interface ActivityWidgetProps {
 }
 
 export function ActivityWidget({ userId }: ActivityWidgetProps) {
+  const { t } = useLang()
   const supabase = createClient()
   const [items, setItems] = useState<Activity[]>([])
   const [loading, setLoading] = useState(true)
@@ -100,7 +102,7 @@ export function ActivityWidget({ userId }: ActivityWidgetProps) {
 
   function timeAgo(date: string): string {
     const s = Math.floor((Date.now() - new Date(date).getTime()) / 1000)
-    if (s < 60) return 'now'
+    if (s < 60) return t('widgets.timeNow')
     if (s < 3600) return `${Math.floor(s / 60)}m`
     if (s < 86400) return `${Math.floor(s / 3600)}h`
     if (s < 604800) return `${Math.floor(s / 86400)}d`
@@ -110,9 +112,9 @@ export function ActivityWidget({ userId }: ActivityWidgetProps) {
   return (
     <div className="vs-card vs-lit">
       <div className="flex items-center justify-between mb-3">
-        <p className="vs-label">RECENT ACTIVITY</p>
+        <p className="vs-label">{t('widgets.recentActivity')}</p>
         <Link href="/notifications" className="text-[10px] text-cyan hover:text-cyan/80 transition-colors tracking-wide">
-          See all →
+          {t('widgets.seeAll')} →
         </Link>
       </div>
       {loading ? (
@@ -128,7 +130,7 @@ export function ActivityWidget({ userId }: ActivityWidgetProps) {
           ))}
         </div>
       ) : items.length === 0 ? (
-        <p className="text-xs text-text-dim italic">Nothing yet — check back when others interact with you.</p>
+        <p className="text-xs text-text-dim italic">{t('widgets.activityEmpty')}</p>
       ) : (
         <ul className="space-y-2.5">
           {items.map(item => {

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useLang } from '@/lib/lang-context'
 
 interface ClanForm {
   name: string
@@ -13,6 +14,7 @@ interface ClanForm {
 
 export default function NewClanPage() {
   const router = useRouter()
+  const { t } = useLang()
   const [form, setForm] = useState<ClanForm>({
     name: '',
     slug: '',
@@ -46,10 +48,10 @@ export default function NewClanPage() {
         body: JSON.stringify(payload),
       })
       const json = await res.json()
-      if (!res.ok) throw new Error(json.error ?? 'Aanmaken mislukt')
+      if (!res.ok) throw new Error(json.error ?? t('clans2.createFailed'))
       router.push(`/clans/${json.data.slug}`)
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Er ging iets mis.'
+      const message = err instanceof Error ? err.message : t('clans2.somethingWrong')
       setError(message)
     } finally {
       setLoading(false)
@@ -59,21 +61,21 @@ export default function NewClanPage() {
   return (
     <div className="max-w-lg mx-auto px-4 py-8">
       <div className="mb-8">
-        <p className="font-mono text-[10px] tracking-[0.2em] text-purple uppercase mb-1">Clans</p>
-        <h1 className="font-mono text-2xl font-bold text-text mb-1">Clan aanmaken</h1>
-        <p className="text-text-dim text-sm">Kost 500 XP om aan te maken.</p>
+        <p className="font-mono text-[10px] tracking-[0.2em] text-purple uppercase mb-1">{t('clans2.clans')}</p>
+        <h1 className="font-mono text-2xl font-bold text-text mb-1">{t('clans2.createClan')}</h1>
+        <p className="text-text-dim text-sm">{t('clans2.createCost')}</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
           <label className="font-mono text-xs text-text-dim uppercase tracking-widest block mb-2">
-            Naam *
+            {t('clans2.labelName')}
           </label>
           <input
             type="text"
             value={form.name}
             onChange={(e) => handleNameChange(e.target.value)}
-            placeholder="Clan naam"
+            placeholder={t('clans2.placeholderName')}
             maxLength={50}
             required
             className="w-full bg-void border border-border rounded-xl px-4 py-3 text-text text-sm font-mono placeholder-text-dim/60 focus:outline-none focus:border-purple transition-colors"
@@ -82,7 +84,7 @@ export default function NewClanPage() {
 
         <div>
           <label className="font-mono text-xs text-text-dim uppercase tracking-widest block mb-2">
-            Slug *
+            {t('clans2.labelSlug')}
           </label>
           <div className="flex items-center bg-void border border-border rounded-xl px-4 py-3 focus-within:border-purple transition-colors">
             <span className="font-mono text-xs text-text-dim/60 mr-1">/clans/</span>
@@ -105,12 +107,12 @@ export default function NewClanPage() {
 
         <div>
           <label className="font-mono text-xs text-text-dim uppercase tracking-widest block mb-2">
-            Beschrijving
+            {t('clans2.labelDescription')}
           </label>
           <textarea
             value={form.description}
             onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-            placeholder="Waar staat jullie clan voor?"
+            placeholder={t('clans2.placeholderDescription')}
             rows={3}
             maxLength={500}
             className="w-full bg-void border border-border rounded-xl px-4 py-3 text-text text-sm font-mono placeholder-text-dim/60 focus:outline-none focus:border-purple transition-colors resize-none"
@@ -132,11 +134,11 @@ export default function NewClanPage() {
                 }`}
               />
             </button>
-            <span className="font-mono text-xs text-text-dim">Open clan</span>
+            <span className="font-mono text-xs text-text-dim">{t('clans2.openClan')}</span>
           </label>
 
           <div className="flex items-center gap-2">
-            <label className="font-mono text-xs text-text-dim">Max leden:</label>
+            <label className="font-mono text-xs text-text-dim">{t('clans2.maxMembers')}</label>
             <input
               type="number"
               value={form.max_members}
@@ -153,9 +155,9 @@ export default function NewClanPage() {
         {error && <p className="font-mono text-xs text-danger">{error}</p>}
 
         <div className="bg-purple/8 border border-purple/20 rounded-xl px-4 py-3">
-          <p className="font-mono text-xs text-purple">⚠ Aanmaken kost 500 XP</p>
+          <p className="font-mono text-xs text-purple">⚠ {t('clans2.costWarning')}</p>
           <p className="text-text-dim text-xs mt-0.5">
-            Deze XP wordt afgetrokken van jouw account.
+            {t('clans2.costDeducted')}
           </p>
         </div>
 
@@ -164,7 +166,7 @@ export default function NewClanPage() {
           disabled={loading}
           className="w-full py-3 bg-purple text-white font-mono text-sm uppercase tracking-wider rounded-xl hover:bg-purple/85 transition-colors duration-200 disabled:opacity-40"
         >
-          {loading ? 'Bezig...' : 'Clan aanmaken (−500 XP)'}
+          {loading ? t('clans2.busy') : t('clans2.createClanXp')}
         </button>
       </form>
     </div>

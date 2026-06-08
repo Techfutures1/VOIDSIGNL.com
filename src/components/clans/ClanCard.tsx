@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { useLang } from '@/lib/lang-context'
 
 interface ClanCardProps {
   clan: {
@@ -20,6 +21,7 @@ interface ClanCardProps {
 }
 
 export default function ClanCard({ clan, rank, isMember }: ClanCardProps) {
+  const { t } = useLang()
   return (
     <Link href={`/clans/${clan.slug}`}>
       <div className="relative bg-surface border border-border rounded-xl overflow-hidden hover:border-purple transition-colors duration-200 group">
@@ -63,7 +65,7 @@ export default function ClanCard({ clan, rank, isMember }: ClanCardProps) {
           {isMember && (
             <div className="absolute top-2 right-2">
               <span className="font-mono text-[8px] uppercase tracking-widest px-2 py-0.5 rounded-full bg-purple/90 text-white">
-                Lid
+                {t('clans2.member')}
               </span>
             </div>
           )}
@@ -108,7 +110,7 @@ export default function ClanCard({ clan, rank, isMember }: ClanCardProps) {
                     : 'bg-surface-2 text-text-dim/60'
                 }`}
               >
-                {clan.is_open ? 'Open' : 'Gesloten'}
+                {clan.is_open ? t('clans2.open') : t('clans2.closed')}
               </span>
             </div>
             <span className="font-mono text-xs font-bold text-purple">
